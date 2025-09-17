@@ -50,6 +50,7 @@ loop (
 
     ~info is get "https://api.github.com/users/`~username`"
     say "`~info.name` has `~info.public_repos` public repositories"
+    wait 5
 )
 ```
 

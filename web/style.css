@@ -284,7 +284,7 @@ body {
     border-radius: 8px;
     padding: 1rem;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.9rem;
+    font-size: 16px;
     line-height: 1.6;
     overflow-y: auto;
     min-height: 300px;
@@ -373,7 +373,7 @@ body {
     height: auto !important;
     min-height: 300px !important;
     font-family: 'JetBrains Mono', monospace !important;
-    font-size: 0.9rem !important;
+    font-size: 16px !important;
     line-height: 1.5 !important;
     border: none !important;
     background: #0f172a !important;
@@ -461,5 +461,18 @@ body {
 
     .status-bar {
         padding: 0.5rem 1rem;
+    }
+
+    /* Reduce min-height on mobile for better output visibility */
+    .CodeMirror {
+        min-height: 200px !important;
+    }
+
+    #codeInput {
+        min-height: 200px;
+    }
+
+    .output-display {
+        min-height: 200px;
     }
 }
