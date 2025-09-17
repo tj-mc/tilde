@@ -148,7 +148,7 @@ impl Parser {
                     self.advance();
                     let property = match self.current_token() {
                         Token::Identifier(prop_name) => prop_name.clone(),
-                        Token::Variable(prop_name) => prop_name.clone(),
+                        Token::Variable(prop_name) => format!("~{}", prop_name),
                         Token::Number(n) => {
                             // Convert number to integer string if it's a whole number
                             if n.fract() == 0.0 {
@@ -235,11 +235,45 @@ impl Parser {
 
                     Ok(Expression::FunctionCall { name, args })
                 } else {
-                    // Regular function call or identifier
-                    Ok(Expression::FunctionCall {
-                        name,
-                        args: Vec::new(),
-                    })
+                    // Check if this is a built-in function that can take arguments without parentheses
+                    let builtin_functions = ["length", "append", "keys-of", "values-of", "has-key"];
+
+                    if builtin_functions.contains(&name.as_str()) {
+                        // Parse arguments like action calls (space-separated until terminator)
+                        let mut args = Vec::new();
+
+                        // Parse arguments until we hit a terminator
+                        while !matches!(
+                            self.current_token(),
+                            Token::Eof
+                                | Token::Newline
+                                | Token::If
+                                | Token::Else
+                                | Token::Loop
+                                | Token::Breakloop
+                                | Token::Say
+                                | Token::Ask
+                                | Token::Open
+                                | Token::Get
+                                | Token::Run
+                                | Token::Wait
+                                | Token::Give
+                                | Token::Action
+                                | Token::LeftParen
+                                | Token::RightParen
+                                | Token::Is
+                        ) && !self.is_binary_operator(self.current_token()) {
+                            args.push(self.parse_primary()?);
+                        }
+
+                        Ok(Expression::FunctionCall { name, args })
+                    } else {
+                        // Regular identifier with no arguments
+                        Ok(Expression::FunctionCall {
+                            name,
+                            args: Vec::new(),
+                        })
+                    }
                 }
             }
             Token::Say => {

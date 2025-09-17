@@ -59,6 +59,14 @@ class TailsWebREPL {
         // Close examples button
         document.getElementById('closeExamples').addEventListener('click', () => this.hideExamples());
 
+        // Close examples on backdrop click
+        document.getElementById('examplesBackdrop').addEventListener('click', (e) => {
+            // Only close if clicking on the backdrop itself, not the panel
+            if (e.target === document.getElementById('examplesBackdrop')) {
+                this.hideExamples();
+            }
+        });
+
         // Example items
         document.querySelectorAll('.example-item').forEach(item => {
             item.addEventListener('click', () => {
@@ -194,11 +202,23 @@ class TailsWebREPL {
     }
 
     showExamples() {
-        document.getElementById('examplesPanel').style.display = 'flex';
+        const backdrop = document.getElementById('examplesBackdrop');
+        if (backdrop) {
+            document.documentElement.classList.add('modal-open');
+            document.body.classList.add('modal-open');
+            backdrop.classList.remove('examples-hidden');
+        } else {
+            console.error('examplesBackdrop element not found');
+        }
     }
 
     hideExamples() {
-        document.getElementById('examplesPanel').style.display = 'none';
+        const backdrop = document.getElementById('examplesBackdrop');
+        if (backdrop) {
+            document.documentElement.classList.remove('modal-open');
+            document.body.classList.remove('modal-open');
+            backdrop.classList.add('examples-hidden');
+        }
     }
 
     hideLoading() {

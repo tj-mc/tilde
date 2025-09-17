@@ -594,18 +594,67 @@ impl Evaluator {
                         }
                     }
                     Value::List(list) => {
-                        // Try to parse property as numeric index
-                        if let Ok(index) = property.parse::<usize>() {
-                            if index < list.len() {
-                                Ok(list[index].clone())
-                            } else {
-                                Ok(Value::Null) // Return null for out-of-bounds access
+                        // Check if property is a variable (starts with ~)
+                        let index_value = if property.starts_with('~') {
+                            // Remove the ~ for lookup (variables are stored without ~ prefix everywhere)
+                            let var_name_without_tilde = &property[1..];
+
+                            // Search in scope stack first (function local variables stored without ~)
+                            let mut found_value = None;
+                            for scope in self.scope_stack.iter().rev() {
+                                if let Some(val) = scope.get(var_name_without_tilde) {
+                                    found_value = Some(val.clone());
+                                    break;
+                                }
+                            }
+
+                            // If not found in scope, check global variables (also stored without ~)
+                            match found_value.or_else(|| self.variables.get(var_name_without_tilde).cloned()) {
+                                Some(val) => val,
+                                None => return Err(format!("Undefined variable: ~{}", var_name_without_tilde)),
                             }
                         } else {
-                            Err(format!(
-                                "Cannot access non-numeric property '{}' on list",
-                                property
-                            ))
+                            // Try to parse property as literal numeric index
+                            match property.parse::<f64>() {
+                                Ok(n) => Value::Number(n),
+                                Err(_) => return Err(format!(
+                                    "Cannot access non-numeric property '{}' on list",
+                                    property
+                                )),
+                            }
+                        };
+
+                        // Convert the index value to usize
+                        match index_value {
+                            Value::Number(n) => {
+                                let index = n as usize;
+                                if index < list.len() {
+                                    Ok(list[index].clone())
+                                } else {
+                                    Ok(Value::Null) // Return null for out-of-bounds access
+                                }
+                            }
+                            Value::String(s) => {
+                                // Try to parse string as number (for cases like "1" -> 1)
+                                match s.parse::<f64>() {
+                                    Ok(n) => {
+                                        let index = n as usize;
+                                        if index < list.len() {
+                                            Ok(list[index].clone())
+                                        } else {
+                                            Ok(Value::Null)
+                                        }
+                                    }
+                                    Err(_) => Err(format!(
+                                        "List index must be numeric, got string: '{}'",
+                                        s
+                                    )),
+                                }
+                            }
+                            _ => Err(format!(
+                                "List index must be a number, got: {:?}",
+                                index_value
+                            )),
                         }
                     }
                     _ => Err(format!(
