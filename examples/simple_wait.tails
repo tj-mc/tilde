@@ -1,0 +1,10 @@
+say "Testing wait functionality..."
+
+say "Waiting 0.5 seconds..."
+wait 0.5
+say "Done!"
+
+say "Wait with variable:"
+~delay is 1
+wait ~delay
+say "Variable wait completed!"

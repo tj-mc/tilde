@@ -1,0 +1,24 @@
+say "Welcome to the Number Guessing Game!"
+say "I'm thinking of a number between 1 and 100"
+
+~secret is 73
+~attempts is 0
+~max-attempts is 7
+
+say "You have" ~max-attempts "attempts to guess it!"
+
+loop (
+    ~attempts is ~attempts + 1
+    ~guess is ask "Attempt" ~attempts "- What's your guess? "
+    
+    if ~guess == ~secret say "Congratulations! You got it!"
+    if ~guess < ~secret say "Too low! Try higher."  
+    if ~guess > ~secret say "Too high! Try lower."
+    
+    if ~guess == ~secret break-loop
+    if ~attempts >= ~max-attempts break-loop
+)
+
+if ~guess == ~secret say "You won in" ~attempts "attempts!" else say "Game over! The number was" ~secret
+
+say "You used" ~attempts "out of" ~max-attempts "attempts"

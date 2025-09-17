@@ -1,0 +1,6 @@
+timestamp,commit,test_name,duration_ns,final_allocated,peak_allocated,allocation_count,avg_allocation_size
+1757936560,10b255f,Simple Parsing,123208,385,649,13,49
+1757936560,10b255f,Complex Parsing,11792,1516,4704,76,61
+1757936560,10b255f,Simple Evaluation,9250,0,789,14,56
+1757936560,10b255f,String Concatenation Growth,41917,0,4629,369,12
+1757936560,10b255f,Many Variables,56709,0,39258,531,73

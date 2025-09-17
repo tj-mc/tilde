@@ -1,0 +1,32 @@
+say "=== User Profile Demo ==="
+
+~user is {"name": "Alice", "email": "alice@example.com"}
+
+~user.profile is {}
+~user.profile.age is 28
+~user.profile.city is "San Francisco"
+
+~user.settings is {}
+~user.settings.theme is "dark"
+~user.settings.notifications is true
+
+say "Complete profile:" ~user
+
+~user.profile.age is 29
+~user.settings.theme is "light"
+
+~user.work is {}
+~user.work.company is "Tech Corp"
+~user.work.position is "Engineer"
+
+say "Updated profile:" ~user
+
+say "User details:"
+say "Name:" ~user.name
+say "Age:" ~user.profile.age  
+say "Theme:" ~user.settings.theme
+say "Company:" ~user.work.company
+
+if ~user.profile.age >= 18 (
+    say "User is an adult"
+)

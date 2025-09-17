@@ -1,0 +1,10 @@
+say "Simple Calculator"
+~x is ask "Enter first number: "
+~y is ask "Enter second number: "
+
+~sum is ~x + ~y
+~diff is ~x - ~y
+
+say "Results:"
+say ~x "+" ~y "=" ~sum
+say ~x "-" ~y "=" ~diff

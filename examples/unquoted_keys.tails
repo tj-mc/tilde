@@ -1,0 +1,28 @@
+say "=== Unquoted Object Keys Demo ==="
+
+~config is {
+    host: "localhost"
+    port: 8080
+    debug: true
+}
+
+say "Config with unquoted keys:" ~config
+
+~user is {
+    name: "Alice"
+    age: 30
+    active: true
+    profile: {
+        city: "San Francisco"
+        country: "USA"
+    }
+}
+
+say "User object:" ~user
+
+~user.profile.city is "New York"
+~user.settings is {theme: "dark", lang: "en"}
+
+say "Updated user:" ~user
+say "City:" ~user.profile.city
+say "Theme:" ~user.settings.theme

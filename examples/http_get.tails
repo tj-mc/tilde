@@ -1,0 +1,10 @@
+say "Fetching data from a public API..."
+
+~response is get "https://jsonplaceholder.typicode.com/todos/1"
+say "Response received!"
+say ~response
+say ~response.userId
+
+say "Testing timeout functionality..."
+~quick-response is get "https://httpbin.org/delay/1" 5
+say "Quick response received!"

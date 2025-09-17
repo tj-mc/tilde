@@ -1,0 +1,21 @@
+say "=== Configuration Management ==="
+
+~config is {}
+
+~config.database is {}
+~config.database.host is "localhost"
+~config.database.port is 5432
+~config.database.ssl is true
+
+~config.api is {}
+~config.api.version is "v1" 
+~config.api.timeout is 30000
+
+say "Initial config:" ~config
+
+~config.database.host is "production-db.example.com"
+~config.api.timeout is 60000
+
+say "Updated config:" ~config
+say "Database host:" ~config.database.host
+say "API timeout:" ~config.api.timeout

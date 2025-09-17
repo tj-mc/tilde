@@ -1,0 +1,15 @@
+action fib ~n (
+    if ~n <= 1 give ~n
+    ~a is *fib (~n - 1)
+    ~b is *fib (~n - 2)
+    give ~a + ~b
+)
+
+say "Fibonacci sequence using actions:"
+~i is 0
+loop (
+    if ~i > 10 break-loop
+    ~result is *fib ~i
+    say "fib(" ~i ") = " ~result
+    ~i is ~i + 1
+)

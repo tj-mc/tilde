@@ -1,0 +1,10 @@
+~secret is 42
+say "I'm thinking of a number between 1 and 100..."
+
+~guess is ask "What's your guess? "
+
+if ~guess == ~secret (
+   say "Correct! You guessed it!"
+) else if ~guess < ~secret say "Too low!" else say "Too high!"
+
+say "The number was" ~secret

@@ -1,0 +1,46 @@
+action fibonacci ~n (
+    if ~n <= 1 (
+        give ~n
+    ) else (
+        ~n1 is ~n - 1
+        ~n2 is ~n - 2
+        ~fib1 is *fibonacci ~n1
+        ~fib2 is *fibonacci ~n2
+        give ~fib1 + ~fib2
+    )
+)
+
+action factorial ~n (
+    if ~n <= 1 (
+        give 1
+    ) else (
+        ~prev is ~n - 1
+        ~result is *factorial ~prev
+        give ~n * ~result
+    )
+)
+
+action simple_benchmark ~iterations (
+    ~total is 0
+    ~counter is 0
+
+    loop (
+        if ~counter >= ~iterations (
+            break-loop
+        )
+
+        ~fib_result is *fibonacci 15
+        ~fact_result is *factorial 6
+        ~combined is ~fib_result + ~fact_result
+        ~total is ~total + ~combined
+
+        ~counter is ~counter + 1
+    )
+
+    give ~total
+)
+
+say "Starting profile benchmark..."
+~result is *simple_benchmark 10
+say "Profile benchmark completed!"
+say "Final result: " ~result

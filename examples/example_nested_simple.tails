@@ -1,0 +1,35 @@
+say "=== Nested Property Assignment Demo ==="
+
+~obj is {}
+say "Empty object:" ~obj
+
+~obj.level1 is {}
+say "With level1:" ~obj
+
+~obj.level1.level2 is "nested value"
+say "With nested value:" ~obj
+
+~data is {}
+~data.user.name is "Bob"
+say "Direct nested assignment:" ~data
+
+~settings is {}
+~settings.app.name is "MyApp"
+~settings.app.version is "1.0"
+~settings.app.debug is true
+say "Multiple properties:" ~settings
+
+~settings.app.version is "1.1"
+~settings.app.author is "Developer"
+say "Updated properties:" ~settings
+
+~user-name is ~data.user.name
+~app-version is ~settings.app.version
+
+say "Retrieved values:"
+say "User name:" ~user-name
+say "App version:" ~app-version
+
+if ~settings.app.debug (
+    say "Debug mode enabled for" ~settings.app.name
+)

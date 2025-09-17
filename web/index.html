@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>~tails 🐈‍⬛ Web REPL</title>
+    <meta name="description" content="Interactive Web REPL for the Tails - a scripting language for everyone. Start coding today in 5 seconds, no install required!">
+
+    <meta name="keywords" content="tails, scripting language, repl, webassembly, wasm, programming, interactive">
+    <meta name="author" content="Tom McIntosh">
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Tails Scripting Language - Web REPL">
+    <meta property="og:description" content="Try the Tails scripting language directly in your browser! Interactive Web REPL">
+    <meta property="og:url" content="https://tj-mc.github.io/tails/">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Tails Web REPL - Interactive Scripting Language">
+    <meta property="twitter:description" content="Try the Tails scripting language directly in your browser! Interactive Web REPL">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/material-darker.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="title">~tails 🐈‍⬛ Web REPL</h1>
+                <p class="subtitle">A scripting language for everyone</p>
+            </div>
+            <div class="header-actions">
+                <a href="https://github.com/tj-mc/tails" target="_blank" class="btn btn-tertiary github-link">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    GitHub
+                </a>
+                <button id="clearBtn" class="btn btn-secondary">Clear</button>
+                <button id="resetBtn" class="btn btn-secondary">Reset</button>
+                <button id="examplesBtn" class="btn btn-primary">Examples</button>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Examples panel (initially hidden) -->
+            <div id="examplesPanel" class="examples-panel" style="display: none;">
+                <div class="examples-header">
+                    <h3>Example Programs</h3>
+                    <button id="closeExamples" class="btn-close">&times;</button>
+                </div>
+                <div class="examples-list">
+                    <div class="example-item" data-code='~name is ask "Your name?"\nsay "Hello, " ~name'>
+                        <h4>Hello World</h4>
+                        <p>Basic variable assignment and output</p>
+                    </div>
+                    <div class="example-item" data-code='~a is 10\n~b is 20\n~sum is ~a + ~b\nsay "The sum of " ~a " and " ~b " is " ~sum'>
+                        <h4>Variables & Math</h4>
+                        <p>Simple arithmetic operations</p>
+                    </div>
+                    <div class="example-item" data-code='~weather is "sunny"\n~temp is 25\n\nif ~weather == "sunny" (\n    if ~temp > 20 (\n        say "Perfect day for a picnic! 🌞"\n    ) else (\n        say "Sunny but chilly - bring a jacket"\n    )\n) else (\n    say "Maybe stay inside today"\n)\n\n~score is 85\nif ~score >= 90 (\n    say "Grade: A - Excellent!"\n) else if ~score >= 80 (\n    say "Grade: B - Well done!"\n) else (\n    say "Grade: C - Keep trying!"\n)'>
+                        <h4>Conditionals</h4>
+                        <p>Nested if statements and else-if chains</p>
+                    </div>
+                    <div class="example-item" data-code='~user is {name: "Alice", age: 30, city: "Paris"}\nsay "User: " ~user.name " is " ~user.age " years old and lives in " ~user.city'>
+                        <h4>Objects</h4>
+                        <p>Working with object properties</p>
+                    </div>
+                    <div class="example-item" data-code='action convert-temperature ~temp ~from ~to (\n    if ~from == "C" (\n        if ~to == "F" (\n            ~result is (~temp * 9/5) + 32\n            say ~temp "°C = " ~result "°F"\n        ) else if ~to == "K" (\n            ~result is ~temp + 273.15\n            say ~temp "°C = " ~result "K"\n        )\n    ) else if ~from == "F" (\n        if ~to == "C" (\n            ~result is (~temp - 32) * 5/9\n            say ~temp "°F = " ~result "°C"\n        )\n    )\n)\n\n*convert-temperature 25 "C" "F"\n*convert-temperature 77 "F" "C"\n*convert-temperature 0 "C" "K"'>
+                        <h4>Actions (Functions)</h4>
+                        <p>Define and call custom actions with parameters</p>
+                    </div>
+                    <div class="example-item" data-code='~user is get "https://api.github.com/users/octocat"\nsay "Found user: " ~user.name " with " ~user.public_repos " repos"'>
+                        <h4>Network Request</h4>
+                        <p>Fetch data from APIs and display results</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REPL Interface -->
+            <div class="repl-container">
+                <!-- Code Input -->
+                <div class="input-section">
+                    <label for="codeInput" class="input-label">Code Input</label>
+                    <div class="editor-container">
+                        <textarea id="codeInput" placeholder="Enter your Tails code here...">~name is ask
+say "Hello, " ~name</textarea>
+                    </div>
+                    <div class="input-actions">
+                        <button id="runBtn" class="btn btn-primary">Run Code</button>
+                        <button id="clearCodeBtn" class="btn btn-tertiary">Clear Code</button>
+                    </div>
+                    <span class="shortcut">Ctrl+Enter to run</span>
+                </div>
+
+                <!-- Output -->
+                <div class="output-section">
+                    <label class="output-label">Output</label>
+                    <div id="output" class="output-display"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading indicator -->
+        <div id="loadingIndicator" class="loading-indicator">
+            <div class="spinner"></div>
+            <p>Loading Tails WebAssembly module...</p>
+        </div>
+
+        <!-- Status bar -->
+        <div class="status-bar">
+            <span id="statusText">Ready</span>
+            <span id="versionText">v0.1.0</span>
+        </div>
+    </div>
+
+    <script type="module" src="repl.js"></script>
+</body>
+</html>

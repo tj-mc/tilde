@@ -1,0 +1,33 @@
+action greet ~name (
+    say "Hello, " ~name "!"
+)
+
+*greet "World"
+
+action add ~a ~b (
+    give ~a + ~b
+)
+
+~sum is *add 10 20
+say "10 + 20 = " ~sum
+
+~counter is 0
+
+action increment (
+    ~counter is ~counter + 1
+    give ~counter
+)
+
+say "Counter before: " ~counter
+~result is *increment
+say "Counter after increment: " ~counter
+say "Result: " ~result
+
+action factorial ~n (
+    if ~n <= 1 give 1
+    ~recurse is *factorial (~n - 1)
+    give ~n * ~recurse
+)
+
+~fact5 is *factorial 5
+say "5! = " ~fact5

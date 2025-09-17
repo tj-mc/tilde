@@ -1,0 +1,6 @@
+~age is 25
+
+if ~age < 18 say "You are a minor" else say "You are an adult"
+
+~score is 85
+if ~score >= 90 say "Grade: A" else if ~score >= 80 say "Grade: B" else say "Grade: C or below"

@@ -1,0 +1,337 @@
+use super::Parser;
+use crate::ast::*;
+use crate::lexer::Token;
+
+impl Parser {
+    pub fn parse_statement(&mut self) -> Result<Statement, String> {
+        match self.current_token() {
+            Token::Variable(name) => {
+                let var_name = name.clone();
+                self.advance();
+
+                // Check for immediate assignment first
+                if *self.current_token() == Token::Is {
+                    // Simple variable assignment: ~var is value
+                    self.advance();
+                    let value = self.parse_expression()?;
+                    Ok(Statement::Assignment {
+                        variable: var_name,
+                        value,
+                    })
+                } else if *self.current_token() == Token::Dot {
+                    // This might be a property access assignment: ~var.prop is value
+                    let saved_position = self.position;
+
+                    // Try to parse the property chain and check for assignment
+                    let mut expr = Expression::Variable(var_name);
+                    let _found_assignment = false;
+
+                    while *self.current_token() == Token::Dot {
+                        self.advance();
+                        let property = match self.current_token() {
+                            Token::Identifier(prop_name) => prop_name.clone(),
+                            Token::Variable(prop_name) => prop_name.clone(),
+                            Token::Number(n) => {
+                                // Convert number to integer string if it's a whole number
+                                if n.fract() == 0.0 {
+                                    (*n as i64).to_string()
+                                } else {
+                                    n.to_string()
+                                }
+                            }
+                            _ => return Err("Expected property name or number after '.'".to_string()),
+                        };
+                        self.advance();
+
+                        expr = Expression::PropertyAccess {
+                            object: Box::new(expr),
+                            property: property.clone(),
+                        };
+
+                        // Check if this is where the assignment happens
+                        if *self.current_token() == Token::Is {
+                            self.advance();
+                            let value = self.parse_expression()?;
+
+                            // Extract the base object and property for assignment
+                            if let Expression::PropertyAccess { object, property } = expr {
+                                return Ok(Statement::PropertyAssignment {
+                                    object,
+                                    property,
+                                    value,
+                                });
+                            } else {
+                                return Err("Invalid property assignment structure".to_string());
+                            }
+                        }
+                    }
+
+                    // If we got here, it wasn't a property assignment, reset and treat as expression
+                    self.position = saved_position;
+                    let expr = self.parse_expression()?;
+                    Ok(Statement::Expression(expr))
+                } else {
+                    // Reset position and parse as expression
+                    self.position -= 1; // Go back to the variable token
+                    let expr = self.parse_expression()?;
+                    Ok(Statement::Expression(expr))
+                }
+            }
+            Token::If => self.parse_if(),
+            Token::Loop => self.parse_loop(),
+            Token::Breakloop => {
+                self.advance();
+                Ok(Statement::Breakloop)
+            }
+            Token::Say => {
+                self.advance();
+                let mut args = Vec::new();
+
+                // Parse all arguments until we hit a statement terminator or newline
+                while !matches!(
+                    self.current_token(),
+                    Token::Eof
+                        | Token::Newline
+                        | Token::If
+                        | Token::Else
+                        | Token::Loop
+                        | Token::Breakloop
+                        | Token::Say
+                        | Token::Ask
+                        | Token::Open
+                        | Token::Get
+                        | Token::Run
+                        | Token::Wait
+                ) {
+                    let arg = self.parse_expression()?;
+                    args.push(arg);
+
+                    // Don't require commas between arguments in say statements
+                }
+
+                Ok(Statement::Say(args))
+            }
+            Token::Ask => {
+                self.advance();
+                let mut args = Vec::new();
+
+                // Parse all arguments until we hit a statement terminator
+                while !matches!(
+                    self.current_token(),
+                    Token::Eof
+                        | Token::Newline
+                        | Token::If
+                        | Token::Else
+                        | Token::Loop
+                        | Token::Breakloop
+                        | Token::Say
+                        | Token::Ask
+                        | Token::Open
+                        | Token::Get
+                        | Token::Run
+                        | Token::Wait
+                ) {
+                    let arg = self.parse_expression()?;
+                    args.push(arg);
+                }
+
+                Ok(Statement::Ask(args))
+            }
+            Token::Open => {
+                self.advance();
+                let path = self.parse_expression()?;
+                Ok(Statement::Open(path))
+            }
+            Token::Get => {
+                self.advance();
+                let mut args = Vec::new();
+
+                // Parse all arguments until we hit a statement terminator
+                while !matches!(
+                    self.current_token(),
+                    Token::Eof
+                        | Token::Newline
+                        | Token::If
+                        | Token::Else
+                        | Token::Loop
+                        | Token::Breakloop
+                        | Token::Say
+                        | Token::Ask
+                        | Token::Open
+                        | Token::Get
+                        | Token::Run
+                        | Token::Wait
+                ) {
+                    let arg = self.parse_expression()?;
+                    args.push(arg);
+                }
+
+                Ok(Statement::Get(args))
+            }
+            Token::Run => {
+                self.advance();
+                let mut args = Vec::new();
+
+                // Parse all arguments until we hit a statement terminator
+                while !matches!(
+                    self.current_token(),
+                    Token::Eof
+                        | Token::Newline
+                        | Token::If
+                        | Token::Else
+                        | Token::Loop
+                        | Token::Breakloop
+                        | Token::Say
+                        | Token::Ask
+                        | Token::Open
+                        | Token::Get
+                        | Token::Run
+                        | Token::Wait
+                ) {
+                    let arg = self.parse_expression()?;
+                    args.push(arg);
+                }
+
+                Ok(Statement::Run(args))
+            }
+            Token::Wait => {
+                self.advance();
+                let mut args = Vec::new();
+
+                // Parse all arguments until we hit a statement terminator
+                while !matches!(
+                    self.current_token(),
+                    Token::Eof
+                        | Token::Newline
+                        | Token::If
+                        | Token::Else
+                        | Token::Loop
+                        | Token::Breakloop
+                        | Token::Say
+                        | Token::Ask
+                        | Token::Open
+                        | Token::Get
+                        | Token::Run
+                        | Token::Wait
+                ) {
+                    let arg = self.parse_expression()?;
+                    args.push(arg);
+                }
+
+                Ok(Statement::Wait(args))
+            }
+            Token::LeftParen => self.parse_block(),
+            Token::Action => self.parse_action_definition(),
+            Token::Give => {
+                self.advance();
+                let expr = self.parse_expression()?;
+                Ok(Statement::Give(expr))
+            }
+            _ => {
+                let expr = self.parse_expression()?;
+                Ok(Statement::Expression(expr))
+            }
+        }
+    }
+
+    pub fn parse_if(&mut self) -> Result<Statement, String> {
+        self.expect(Token::If)?;
+
+        let condition = self.parse_expression()?;
+        let then_stmt = Box::new(self.parse_statement()?);
+
+        let else_stmt = if *self.current_token() == Token::Else {
+            self.advance();
+            Some(Box::new(self.parse_statement()?))
+        } else {
+            None
+        };
+
+        Ok(Statement::If {
+            condition,
+            then_stmt,
+            else_stmt,
+        })
+    }
+
+    pub fn parse_loop(&mut self) -> Result<Statement, String> {
+        self.expect(Token::Loop)?;
+        self.expect(Token::LeftParen)?;
+        self.skip_newlines();
+
+        let mut body = Vec::new();
+
+        while *self.current_token() != Token::RightParen && *self.current_token() != Token::Eof {
+            self.skip_newlines();
+            if *self.current_token() == Token::RightParen {
+                break;
+            }
+            body.push(self.parse_statement()?);
+            self.skip_newlines();
+        }
+
+        self.expect(Token::RightParen)?;
+
+        Ok(Statement::Loop { body })
+    }
+
+    pub fn parse_block(&mut self) -> Result<Statement, String> {
+        self.expect(Token::LeftParen)?;
+        self.skip_newlines();
+
+        let mut body = Vec::new();
+
+        while *self.current_token() != Token::RightParen && *self.current_token() != Token::Eof {
+            self.skip_newlines();
+            if *self.current_token() == Token::RightParen {
+                break;
+            }
+            body.push(self.parse_statement()?);
+            self.skip_newlines();
+        }
+
+        self.expect(Token::RightParen)?;
+
+        Ok(Statement::Block { body })
+    }
+
+    pub fn parse_action_definition(&mut self) -> Result<Statement, String> {
+        self.expect(Token::Action)?;
+
+        // Parse action name
+        let name = match self.current_token() {
+            Token::Identifier(n) => n.clone(),
+            _ => return Err("Expected action name after 'action'".to_string()),
+        };
+        self.advance();
+
+        // Parse parameters (space-separated variables with ~ prefix)
+        let mut params = Vec::new();
+        while let Token::Variable(param_name) = self.current_token() {
+            params.push(param_name.clone());
+            self.advance();
+        }
+
+        // Parse body block
+        self.expect(Token::LeftParen)?;
+        self.skip_newlines();
+
+        let mut body = Vec::new();
+        while *self.current_token() != Token::RightParen && *self.current_token() != Token::Eof {
+            self.skip_newlines();
+            if *self.current_token() == Token::RightParen {
+                break;
+            }
+            body.push(self.parse_statement()?);
+            self.skip_newlines();
+        }
+
+        self.expect(Token::RightParen)?;
+
+        Ok(Statement::ActionDefinition {
+            name,
+            params,
+            body,
+        })
+    }
+}

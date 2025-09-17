@@ -1,0 +1,97 @@
+# =============================================================================
+# Tails Shell Command Examples
+# Demonstrating the 'run' command and string interpolation with backticks
+# =============================================================================
+
+say "=== Tails Shell Command Examples ==="
+say "Demonstrating the 'run' command and string interpolation"
+say ""
+
+# Example 1: Basic command execution
+# The 'run' command executes shell commands and returns an object with output
+say "1. Basic shell command execution"
+~result is run "echo Hello from the shell!"
+say "Command output: " ~result.output
+
+# Example 2: Variable interpolation using backticks
+# Use backticks `~variable` to substitute variables into command strings
+say "2. String interpolation with backticks"
+~name is "Tails"
+~greeting is run "echo Welcome to `~name` scripting!"
+say "Interpolated greeting: " ~greeting.output
+
+# Example 3: File operations with interpolated paths
+# Demonstrate creating, reading, and cleaning up files using shell commands
+say "3. Working with files"
+~filename is "temp_demo.txt"
+~content is "This is a demo file created by Tails"
+# Write content to file using echo and redirection
+~write_result is run "echo '`~content`' > `~filename`"
+# Read the file back to verify it was written
+~read_result is run "cat `~filename`"
+say "File content: " ~read_result.output
+# Clean up: remove the temporary file
+~cleanup is run "rm `~filename`"
+say "File cleaned up!"
+
+# Example 4: Gathering system information
+# Use shell commands to get information about the current environment
+say "4. System information gathering"
+~user_info is run "whoami"
+~current_dir is run "pwd"
+say "Current user: " ~user_info.output
+say "Working directory: " ~current_dir.output
+
+# Example 5: Conditional logic based on command output
+# Show how to use command results in conditional statements
+say "5. Conditional execution based on command results"
+~ls_result is run "ls -la | head -5"
+# Check if the command produced output and act accordingly
+if ~ls_result.output != "" (
+    say "Directory listing (first 5 items):"
+    say ~ls_result.output
+) else (
+    say "No files found or command failed"
+)
+
+say "6. Command chaining and pipes"
+~process_count is run "ps aux | wc -l"
+say "Number of running processes: " ~process_count.output
+
+say "7. Date and time operations"
+~current_time is run "date"
+~timestamp is run "date +%Y%m%d_%H%M%S"
+say "Current time: " ~current_time.output
+say "Timestamp: " ~timestamp.output
+
+say "8. Environment variables"
+~home_dir is run "echo $HOME"
+~path_info is run "echo $PATH | tr ':' '\n' | head -3"
+say "Home directory: " ~home_dir.output
+say "First 3 PATH entries:"
+say ~path_info.output
+
+say "9. Git integration example (if in a git repo)"
+~git_status is run "git status --porcelain || echo 'Not a git repository'"
+~git_branch is run "git branch --show-current 2>/dev/null || echo 'No git branch'"
+say "Git status: " ~git_status.output
+say "Current branch: " ~git_branch.output
+
+say "10. Network connectivity test"
+~ping_result is run "ping -c 1 8.8.8.8 > /dev/null && echo 'Connected' || echo 'No connection'"
+say "Network status: " ~ping_result.output
+
+say ""
+say "=== Advanced Use Cases ==="
+
+say "11. Creating a simple backup script"
+~backup_name is run "echo backup_$(date +%Y%m%d_%H%M%S).tar.gz"
+~backup_command is "tar -czf `~backup_name.output` . --exclude='*.tar.gz' --exclude='.git' --exclude='target' || echo 'Backup failed'"
+say "Backup filename: " ~backup_name.output
+say "Backup command would be: " ~backup_command
+
+
+say ""
+say "=== Demo Complete ==="
+say "The 'run' command provides a powerful escape hatch for any system functionality!"
+say "Combined with string interpolation using backticks, you can build complex automation scripts."

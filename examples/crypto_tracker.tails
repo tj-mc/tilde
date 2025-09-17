@@ -1,0 +1,148 @@
+say "=== Real-time Crypto Portfolio Tracker ==="
+say "Building the most interesting program possible with current Tails features!"
+say ""
+
+say "1. Setting up portfolio configuration..."
+
+~portfolio is {
+    btc: {
+        symbol: "bitcoin"
+        amount: 0.1
+        buyPrice: 35000
+        alertHigh: 50000
+        alertLow: 30000
+    }
+    eth: {
+        symbol: "ethereum"  
+        amount: 2.5
+        buyPrice: 2000
+        alertHigh: 3000
+        alertLow: 1500
+    }
+    ada: {
+        symbol: "cardano"
+        amount: 1000
+        buyPrice: 0.50
+        alertHigh: 1.00
+        alertLow: 0.30
+    }
+}
+
+~tracker-config is {
+    api_url: "https://api.coingecko.com/api/v3/simple/price"
+    currency: "usd"
+    poll_interval: 10
+    max_polls: 50
+    alerts_enabled: true
+}
+
+say "Portfolio configured:"
+say "- Bitcoin: " ~portfolio.btc.amount " BTC (bought at $" ~portfolio.btc.buyPrice ")"  
+say "- Ethereum: " ~portfolio.eth.amount " ETH (bought at $" ~portfolio.eth.buyPrice ")"
+say "- Cardano: " ~portfolio.ada.amount " ADA (bought at $" ~portfolio.ada.buyPrice ")"
+say ""
+
+say "2. Starting price monitoring..."
+~poll-count is 0
+~total-initial-value is 0
+~current-total-value is 0
+
+loop (
+    ~poll-count is ~poll-count + 1
+    say "=== Poll " ~poll-count " of " ~tracker-config.max_polls " ==="
+    
+    say "Fetching BTC price..."
+    ~btc-url is "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
+    ~btc-data is get ~btc-url
+    ~btc-price is ~btc-data.bitcoin.usd
+    
+    say "Fetching ETH price..."
+    wait 10
+    ~eth-url is "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"  
+    ~eth-data is get ~eth-url
+    ~eth-price is ~eth-data.ethereum.usd
+    
+    say "Fetching ADA price..."
+    wait 10
+    ~ada-url is "https://api.coingecko.com/api/v3/simple/price?ids=cardano&vs_currencies=usd"
+    ~ada-data is get ~ada-url
+    ~ada-price is ~ada-data.cardano.usd
+    
+    say ""
+    say "Current Prices:"
+    say "- Bitcoin: $" ~btc-price
+    say "- Ethereum: $" ~eth-price  
+    say "- Cardano: $" ~ada-price
+    say ""
+    
+    say "Portfolio Values:"
+    ~btc-value is ~portfolio.btc.amount
+    say "- BTC Holdings: " ~btc-value " × $" ~btc-price " = $" ~btc-value
+    
+    ~eth-value is ~portfolio.eth.amount  
+    say "- ETH Holdings: " ~eth-value " × $" ~eth-price " = $" ~eth-value
+    
+    ~ada-value is ~portfolio.ada.amount
+    say "- ADA Holdings: " ~ada-value " × $" ~ada-price " = $" ~ada-value
+    
+    say ""
+    say "Price Alerts:"
+    
+    if ~btc-price > ~portfolio.btc.alertHigh (
+        say "🚨 ALERT: Bitcoin price $" ~btc-price " exceeded high alert of $" ~portfolio.btc.alertHigh
+    )
+    if ~btc-price < ~portfolio.btc.alertLow (
+        say "🚨 ALERT: Bitcoin price $" ~btc-price " below low alert of $" ~portfolio.btc.alertLow  
+    )
+    
+    if ~eth-price > ~portfolio.eth.alertHigh (
+        say "🚨 ALERT: Ethereum price $" ~eth-price " exceeded high alert of $" ~portfolio.eth.alertHigh
+    )
+    if ~eth-price < ~portfolio.eth.alertLow (
+        say "🚨 ALERT: Ethereum price $" ~eth-price " below low alert of $" ~portfolio.eth.alertLow
+    )
+    
+    if ~ada-price > ~portfolio.ada.alertHigh (
+        say "🚨 ALERT: Cardano price $" ~ada-price " exceeded high alert of $" ~portfolio.ada.alertHigh  
+    )
+    if ~ada-price < ~portfolio.ada.alertLow (
+        say "🚨 ALERT: Cardano price $" ~ada-price " below low alert of $" ~portfolio.ada.alertLow
+    )
+    
+    say ""
+    say "Gain/Loss Analysis:"
+    
+    if ~btc-price > ~portfolio.btc.buyPrice (
+        say "- Bitcoin: PROFIT (bought at $" ~portfolio.btc.buyPrice ", now $" ~btc-price ")"
+    ) else (
+        say "- Bitcoin: LOSS (bought at $" ~portfolio.btc.buyPrice ", now $" ~btc-price ")"
+    )
+    
+    if ~eth-price > ~portfolio.eth.buyPrice (
+        say "- Ethereum: PROFIT (bought at $" ~portfolio.eth.buyPrice ", now $" ~eth-price ")"
+    ) else (
+        say "- Ethereum: LOSS (bought at $" ~portfolio.eth.buyPrice ", now $" ~eth-price ")"
+    )
+    
+    if ~ada-price > ~portfolio.ada.buyPrice (
+        say "- Cardano: PROFIT (bought at $" ~portfolio.ada.buyPrice ", now $" ~ada-price ")"
+    ) else (
+        say "- Cardano: LOSS (bought at $" ~portfolio.ada.buyPrice ", now $" ~ada-price ")"
+    )
+    
+    say ""
+    
+    if ~poll-count >= ~tracker-config.max_polls (
+        say "Reached maximum polls. Portfolio tracking complete!"
+        break-loop
+    )
+    
+    say "Waiting " ~tracker-config.poll_interval " seconds until next update..."
+    wait ~tracker-config.poll_interval
+    say ""
+)
+
+say ""
+say "=== Portfolio Tracking Session Complete ==="
+say "Thank you for using the Tails Crypto Portfolio Tracker!"
+say "This demo showcased: HTTP requests, JSON parsing, objects, loops, conditionals, and real-time data processing."

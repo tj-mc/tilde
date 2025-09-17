@@ -1,0 +1,22 @@
+say "Starting timing demonstration..."
+
+say "Waiting 1 second..."
+wait 1
+say "1 second elapsed!"
+
+~delay is 2.5
+say "Waiting" ~delay "seconds..."
+wait ~delay
+say "Variable delay completed!"
+
+~countdown is 3
+loop (
+    say "Countdown:" ~countdown
+    wait 1
+    ~countdown is ~countdown - 1
+    
+    if ~countdown <= 0 (
+        say "Time's up!"
+        break-loop
+    )
+)

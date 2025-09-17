@@ -1,0 +1,38 @@
+say "Collatz Conjecture Sequence Generator"
+say "Enter a positive integer to see its sequence"
+
+~number is ask "Starting number: "
+~original is ~number
+~steps is 0
+
+say ""
+say "Sequence for" ~original
+say ~number
+
+loop (
+    if ~number <= 1 break-loop
+
+    ~steps is ~steps + 1
+
+    if ~number % 2 == 0 (
+        say ~number "is even, dividing by 2"
+        ~number is ~number \ 2
+    ) else (
+        ~new_number is (~number * 3) + 1
+        say ~number "is odd, 3n+1 gives" ~new_number
+        ~number is ~new_number
+    )
+)
+
+say ""
+say "Reached 1 in" ~steps "steps"
+
+if ~original == 27 (
+    say "Fun fact: 27 has one of the longest sequences for small numbers!"
+) else if ~original == 1 (
+    say "Starting with 1 gives the shortest possible sequence!"
+) else if ~steps > 100 (
+    say "That was a long journey! Numbers with long sequences are rare."
+) else if ~steps < 10 (
+    say "A quick convergence! Most small numbers reach 1 quickly."
+)

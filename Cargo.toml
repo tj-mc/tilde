@@ -1,0 +1,65 @@
+[package]
+name = "tails"
+version = "0.1.0"
+edition = "2024"
+default-run = "tails"
+description = "Tails Scripting Language Interpreter"
+authors = ["Tom McIntosh"]
+license = "MIT"
+repository = "https://github.com/tj-mc/tails"
+keywords = ["scripting", "interpreter", "language", "tails", "automation"]
+categories = ["development-tools"]
+
+[[bin]]
+name = "benchmarks"
+path = "tools/benchmarks.rs"
+
+[[bin]]
+name = "stress_test"
+path = "tools/stress_test.rs"
+
+[[bin]]
+name = "memory_profiler"
+path = "tools/memory_profiler.rs"
+
+[[bin]]
+name = "structured_benchmarks"
+path = "tools/structured_benchmarks.rs"
+
+[[bin]]
+name = "performance_main"
+path = "tools/performance_main.rs"
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+
+# HTTP client (not available in WASM)
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+ureq = "3.1.2"
+
+# WebAssembly dependencies (only for WASM target)
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"
+web-sys = { version = "0.3", features = [
+  "console",
+  "Document",
+  "Element",
+  "HtmlElement",
+  "Window",
+  "Request",
+  "RequestInit",
+  "RequestMode",
+  "Response",
+  "Headers",
+] }
+js-sys = "0.3"
+console_error_panic_hook = "0.1"
+getrandom = { version = "0.2", features = ["js"] }
+
+[features]
+default = []
+wasm = []
+
+[lib]
+crate-type = ["cdylib", "rlib"]

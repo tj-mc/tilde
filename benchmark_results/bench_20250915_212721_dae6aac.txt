@@ -1,0 +1,97 @@
+Date: Mon Sep 15 21:27:21 AEST 2025
+Commit: dae6aac
+Rust: rustc 1.89.0 (29483883e 2025-08-04)
+System: Darwin dabble-GQ5WGRJC34 24.6.0 Darwin Kernel Version 24.6.0: Mon Jul 14 11:30:40 PDT 2025; root:xnu-11417.140.69~1/RELEASE_ARM64_T8132 arm64
+======================================
+
+PERFORMANCE BENCHMARKS:
+-----------------------
+🔥 Tails Language Benchmarks (Zero Dependencies)
+==================================================
+
+📖 LEXER BENCHMARKS
+-----------------
+Benchmarking Simple tokenization...
+  10000 iterations in 1.916333ms
+  Average: 0.19μs per operation
+  Throughput: 5219207 ops/sec
+
+Benchmarking Complex tokenization...
+  1000 iterations in 2.205083ms
+  Average: 2.21μs per operation
+  Throughput: 453515 ops/sec
+
+🌳 PARSER BENCHMARKS
+------------------
+Benchmarking Simple parsing...
+  5000 iterations in 2.403417ms
+  Average: 0.48μs per operation
+  Throughput: 2080732 ops/sec
+
+Benchmarking Complex parsing...
+  1000 iterations in 3.381709ms
+  Average: 3.38μs per operation
+  Throughput: 295770 ops/sec
+
+⚡ EVALUATOR BENCHMARKS
+--------------------
+Benchmarking Simple evaluation...
+  5000 iterations in 804.208µs
+  Average: 0.16μs per operation
+  Throughput: 6218905 ops/sec
+
+Benchmarking Arithmetic evaluation...
+  2000 iterations in 1.666125ms
+  Average: 0.83μs per operation
+  Throughput: 1200480 ops/sec
+
+Benchmarking Loop evaluation (50 iterations)...
+  200 iterations in 2.248875ms
+  Average: 11.24μs per operation
+  Throughput: 88968 ops/sec
+
+🔄 FULL PIPELINE BENCHMARKS
+-------------------------
+Benchmarking Full pipeline (Fibonacci 20)...
+  500 iterations in 6.492166ms
+  Average: 12.98μs per operation
+  Throughput: 77018 ops/sec
+
+Benchmarking String concatenation stress test...
+  1000 iterations in 6.86675ms
+  Average: 6.87μs per operation
+  Throughput: 145645 ops/sec
+
+✅ Benchmarks complete!
+
+STRESS TESTS:
+-------------
+💥 Tails Language Stress Tests
+==============================
+
+🧠 MEMORY STRESS TESTS
+---------------------
+Testing large variable count...
+  ✅ 1000 variables: 728.917µs
+Testing deep string concatenation...
+  ✅ 100 string concatenations: 195.625µs
+Testing deep computation...
+  ✅ Nested loops (20x50 = 1000 iterations): 791µs
+
+⚡ PERFORMANCE STRESS TESTS
+-------------------------
+Testing Fibonacci sequence calculation...
+  ✅ Fibonacci 500: 662.458µs
+Testing comparison operations...
+  ✅ 1200 comparison operations: 590.167µs
+
+🔬 EDGE CASE STRESS TESTS
+------------------------
+Testing large number operations...
+  ✅ Large number operations: 6.042µs
+Testing edge case values...
+  ✅ Edge case values: 15.917µs
+Testing complex expressions...
+  ✅ Complex expressions: 10.209µs
+
+✅ All stress tests completed!

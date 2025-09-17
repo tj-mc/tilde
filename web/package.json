@@ -1,0 +1,23 @@
+{
+  "name": "tails-web-repl",
+  "version": "0.1.0",
+  "description": "Tails Scripting Language Web REPL",
+  "main": "repl.js",
+  "type": "module",
+  "scripts": {
+    "build": "../build-web.sh",
+    "serve": "python3 -m http.server 8000",
+    "dev": "../serve-web.sh"
+  },
+  "keywords": ["tails", "repl", "wasm", "scripting", "language"],
+  "author": "Tom McIntosh",
+  "license": "MIT",
+  "homepage": "https://tj-mc.github.io/tails/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tj-mc/tails.git"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

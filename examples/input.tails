@@ -1,0 +1,5 @@
+~name is ask "What's your name? "
+say "Hello," ~name
+
+~age is ask "How old are you? "
+if ~age >= 18 say "You are an adult!" else say "You are a minor."

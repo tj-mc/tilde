@@ -1,0 +1,60 @@
+say "=== Comprehensive Object Demo ==="
+
+say "1. Using unquoted keys:"
+~app is {
+    name: "MyTailsApp"
+    version: "2.0"
+    debug: true
+    port: 8080
+}
+say ~app
+
+say "2. Mixed quoted and unquoted keys:"
+~config is {
+    "api-key": "secret123"
+    database: "postgres"
+    "max-connections": 100
+    timeout: 5000
+}
+say ~config
+
+say "3. Nested objects with unquoted keys:"
+~user is {
+    profile: {
+        firstName: "John"
+        lastName: "Doe"
+        age: 32
+        location: {
+            city: "Portland"
+            state: "Oregon"
+            country: "USA"
+        }
+    }
+    preferences: {
+        theme: "dark"
+        language: "en-US"
+        notifications: true
+    }
+}
+say ~user
+
+say "4. Nested property assignment with unquoted keys:"
+~user.profile.age is 33
+~user.preferences.theme is "light"
+~user.profile.location.city is "Seattle"
+
+say "Updated user:" ~user
+
+say "5. Object functions with unquoted keys:"
+~keys is keys-of ~user.preferences
+~values is values-of ~user.preferences
+say "Preference keys:" ~keys
+say "Preference values:" ~values
+
+say "6. Conditional logic with unquoted properties:"
+if ~user.preferences.notifications (
+    say "Notifications are enabled"
+    if ~user.profile.age > 30 (
+        say "User is over 30 and will receive age-appropriate content"
+    )
+)
