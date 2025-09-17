@@ -267,6 +267,14 @@ body {
     gap: 1rem;
 }
 
+.output-actions {
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    height: 2.5rem; /* Match the height of input-actions row */
+}
+
 .shortcut {
     margin-top: 10px;
     font-size: 0.8rem;

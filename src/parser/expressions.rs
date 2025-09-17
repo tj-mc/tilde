@@ -160,6 +160,7 @@ impl Parser {
                             | Token::Wait
                             | Token::Give
                             | Token::Action
+                            | Token::LeftParen
                             | Token::RightParen
                             | Token::Is
                     ) && !self.is_binary_operator(self.current_token()) {
