@@ -1,7 +1,23 @@
 #!/bin/bash
 
-# Build web REPL examples from the examples/ directory
-# This ensures a single source of truth for all examples
+# Build Web REPL Examples
+# =======================
+#
+# This script automatically generates the web REPL examples section in web/index.html
+# from the curated .tails files in the examples/ directory. This ensures a single
+# source of truth for all examples across the project.
+#
+# Usage:
+#   ./tools/build_web_examples.sh
+#
+# What it does:
+# - Reads selected .tails files from examples/ directory
+# - Escapes content for HTML attributes (handles quotes, newlines, backslashes)
+# - Injects the examples into web/index.html between the examples-list markers
+# - Maintains metadata (titles and descriptions) for each example
+#
+# Manual execution only - not part of CI/CD pipeline
+# Call this when you add/modify examples and want to update the web REPL
 
 set -e
 
