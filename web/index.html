@@ -80,7 +80,7 @@
                         <h4>Fibonacci Sequence</h4>
                         <p>Functions with return values and loops</p>
                     </div>
-                    <div class="example-item" data-code='action is-prime ~num (\n    if ~num < 2 (\n        give false\n    ) else if ~num == 2 (\n        give true\n    ) else if ~num % 2 == 0 (\n        give false\n    ) else (\n        ~is_prime is true\n        ~i is 3\n        loop (\n            if ~i * ~i > ~num break-loop\n            if ~num % ~i == 0 (\n                ~is_prime is false\n                break-loop\n            )\n            ~i is ~i + 2\n        )\n        give ~is_prime\n    )\n)\n\nsay "Prime numbers from 1 to 30:"\n~num is 2\nloop (\n    if ~num > 30 break-loop\n    if *is-prime ~num (\n        say ~num " is prime ✓"\n    )\n    ~num is ~num + 1\n)'>
+                    <div class="example-item" data-code='action is-prime ~num (\n    if ~num < 2 (\n        give false\n    ) else if ~num == 2 (\n        give true\n    ) else if ~num % 2 == 0 (\n        give false\n    ) else (\n        ~is_prime is true\n        ~i is 3\n        loop (\n            if ~i * ~i > ~num break-loop\n            if ~num % ~i == 0 (\n                ~is_prime is false\n                break-loop\n            )\n            ~i is ~i + 2\n        )\n        give ~is_prime\n    )\n)\n\nsay "Prime numbers from 1 to 30:"\n~num is 2\nloop (\n    if ~num > 30 break-loop\n    ~prime_check is *is-prime ~num\n    if ~prime_check (\n        say ~num " is prime ✓"\n    )\n    ~num is ~num + 1\n)'>
                         <h4>Prime Number Checker</h4>
                         <p>Advanced functions with mathematical logic</p>
                     </div>

@@ -1200,3 +1200,89 @@ fn test_nested_function_calls_with_parentheses() {
     // Test both args as nested calls: (1 + 2) + (3 + 4) = 10
     assert_eq!(evaluator.get_variable("result3"), Some(&Value::Number(10.0)));
 }
+
+#[test]
+fn test_prime_number_checker() {
+    let input = "
+        action is-prime ~num (
+            if ~num < 2 (
+                give false
+            ) else if ~num == 2 (
+                give true
+            ) else if ~num % 2 == 0 (
+                give false
+            ) else (
+                ~is_prime is true
+                ~i is 3
+                loop (
+                    if ~i * ~i > ~num break-loop
+                    if ~num % ~i == 0 (
+                        ~is_prime is false
+                        break-loop
+                    )
+                    ~i is ~i + 2
+                )
+                give ~is_prime
+            )
+        )
+
+        ~test1 is *is-prime 1
+        ~test2 is *is-prime 2
+        ~test3 is *is-prime 3
+        ~test4 is *is-prime 4
+        ~test5 is *is-prime 9
+        ~test6 is *is-prime 11
+        ~test7 is *is-prime 17
+    ";
+
+    let mut parser = Parser::new(input);
+    let program = parser.parse().unwrap();
+
+    let mut evaluator = Evaluator::new();
+    evaluator.eval_program(program).unwrap();
+
+    // Test prime number results
+    assert_eq!(evaluator.get_variable("test1"), Some(&Value::Boolean(false))); // 1 is not prime
+    assert_eq!(evaluator.get_variable("test2"), Some(&Value::Boolean(true)));  // 2 is prime
+    assert_eq!(evaluator.get_variable("test3"), Some(&Value::Boolean(true)));  // 3 is prime
+    assert_eq!(evaluator.get_variable("test4"), Some(&Value::Boolean(false))); // 4 is not prime
+    assert_eq!(evaluator.get_variable("test5"), Some(&Value::Boolean(false))); // 9 is not prime
+    assert_eq!(evaluator.get_variable("test6"), Some(&Value::Boolean(true)));  // 11 is prime
+    assert_eq!(evaluator.get_variable("test7"), Some(&Value::Boolean(true)));  // 17 is prime
+}
+
+#[test]
+fn test_action_call_in_if_condition_workaround() {
+    // This test ensures the workaround for action calls in if conditions works
+    let input = "
+        action is-even ~num (
+            give ~num % 2 == 0
+        )
+
+        ~results is []
+        ~num is 1
+        loop (
+            if ~num > 5 break-loop
+            ~even_check is *is-even ~num
+            if ~even_check (
+                ~results is append ~results ~num
+            )
+            ~num is ~num + 1
+        )
+    ";
+
+    let mut parser = Parser::new(input);
+    let program = parser.parse().unwrap();
+
+    let mut evaluator = Evaluator::new();
+    evaluator.eval_program(program).unwrap();
+
+    // Should contain even numbers: [2, 4]
+    if let Some(Value::List(results)) = evaluator.get_variable("results") {
+        assert_eq!(results.len(), 2);
+        assert_eq!(results[0], Value::Number(2.0));
+        assert_eq!(results[1], Value::Number(4.0));
+    } else {
+        panic!("Expected results to be a list");
+    }
+}
