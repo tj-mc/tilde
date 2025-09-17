@@ -1,6 +1,6 @@
 # `~tails` 🐈‍⬛
 
-**A scripting language for everyone**
+**Interpreted Programming Language**
 
 Tails prioritizes **readability** and **simplicity** above all else. 
 
