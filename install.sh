@@ -24,23 +24,29 @@ NC='\033[0m' # No Color
 
 echo "🐈‍⬛ Installing Tails v$VERSION..."
 
-# Detect platform
+# Detect platform and map to release asset names
 OS=$(uname -s)
 ARCH=$(uname -m)
 
 case "$OS" in
     "Linux")
         case "$ARCH" in
-            "x86_64") TARGET="x86_64-unknown-linux-gnu" ;;
+            "x86_64") ASSET_NAME="linux-x64" ;;
             *) echo -e "${RED}Unsupported architecture: $ARCH${NC}"; exit 1 ;;
         esac
+        ARCHIVE_EXT="tar.gz"
         ;;
     "Darwin")
         case "$ARCH" in
-            "x86_64") TARGET="x86_64-apple-darwin" ;;
-            "arm64") TARGET="aarch64-apple-darwin" ;;
+            "x86_64") ASSET_NAME="macos-intel" ;;
+            "arm64") ASSET_NAME="macos-arm64" ;;
             *) echo -e "${RED}Unsupported architecture: $ARCH${NC}"; exit 1 ;;
         esac
+        ARCHIVE_EXT="tar.gz"
+        ;;
+    "MINGW"*|"MSYS_NT"*|"CYGWIN"*)
+        ASSET_NAME="windows-x64"
+        ARCHIVE_EXT="zip"
         ;;
     *)
         echo -e "${RED}Unsupported OS: $OS${NC}"
@@ -48,24 +54,26 @@ case "$OS" in
         ;;
 esac
 
-echo "Detected platform: $TARGET"
+echo "Detected platform: $ASSET_NAME"
 
 # Download URL
 GITHUB_REPO="tj-mc/tails"
-DOWNLOAD_URL="https://github.com/$GITHUB_REPO/releases/download/v$VERSION/tails-v$VERSION-$TARGET.tar.gz"
+DOWNLOAD_URL="https://github.com/$GITHUB_REPO/releases/download/v$VERSION/tails-v$VERSION-$ASSET_NAME.$ARCHIVE_EXT"
 
 # Create temporary directory
 cd "$TEMP_DIR"
 
 echo "Downloading Tails binary..."
+ARCHIVE_FILE="tails.$ARCHIVE_EXT"
+
 if command -v curl >/dev/null 2>&1; then
-    curl -L "$DOWNLOAD_URL" -o "tails.tar.gz" || {
+    curl -L "$DOWNLOAD_URL" -o "$ARCHIVE_FILE" || {
         echo -e "${RED}Download failed. Please check your internet connection and try again.${NC}"
         echo "Manual download URL: $DOWNLOAD_URL"
         exit 1
     }
 elif command -v wget >/dev/null 2>&1; then
-    wget "$DOWNLOAD_URL" -O "tails.tar.gz" || {
+    wget "$DOWNLOAD_URL" -O "$ARCHIVE_FILE" || {
         echo -e "${RED}Download failed. Please check your internet connection and try again.${NC}"
         echo "Manual download URL: $DOWNLOAD_URL"
         exit 1
@@ -76,12 +84,23 @@ else
 fi
 
 echo "Extracting..."
-tar -xzf tails.tar.gz
+if [ "$ARCHIVE_EXT" = "tar.gz" ]; then
+    tar -xzf "$ARCHIVE_FILE"
+elif [ "$ARCHIVE_EXT" = "zip" ]; then
+    unzip -q "$ARCHIVE_FILE"
+fi
 
 # Find the binary in the extracted directory
-BINARY_PATH=$(find . -name "tails" -type f | head -1)
+if [ "$OS" = "MINGW"* ] || [ "$OS" = "MSYS_NT"* ] || [ "$OS" = "CYGWIN"* ]; then
+    BINARY_PATH=$(find . -name "tails.exe" -type f | head -1)
+    BINARY_NAME="tails.exe"
+else
+    BINARY_PATH=$(find . -name "tails" -type f | head -1)
+    BINARY_NAME="tails"
+fi
+
 if [ -z "$BINARY_PATH" ]; then
-    echo -e "${RED}Binary not found in downloaded package${NC}"
+    echo -e "${RED}Binary ($BINARY_NAME) not found in downloaded package${NC}"
     exit 1
 fi
 
