@@ -1028,3 +1028,143 @@ fn test_comments_with_objects() {
         Some(&Value::String("User Alice is 30 years old".to_string()))
     );
 }
+
+#[test]
+fn test_logical_and_operator() {
+    let input = "
+        ~result1 is true and true
+        ~result2 is true and false
+        ~result3 is false and true
+        ~result4 is false and false
+        ~result5 is 1 and 2
+        ~result6 is 0 and 3
+        ~result7 is 5 and 0
+    ";
+
+    let mut parser = Parser::new(input);
+    let program = parser.parse().unwrap();
+
+    let mut evaluator = Evaluator::new();
+    evaluator.eval_program(program).unwrap();
+
+    assert_eq!(evaluator.get_variable("result1"), Some(&Value::Boolean(true)));
+    assert_eq!(evaluator.get_variable("result2"), Some(&Value::Boolean(false)));
+    assert_eq!(evaluator.get_variable("result3"), Some(&Value::Boolean(false)));
+    assert_eq!(evaluator.get_variable("result4"), Some(&Value::Boolean(false)));
+    assert_eq!(evaluator.get_variable("result5"), Some(&Value::Number(2.0))); // 1 is truthy, return 2
+    assert_eq!(evaluator.get_variable("result6"), Some(&Value::Number(0.0))); // 0 is falsy, return 0
+    assert_eq!(evaluator.get_variable("result7"), Some(&Value::Number(0.0))); // 5 is truthy, return 0
+}
+
+#[test]
+fn test_logical_or_operator() {
+    let input = "
+        ~result1 is true or true
+        ~result2 is true or false
+        ~result3 is false or true
+        ~result4 is false or false
+        ~result5 is 1 or 2
+        ~result6 is 0 or 3
+        ~result7 is 5 or 0
+    ";
+
+    let mut parser = Parser::new(input);
+    let program = parser.parse().unwrap();
+
+    let mut evaluator = Evaluator::new();
+    evaluator.eval_program(program).unwrap();
+
+    assert_eq!(evaluator.get_variable("result1"), Some(&Value::Boolean(true)));
+    assert_eq!(evaluator.get_variable("result2"), Some(&Value::Boolean(true)));
+    assert_eq!(evaluator.get_variable("result3"), Some(&Value::Boolean(true)));
+    assert_eq!(evaluator.get_variable("result4"), Some(&Value::Boolean(false)));
+    assert_eq!(evaluator.get_variable("result5"), Some(&Value::Number(1.0))); // 1 is truthy, return 1
+    assert_eq!(evaluator.get_variable("result6"), Some(&Value::Number(3.0))); // 0 is falsy, return 3
+    assert_eq!(evaluator.get_variable("result7"), Some(&Value::Number(5.0))); // 5 is truthy, return 5
+}
+
+#[test]
+fn test_logical_operator_precedence() {
+    let input = "
+        ~result1 is true or false and false
+        ~result2 is false and true or true
+        ~result3 is 1 or 0 and 2
+        ~result4 is 0 and 1 or 3
+    ";
+
+    let mut parser = Parser::new(input);
+    let program = parser.parse().unwrap();
+
+    let mut evaluator = Evaluator::new();
+    evaluator.eval_program(program).unwrap();
+
+    // true or (false and false) => true or false => true
+    assert_eq!(evaluator.get_variable("result1"), Some(&Value::Boolean(true)));
+    // (false and true) or true => false or true => true
+    assert_eq!(evaluator.get_variable("result2"), Some(&Value::Boolean(true)));
+    // 1 or (0 and 2) => 1 or 0 => 1
+    assert_eq!(evaluator.get_variable("result3"), Some(&Value::Number(1.0)));
+    // (0 and 1) or 3 => 0 or 3 => 3
+    assert_eq!(evaluator.get_variable("result4"), Some(&Value::Number(3.0)));
+}
+
+#[test]
+fn test_logical_operators_with_strings() {
+    let input = "
+        ~result1 is \"hello\" and \"world\"
+        ~result2 is \"\" and \"world\"
+        ~result3 is \"hello\" or \"\"
+        ~result4 is \"\" or \"world\"
+    ";
+
+    let mut parser = Parser::new(input);
+    let program = parser.parse().unwrap();
+
+    let mut evaluator = Evaluator::new();
+    evaluator.eval_program(program).unwrap();
+
+    assert_eq!(
+        evaluator.get_variable("result1"),
+        Some(&Value::String("world".to_string()))
+    ); // "hello" is truthy, return "world"
+    assert_eq!(
+        evaluator.get_variable("result2"),
+        Some(&Value::String("".to_string()))
+    ); // "" is falsy, return ""
+    assert_eq!(
+        evaluator.get_variable("result3"),
+        Some(&Value::String("hello".to_string()))
+    ); // "hello" is truthy, return "hello"
+    assert_eq!(
+        evaluator.get_variable("result4"),
+        Some(&Value::String("world".to_string()))
+    ); // "" is falsy, return "world"
+}
+
+#[test]
+fn test_logical_operators_short_circuit() {
+    // Test that the right operand is not evaluated when short-circuiting
+    let input = "
+        ~counter is 0
+        action increment (
+            ~counter is ~counter + 1
+            give true
+        )
+
+        ~result1 is true or *increment
+        ~result2 is false and *increment
+    ";
+
+    let mut parser = Parser::new(input);
+    let program = parser.parse().unwrap();
+
+    let mut evaluator = Evaluator::new();
+    evaluator.eval_program(program).unwrap();
+
+    // Counter should still be 0 because both operations short-circuited
+    // true or X => true (X not evaluated)
+    // false and X => false (X not evaluated)
+    assert_eq!(evaluator.get_variable("counter"), Some(&Value::Number(0.0)));
+    assert_eq!(evaluator.get_variable("result1"), Some(&Value::Boolean(true)));
+    assert_eq!(evaluator.get_variable("result2"), Some(&Value::Boolean(false)));
+}

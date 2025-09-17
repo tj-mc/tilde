@@ -34,6 +34,8 @@ pub enum Token {
     Append,
     Action,
     Give,
+    And,
+    Or,
 
     // Operators
     Plus,
@@ -477,6 +479,8 @@ impl Lexer {
                     "append" => Token::Append,
                     "action" => Token::Action,
                     "give" => Token::Give,
+                    "and" => Token::And,
+                    "or" => Token::Or,
                     "true" => Token::Boolean(true),
                     "false" => Token::Boolean(false),
                     _ => Token::Identifier(ident),

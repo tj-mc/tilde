@@ -44,6 +44,17 @@ impl Evaluator {
         }
     }
 
+    fn is_truthy(&self, value: &Value) -> bool {
+        match value {
+            Value::Boolean(b) => *b,
+            Value::Number(n) => *n != 0.0,
+            Value::String(s) => !s.is_empty(),
+            Value::List(l) => !l.is_empty(),
+            Value::Object(o) => !o.is_empty(),
+            Value::Null => false,
+        }
+    }
+
     pub fn eval_program(&mut self, program: Program) -> Result<Value, String> {
         let mut last_value = Value::Null;
 
@@ -325,10 +336,34 @@ impl Evaluator {
                 Ok(Value::List(values))
             }
             Expression::BinaryOp { left, op, right } => {
-                let left_val = self.eval_expression(*left)?;
-                let right_val = self.eval_expression(*right)?;
+                // Handle logical operators with short-circuit evaluation
+                match op {
+                    BinaryOperator::And => {
+                        let left_val = self.eval_expression(*left)?;
+                        if self.is_truthy(&left_val) {
+                            // Left is truthy, return right operand
+                            self.eval_expression(*right)
+                        } else {
+                            // Left is falsy, return left operand (short-circuit)
+                            Ok(left_val)
+                        }
+                    }
+                    BinaryOperator::Or => {
+                        let left_val = self.eval_expression(*left)?;
+                        if self.is_truthy(&left_val) {
+                            // Left is truthy, return left operand (short-circuit)
+                            Ok(left_val)
+                        } else {
+                            // Left is falsy, return right operand
+                            self.eval_expression(*right)
+                        }
+                    }
+                    _ => {
+                        // For other operators, evaluate both operands first
+                        let left_val = self.eval_expression(*left)?;
+                        let right_val = self.eval_expression(*right)?;
 
-                match (left_val, right_val, op) {
+                        match (left_val, right_val, op) {
                     (Value::Number(l), Value::Number(r), BinaryOperator::Add) => {
                         Ok(Value::Number(l + r))
                     }
@@ -377,6 +412,8 @@ impl Evaluator {
                         Ok(Value::String(format!("{}{}", l, r)))
                     }
                     _ => Err("Invalid operation".to_string()),
+                        }
+                    }
                 }
             }
             Expression::FunctionCall { name, args } => {

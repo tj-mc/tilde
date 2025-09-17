@@ -4,7 +4,41 @@ use crate::lexer::Token;
 
 impl Parser {
     pub fn parse_expression(&mut self) -> Result<Expression, String> {
-        self.parse_comparison()
+        self.parse_or()
+    }
+
+    pub fn parse_or(&mut self) -> Result<Expression, String> {
+        let mut expr = self.parse_and()?;
+
+        while matches!(self.current_token(), Token::Or) {
+            let op = BinaryOperator::Or;
+            self.advance();
+            let right = self.parse_and()?;
+            expr = Expression::BinaryOp {
+                left: Box::new(expr),
+                op,
+                right: Box::new(right),
+            };
+        }
+
+        Ok(expr)
+    }
+
+    pub fn parse_and(&mut self) -> Result<Expression, String> {
+        let mut expr = self.parse_comparison()?;
+
+        while matches!(self.current_token(), Token::And) {
+            let op = BinaryOperator::And;
+            self.advance();
+            let right = self.parse_comparison()?;
+            expr = Expression::BinaryOp {
+                left: Box::new(expr),
+                op,
+                right: Box::new(right),
+            };
+        }
+
+        Ok(expr)
     }
 
     pub fn parse_comparison(&mut self) -> Result<Expression, String> {

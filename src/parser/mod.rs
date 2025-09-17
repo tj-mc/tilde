@@ -77,6 +77,8 @@ impl Parser {
                 | Token::GreaterThanOrEqual
                 | Token::Equal
                 | Token::NotEqual
+                | Token::And
+                | Token::Or
         )
     }
 

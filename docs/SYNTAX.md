@@ -29,6 +29,7 @@ say ~message  # outputs: Hello Alice, you are 30 years old!
 ### Operators
 - **Arithmetic**: `+`, `-`, `*`, `/`, `\` (integer division), `%` (modulo)
 - **Comparison**: `<`, `>`, `<=`, `>=`, `==`, `!=`
+- **Logical**: `and`, `or` (with short-circuit evaluation)
 - **Assignment**: `is`
 
 #### Integer Division and Modulo
@@ -38,6 +39,43 @@ The `\` operator performs integer division (floors the result), while `%` gives 
 ~remainder is 7 % 3 # equals 1.0
 ~even_check is ~n % 2 == 0  # true if n is even
 ```
+
+#### Logical Operators
+The `and` and `or` operators provide logical operations with short-circuit evaluation:
+
+**`and` operator:**
+- Returns the first falsy value, or the last value if all are truthy
+- Short-circuits: if left operand is falsy, right operand is not evaluated
+
+**`or` operator:**
+- Returns the first truthy value, or the last value if all are falsy
+- Short-circuits: if left operand is truthy, right operand is not evaluated
+
+```
+# Boolean logic
+~result1 is true and false   # false
+~result2 is true or false    # true
+
+# With other types (truthy/falsy semantics)
+~result3 is 1 and 2          # 2 (1 is truthy, return 2)
+~result4 is 0 or 3           # 3 (0 is falsy, return 3)
+~result5 is "hello" and ""   # "" ("hello" is truthy, return "")
+
+# Practical usage
+if ~age > 18 and ~hasLicense say "Can drive"
+if ~weather == "rain" or ~weather == "snow" say "Bad weather"
+```
+
+**Operator Precedence (highest to lowest):**
+1. Arithmetic: `*`, `/`, `\`, `%`
+2. Arithmetic: `+`, `-`
+3. Comparison: `<`, `>`, `<=`, `>=`, `==`, `!=`
+4. Logical: `and`
+5. Logical: `or`
+
+**Truthy/Falsy Values:**
+- **Falsy**: `false`, `0`, `""` (empty string), `[]` (empty list), `{}` (empty object), `null`
+- **Truthy**: All other values
 
 ## Control Structures
 

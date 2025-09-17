@@ -87,6 +87,8 @@ pub enum BinaryOperator {
     GreaterThanOrEqual,
     Equal,
     NotEqual,
+    And,
+    Or,
 }
 
 pub type Program = Vec<Statement>;
