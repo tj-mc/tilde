@@ -33,7 +33,7 @@ if [ ! -f web/package.json ]; then
     cat > web/package.json << EOF
 {
   "name": "tails-web-repl",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Tails Scripting Language Web REPL",
   "main": "repl.js",
   "type": "module",
