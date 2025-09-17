@@ -164,9 +164,9 @@ body {
     -webkit-justify-content: center;
     -moz-justify-content: center;
     justify-content: center;
-    -webkit-align-items: flex-start;
-    -moz-align-items: flex-start;
-    align-items: flex-start;
+    -webkit-align-items: center;
+    -moz-align-items: center;
+    align-items: center;
     padding: 2rem;
     padding-top: 4rem;
     overflow: auto;

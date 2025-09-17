@@ -1,26 +1,25 @@
-say "Fibonacci Number Calculator"
-~n is ask "How many Fibonacci numbers would you like to see? "
-
-if ~n <= 0 say "Please enter a positive number!" else say "Here are the first" ~n "Fibonacci numbers:"
-
-~a is 0
-~b is 1
-~count is 0
-
-if ~n >= 1 say "1 -> " ~a
-if ~n >= 2 say "2 -> " ~b
-
-~count is 2
-
-loop (
-    if ~count >= ~n break-loop
-    
-    ~next is ~a + ~b
-    ~count is ~count + 1
-    say ~count " -> " ~next
-    
-    ~a is ~b
-    ~b is ~next
+action fibonacci ~n (
+    if ~n <= 1 (
+        give ~n
+    )
+    ~a is 0
+    ~b is 1
+    ~i is 2
+    loop (
+        if ~i > ~n break-loop
+        ~temp is ~b
+        ~b is ~a + ~b
+        ~a is ~temp
+        ~i is ~i + 1
+    )
+    give ~b
 )
 
-say "Done! Generated " ~n " Fibonacci numbers."
+say "Fibonacci sequence:"
+~i is 0
+loop (
+    if ~i > 10 break-loop
+    ~fib is *fibonacci ~i
+    say "F(" ~i ") = " ~fib
+    ~i is ~i + 1
+)

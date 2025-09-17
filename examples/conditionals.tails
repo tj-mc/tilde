@@ -1,0 +1,21 @@
+~weather is "sunny"
+~temp is 25
+
+if ~weather == "sunny" (
+    if ~temp > 20 (
+        say "Perfect day for a picnic! 🌞"
+    ) else (
+        say "Sunny but chilly - bring a jacket"
+    )
+) else (
+    say "Maybe stay inside today"
+)
+
+~score is 85
+if ~score >= 90 (
+    say "Grade: A - Excellent!"
+) else if ~score >= 80 (
+    say "Grade: B - Well done!"
+) else (
+    say "Grade: C - Keep trying!"
+)

@@ -1,0 +1,58 @@
+# Nested Function Calls - The New Power of Tails!
+# This demonstrates the new ability to use parentheses for nested function calls
+
+action sum ~first ~second (
+    ~first + ~second
+)
+
+action multiply ~a ~b (
+    ~a * ~b
+)
+
+action power ~base ~exp (
+    if ~exp == 0 (
+        give 1
+    ) else (
+        ~result is 1
+        ~i is 0
+        loop (
+            if ~i >= ~exp break-loop
+            ~result is ~result * ~base
+            ~i is ~i + 1
+        )
+        give ~result
+    )
+)
+
+action factorial ~n (
+    if ~n <= 1 (
+        give 1
+    ) else (
+        ~result is 1
+        ~i is 2
+        loop (
+            if ~i > ~n break-loop
+            ~result is ~result * ~i
+            ~i is ~i + 1
+        )
+        give ~result
+    )
+)
+
+say "🔥 NESTED FUNCTION CALLS IN ACTION"
+say "=================================="
+
+say "Simple nesting: sum(43, sum(100, 28)) = " (*sum 43 (*sum 100 28))
+
+say "Mixed operations: multiply(5, sum(10, 20)) = " (*multiply 5 (*sum 10 20))
+
+say "Both args nested: sum(sum(1, 2), sum(3, 4)) = " (*sum (*sum 1 2) (*sum 3 4))
+
+say "Power tower: power(2, power(2, 3)) = " (*power 2 (*power 2 3))
+
+say "Factorial composition: factorial(power(2, 3)) = " (*factorial (*power 2 3))
+
+say "Triple nesting: sum(multiply(2, 3), power(factorial(3), 2)) = " (*sum (*multiply 2 3) (*power (*factorial 3) 2))
+
+say ""
+say "✨ The parentheses allow for powerful mathematical expressions!"

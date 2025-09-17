@@ -1,0 +1,2 @@
+~name is ask "Your name?"
+say "Hello, " ~name

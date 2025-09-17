@@ -1,0 +1,20 @@
+action convert-temperature ~temp ~from ~to (
+    if ~from == "C" (
+        if ~to == "F" (
+            ~result is (~temp * 9/5) + 32
+            say ~temp "°C = " ~result "°F"
+        ) else if ~to == "K" (
+            ~result is ~temp + 273.15
+            say ~temp "°C = " ~result "K"
+        )
+    ) else if ~from == "F" (
+        if ~to == "C" (
+            ~result is (~temp - 32) * 5/9
+            say ~temp "°F = " ~result "°C"
+        )
+    )
+)
+
+*convert-temperature 25 "C" "F"
+*convert-temperature 77 "F" "C"
+*convert-temperature 0 "C" "K"

@@ -11,6 +11,7 @@ class TailsWebREPL {
 
         this.initializeElements();
         this.setupEventListeners();
+        this.updateShortcutDisplay();
         this.loadWasm();
     }
 
@@ -87,6 +88,15 @@ class TailsWebREPL {
         });
     }
 
+    updateShortcutDisplay() {
+        const shortcutEl = document.querySelector('.shortcut');
+        if (shortcutEl) {
+            const isMac = navigator.userAgent.includes('Mac') || /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const shortcutKey = isMac ? '⌘' : 'Ctrl';
+            shortcutEl.textContent = `${shortcutKey}+Enter to run`;
+        }
+    }
+
     async loadWasm() {
         try {
             this.updateStatus('Loading WebAssembly module...');
@@ -104,9 +114,9 @@ class TailsWebREPL {
 
             this.hideLoading();
             this.updateStatus('Ready');
-            this.addOutput('🐈‍⬛ Tails Web REPL loaded successfully!', 'success');
-            this.addOutput('Type your Tails code in the editor and click "Run Code" or press Ctrl+Enter.', 'info');
-            this.addOutput('Real Tails interpreter running via WebAssembly!', 'info');
+            const isMac = navigator.userAgent.includes('Mac') || /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const shortcutKey = isMac ? '⌘' : 'Ctrl';
+            this.addOutput(`Type your Tails code in the editor and click "Run Code" or press ${shortcutKey}+Enter.`, 'info');
 
         } catch (error) {
             this.hideLoading();

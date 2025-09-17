@@ -1168,3 +1168,35 @@ fn test_logical_operators_short_circuit() {
     assert_eq!(evaluator.get_variable("result1"), Some(&Value::Boolean(true)));
     assert_eq!(evaluator.get_variable("result2"), Some(&Value::Boolean(false)));
 }
+
+#[test]
+fn test_nested_function_calls_with_parentheses() {
+    let input = "
+        action sum ~first ~second (
+            ~first + ~second
+        )
+
+        action multiply ~a ~b (
+            ~a * ~b
+        )
+
+        ~result1 is *sum 43 (*sum 100 28)
+        ~result2 is *multiply 5 (*sum 10 20)
+        ~result3 is *sum (*sum 1 2) (*sum 3 4)
+    ";
+
+    let mut parser = Parser::new(input);
+    let program = parser.parse().unwrap();
+
+    let mut evaluator = Evaluator::new();
+    evaluator.eval_program(program).unwrap();
+
+    // Test nested addition: 43 + (100 + 28) = 171
+    assert_eq!(evaluator.get_variable("result1"), Some(&Value::Number(171.0)));
+
+    // Test mixed operations: 5 * (10 + 20) = 150
+    assert_eq!(evaluator.get_variable("result2"), Some(&Value::Number(150.0)));
+
+    // Test both args as nested calls: (1 + 2) + (3 + 4) = 10
+    assert_eq!(evaluator.get_variable("result3"), Some(&Value::Number(10.0)));
+}

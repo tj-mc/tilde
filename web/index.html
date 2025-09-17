@@ -48,65 +48,6 @@
         </header>
 
         <div class="main-content">
-            <!-- Examples panel backdrop (initially hidden) -->
-            <div id="examplesBackdrop" class="examples-backdrop examples-hidden">
-                <div id="examplesPanel" class="examples-panel">
-                    <div class="examples-header">
-                        <h3>Example Programs</h3>
-                        <button id="closeExamples" class="btn-close">&times;</button>
-                    </div>
-                <div class="examples-list">
-                    <div class="example-item" data-code='~name is ask "Your name?"\nsay "Hello, " ~name'>
-                        <h4>Hello World</h4>
-                        <p>Basic variable assignment and output</p>
-                    </div>
-                    <div class="example-item" data-code='~a is 10\n~b is 20\n~sum is ~a + ~b\nsay "The sum of " ~a " and " ~b " is " ~sum'>
-                        <h4>Variables & Math</h4>
-                        <p>Simple arithmetic operations</p>
-                    </div>
-                    <div class="example-item" data-code='~weather is "sunny"\n~temp is 25\n\nif ~weather == "sunny" (\n    if ~temp > 20 (\n        say "Perfect day for a picnic! 🌞"\n    ) else (\n        say "Sunny but chilly - bring a jacket"\n    )\n) else (\n    say "Maybe stay inside today"\n)\n\n~score is 85\nif ~score >= 90 (\n    say "Grade: A - Excellent!"\n) else if ~score >= 80 (\n    say "Grade: B - Well done!"\n) else (\n    say "Grade: C - Keep trying!"\n)'>
-                        <h4>Conditionals</h4>
-                        <p>Nested if statements and else-if chains</p>
-                    </div>
-                    <div class="example-item" data-code='~user is {name: "Alice", age: 30, city: "Paris"}\nsay "User: " ~user.name " is " ~user.age " years old and lives in " ~user.city'>
-                        <h4>Objects</h4>
-                        <p>Working with object properties</p>
-                    </div>
-                    <div class="example-item" data-code='action convert-temperature ~temp ~from ~to (\n    if ~from == "C" (\n        if ~to == "F" (\n            ~result is (~temp * 9/5) + 32\n            say ~temp "°C = " ~result "°F"\n        ) else if ~to == "K" (\n            ~result is ~temp + 273.15\n            say ~temp "°C = " ~result "K"\n        )\n    ) else if ~from == "F" (\n        if ~to == "C" (\n            ~result is (~temp - 32) * 5/9\n            say ~temp "°F = " ~result "°C"\n        )\n    )\n)\n\n*convert-temperature 25 "C" "F"\n*convert-temperature 77 "F" "C"\n*convert-temperature 0 "C" "K"'>
-                        <h4>Actions (Functions)</h4>
-                        <p>Define and call custom actions with parameters</p>
-                    </div>
-                    <div class="example-item" data-code='action fibonacci ~n (\n    if ~n <= 1 (\n        give ~n\n    )\n    ~a is 0\n    ~b is 1\n    ~i is 2\n    loop (\n        if ~i > ~n break-loop\n        ~temp is ~b\n        ~b is ~a + ~b\n        ~a is ~temp\n        ~i is ~i + 1\n    )\n    give ~b\n)\n\nsay "Fibonacci sequence:"\n~i is 0\nloop (\n    if ~i > 10 break-loop\n    ~fib is *fibonacci ~i\n    say "F(" ~i ") = " ~fib\n    ~i is ~i + 1\n)'>
-                        <h4>Fibonacci Sequence</h4>
-                        <p>Functions with return values and loops</p>
-                    </div>
-                    <div class="example-item" data-code='action is-prime ~num (\n    if ~num < 2 (\n        give false\n    ) else if ~num == 2 (\n        give true\n    ) else if ~num % 2 == 0 (\n        give false\n    ) else (\n        ~is_prime is true\n        ~i is 3\n        loop (\n            if ~i * ~i > ~num break-loop\n            if ~num % ~i == 0 (\n                ~is_prime is false\n                break-loop\n            )\n            ~i is ~i + 2\n        )\n        give ~is_prime\n    )\n)\n\nsay "Prime numbers from 1 to 30:"\n~num is 2\nloop (\n    if ~num > 30 break-loop\n    if *is-prime ~num (\n        say ~num " is prime ✓"\n    )\n    ~num is ~num + 1\n)'>
-                        <h4>Prime Number Checker</h4>
-                        <p>Advanced functions with mathematical logic</p>
-                    </div>
-                    <div class="example-item" data-code='action factorial ~n (\n    if ~n <= 1 (\n        give 1\n    ) else (\n        ~n-minus-one is ~n - 1\n        ~recursive is *factorial ~n-minus-one\n        give ~n * ~recursive\n    )\n)\n\nsay "Calculating factorials:"\n~i is 0\nloop (\n    if ~i > 8 break-loop\n    ~result is *factorial ~i\n    say ~i "! = " ~result\n    ~i is ~i + 1\n)'>
-                        <h4>Recursive Factorial</h4>
-                        <p>Recursive functions and mathematical computations</p>
-                    </div>
-                    <div class="example-item" data-code='~tasks is ["Learn Tails", "Build a project", "Share with friends"]\n~completed is [false, false, false]\n\nsay "📋 Todo List Manager"\nsay "=================="\n\nif ~completed.0 say "1. ✅ " ~tasks.0 else say "1. ⭕ " ~tasks.0\nif ~completed.1 say "2. ✅ " ~tasks.1 else say "2. ⭕ " ~tasks.1  \nif ~completed.2 say "3. ✅ " ~tasks.2 else say "3. ⭕ " ~tasks.2\n\nsay ""\nsay "Marking task 1 as complete..."\n~completed.0 is true\n\nsay ""\nsay "Updated list:"\nif ~completed.0 say "1. ✅ " ~tasks.0 else say "1. ⭕ " ~tasks.0\nif ~completed.1 say "2. ✅ " ~tasks.1 else say "2. ⭕ " ~tasks.1\nif ~completed.2 say "3. ✅ " ~tasks.2 else say "3. ⭕ " ~tasks.2'>
-                        <h4>Todo List Manager</h4>
-                        <p>Lists and single-line conditionals</p>
-                    </div>
-                    <div class="example-item" data-code='action generate-pattern ~size ~char (\n    ~row is 0\n    loop (\n        if ~row >= ~size break-loop\n        ~line is ""\n        ~col is 0\n        loop (\n            if ~col >= ~size break-loop\n            if ~row == 0 or ~row == (~size - 1) or ~col == 0 or ~col == (~size - 1) (\n                ~line is ~line + ~char\n            ) else (\n                ~line is ~line + " "\n            )\n            ~col is ~col + 1\n        )\n        say ~line\n        ~row is ~row + 1\n    )\n)\n\nsay "🎨 Pattern Generator"\nsay "==================="\nsay "Square border (5x5):"\n*generate-pattern 5 "*"\n\nsay ""\nsay "Smaller pattern:"\n*generate-pattern 3 "#"'>
-                        <h4>Pattern Generator</h4>
-                        <p>Nested loops and creative ASCII art</p>
-                    </div>
-                    <div class="example-item" data-code='~user is get "https://api.github.com/users/octocat"\nsay "Found user: " ~user.name " with " ~user.public_repos " repos"'>
-                        <h4>Network Request</h4>
-                        <p>Fetch data from APIs and display results</p>
-                    </div>
-                    <div class="example-item" data-code='say "🗺️ Traveling Salesman Problem - Classic Algorithm"\nsay "================================================"\n\n~distance_matrix is [\n    [0, 10, 15, 20],\n    [10, 0, 35, 25],\n    [15, 35, 0, 30],\n    [20, 25, 30, 0]\n]\n\naction calculate-distance ~path ~distances (\n    ~total is 0\n    ~i is 0\n    ~path_len is length ~path\n    loop (\n        ~next_i is ~i + 1\n        if ~next_i >= ~path_len break-loop\n        ~from is ~path.~i\n        ~to is ~path.~next_i\n        ~from_row is ~distances.~from\n        ~dist is ~from_row.~to\n        ~total is ~total + ~dist\n        ~i is ~next_i\n    )\n    give ~total\n)\n\nsay "Testing all possible 4-city routes:"\n\n~all_paths is [\n    [0, 1, 2, 3],\n    [0, 1, 3, 2],\n    [0, 2, 1, 3],\n    [0, 2, 3, 1],\n    [0, 3, 1, 2],\n    [0, 3, 2, 1]\n]\n\n~best_distance is 999999\n~best_path is []\n~i is 0\n~paths_len is length ~all_paths\n\nloop (\n    if ~i >= ~paths_len break-loop\n    ~path is ~all_paths.~i\n    ~distance is *calculate-distance ~path ~distance_matrix\n\n    say "Path " ~path " = distance " ~distance\n\n    if ~distance < ~best_distance (\n        ~best_distance is ~distance\n        ~best_path is ~path\n        say "  ✅ New best path!"\n    )\n    ~i is ~i + 1\n)\n\nsay ""\nsay "🏆 OPTIMAL SOLUTION:"\nsay "Best path: " ~best_path\nsay "Total distance: " ~best_distance'>
-                        <h4>🗺️ Traveling Salesman Problem</h4>
-                        <p>Classic NP-hard optimization problem with brute force solution</p>
-                    </div>
-                </div>
-            </div>
-            </div>
 
             <!-- REPL Interface -->
             <div class="repl-container">
@@ -146,6 +87,165 @@ say "Hello, " ~name</textarea>
         <div class="status-bar">
             <span id="statusText">Ready</span>
             <span id="versionText">v0.1.0</span>
+        </div>
+    </div>
+
+    <!-- Examples panel backdrop (initially hidden) -->
+    <div id="examplesBackdrop" class="examples-backdrop examples-hidden">
+        <div id="examplesPanel" class="examples-panel">
+            <div class="examples-header">
+                <h3>Example Programs</h3>
+                <button id="closeExamples" class="btn-close">&times;</button>
+            </div>
+            <div class="examples-list">
+                <div class="example-item" data-code='~name is ask \"Your name?\"\nsay \"Hello, \" ~name\n'>
+                    <h4>Hello World</h4>
+                    <p>Basic variable assignment and output</p>
+                </div>
+                <div class="example-item" data-code='~a is 10\n~b is 20\n~sum is ~a + ~b\nsay \"The sum of \" ~a \" and \" ~b \" is \" ~sum\n'>
+                    <h4>Variables & Math</h4>
+                    <p>Simple arithmetic operations</p>
+                </div>
+                <div class="example-item" data-code='~weather is \"sunny\"\n~temp is 25\n\nif ~weather == \"sunny\" (\n    if ~temp > 20 (\n        say \"Perfect day for a picnic! 🌞\"\n    ) else (\n        say \"Sunny but chilly - bring a jacket\"\n    )\n) else (\n    say \"Maybe stay inside today\"\n)\n\n~score is 85\nif ~score >= 90 (\n    say \"Grade: A - Excellent!\"\n) else if ~score >= 80 (\n    say \"Grade: B - Well done!\"\n) else (\n    say \"Grade: C - Keep trying!\"\n)\n'>
+                    <h4>Conditionals</h4>
+                    <p>Nested if statements and else-if chains</p>
+                </div>
+                <div class="example-item" data-code='~user is {name: \"Alice\" age: 30 city: \"Paris\"}\nsay \"User: \" ~user.name \" is \" ~user.age \" years old and lives in \" ~user.city\n'>
+                    <h4>Objects</h4>
+                    <p>Working with object properties</p>
+                </div>
+                <div class="example-item" data-code='action greet ~name (\n    say \"Hello, \" ~name \"!\"\n)\n\n*greet \"World\"\n\naction add ~a ~b (\n    give ~a + ~b\n)\n\n~sum is *add 10 20\nsay \"10 + 20 = \" ~sum\n\n~counter is 0\n\naction increment (\n    ~counter is ~counter + 1\n    give ~counter\n)\n\nsay \"Counter before: \" ~counter\n~result is *increment\nsay \"Counter after increment: \" ~counter\nsay \"Result: \" ~result\n\naction factorial ~n (\n    if ~n <= 1 give 1\n    ~recurse is *factorial (~n - 1)\n    give ~n * ~recurse\n)\n\n~fact5 is *factorial 5\nsay \"5! = \" ~fact5\n\naction fib ~n (\n    if ~n <= 1 give ~n\n    ~a is *fib (~n - 1)\n    ~b is *fib (~n - 2)\n    give ~a + ~b\n)\n\n~fib10 is *fib 10\nsay \"Fibonacci(10) = \" ~fib10\n\naction make_greeting ~title ~name (\n    give ~title + \" \" + ~name\n)\n\n~greeting is *make_greeting \"Dr.\" \"Smith\"\nsay ~greeting\n\naction max ~a ~b (\n    if ~a > ~b give ~a\n    give ~b\n)\n\n~bigger is *max 42 37\nsay \"Max of 42 and 37 is: \" ~bigger\n\naction double ~x (\n    give *add ~x ~x\n)\n\n~doubled is *double 15\nsay \"Double of 15 is: \" ~doubled\n\naction test_implicit_return ~x (\n   ~x * 2\n)\n\n~implicit is *test_implicit_return 7\nsay \"Implicit return (7*2): \" ~implicit\n'>
+                    <h4>Actions (Functions)</h4>
+                    <p>Define and call custom actions with parameters</p>
+                </div>
+                <div class="example-item" data-code='action fibonacci ~n (\n    if ~n <= 1 (\n        give ~n\n    )\n    ~a is 0\n    ~b is 1\n    ~i is 2\n    loop (\n        if ~i > ~n break-loop\n        ~temp is ~b\n        ~b is ~a + ~b\n        ~a is ~temp\n        ~i is ~i + 1\n    )\n    give ~b\n)\n\nsay \"Fibonacci sequence:\"\n~i is 0\nloop (\n    if ~i > 10 break-loop\n    ~fib is *fibonacci ~i\n    say \"F(\" ~i \") = \" ~fib\n    ~i is ~i + 1\n)\n'>
+                    <h4>Fibonacci Sequence</h4>
+                    <p>Functions with return values and loops</p>
+                </div>
+                <div class="example-item" data-code='# Nested Function Calls - The New Power of Tails!\n# This demonstrates the new ability to use parentheses for nested function calls\n\naction sum ~first ~second (\n    ~first + ~second\n)\n\naction multiply ~a ~b (\n    ~a * ~b\n)\n\naction power ~base ~exp (\n    if ~exp == 0 (\n        give 1\n    ) else (\n        ~result is 1\n        ~i is 0\n        loop (\n            if ~i >= ~exp break-loop\n            ~result is ~result * ~base\n            ~i is ~i + 1\n        )\n        give ~result\n    )\n)\n\naction factorial ~n (\n    if ~n <= 1 (\n        give 1\n    ) else (\n        ~result is 1\n        ~i is 2\n        loop (\n            if ~i > ~n break-loop\n            ~result is ~result * ~i\n            ~i is ~i + 1\n        )\n        give ~result\n    )\n)\n\nsay \"🔥 NESTED FUNCTION CALLS IN ACTION\"\nsay \"==================================\"\n\nsay \"Simple nesting: sum(43, sum(100, 28)) = \" (*sum 43 (*sum 100 28))\n\nsay \"Mixed operations: multiply(5, sum(10, 20)) = \" (*multiply 5 (*sum 10 20))\n\nsay \"Both args nested: sum(sum(1, 2), sum(3, 4)) = \" (*sum (*sum 1 2) (*sum 3 4))\n\nsay \"Power tower: power(2, power(2, 3)) = \" (*power 2 (*power 2 3))\n\nsay \"Factorial composition: factorial(power(2, 3)) = \" (*factorial (*power 2 3))\n\nsay \"Triple nesting: sum(multiply(2, 3), power(factorial(3), 2)) = \" (*sum (*multiply 2 3) (*power (*factorial 3) 2))\n\nsay \"\"\nsay \"✨ The parentheses allow for powerful mathematical expressions!\"\n'>
+                    <h4>🔥 Nested Function Calls</h4>
+                    <p>Mathematical compositions with parentheses</p>
+                </div>
+                <div class="example-item" data-code='# Data Structure Manipulation with Nested Calls\n# Showcasing functional programming patterns in Tails\n\naction sum_list ~list (\n    ~sum is 0\n    ~i is 0\n    ~len is length ~list\n    loop (\n        if ~i >= ~len break-loop\n        ~sum is ~sum + ~list.~i\n        ~i is ~i + 1\n    )\n    give ~sum\n)\n\naction max_list ~list (\n    if (length ~list) == 0 give 0\n    ~max_val is ~list.0\n    ~i is 1\n    ~len is length ~list\n    loop (\n        if ~i >= ~len break-loop\n        if ~list.~i > ~max_val (\n            ~max_val is ~list.~i\n        )\n        ~i is ~i + 1\n    )\n    give ~max_val\n)\n\naction create_range ~start ~end (\n    ~result is []\n    ~i is ~start\n    loop (\n        if ~i > ~end break-loop\n        ~result is append ~result ~i\n        ~i is ~i + 1\n    )\n    give ~result\n)\n\naction filter_even ~list (\n    ~result is []\n    ~i is 0\n    ~len is length ~list\n    loop (\n        if ~i >= ~len break-loop\n        if ~list.~i % 2 == 0 (\n            ~result is append ~result ~list.~i\n        )\n        ~i is ~i + 1\n    )\n    give ~result\n)\n\nsay \"🚀 FUNCTIONAL PROGRAMMING WITH NESTED CALLS\"\nsay \"===========================================\"\n\nsay \"Sum of even numbers 1-20: \" (*sum_list (*filter_even (*create_range 1 20)))\n\nsay \"Max of filtered range 10-30: \" (*max_list (*filter_even (*create_range 10 30)))\n\n# Complex nested object with computed values\n~range_1_5 is *create_range 1 5\n~range_5_15 is *create_range 5 15\n~range_1_10 is *create_range 1 10\n~even_1_10 is *filter_even ~range_1_10\n\n~stats is {\n    total: *sum_list ~range_1_5\n    max: *max_list ~range_5_15\n    even_sum: *sum_list ~even_1_10\n}\n\nsay \"Computed stats: \" ~stats\nsay \"Total: \" ~stats.total \" | Max: \" ~stats.max \" | Even sum: \" ~stats.even_sum\n\nsay \"\"\nsay \"✨ Functional composition makes complex data transformations elegant!\"\n'>
+                    <h4>🚀 Data Structure Madness</h4>
+                    <p>Functional programming patterns</p>
+                </div>
+                <div class="example-item" data-code='say \"Fetching data from a public API...\"\n\n~response is get \"https://jsonplaceholder.typicode.com/todos/1\"\nsay \"Response received!\"\nsay ~response\nsay ~response.userId\n\nsay \"Testing timeout functionality...\"\n~quick-response is get \"https://httpbin.org/delay/1\" 5\nsay \"Quick response received!\"\n'>
+                    <h4>Network Request</h4>
+                    <p>Fetch data from APIs and display results</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="https://github.com/tj-mc/tails" target="_blank" class="btn btn-tertiary github-link">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    GitHub
+                </a>
+                <button id="examplesBtn" class="btn btn-primary">Examples</button>
+            </div>
+        </header>
+
+        <div class="main-content">
+
+            <!-- REPL Interface -->
+            <div class="repl-container">
+                <!-- Code Input -->
+                <div class="input-section">
+                    <label for="codeInput" class="input-label">Code Input</label>
+                    <div class="editor-container">
+                        <textarea id="codeInput" placeholder="Enter your Tails code here...">~name is ask
+say "Hello, " ~name</textarea>
+                    </div>
+                    <div class="input-actions">
+                        <button id="runBtn" class="btn btn-primary">Run Code</button>
+                        <button id="clearCodeBtn" class="btn btn-tertiary">Clear Code</button>
+                    </div>
+                    <span class="shortcut">Ctrl+Enter to run</span>
+                </div>
+
+                <!-- Output -->
+                <div class="output-section">
+                    <label class="output-label">Output</label>
+                    <div id="output" class="output-display"></div>
+                    <div class="output-actions">
+                        <button id="clearBtn" class="btn btn-secondary">Clear Output</button>
+                        <button id="resetBtn" class="btn btn-secondary">Reset REPL</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading indicator -->
+        <div id="loadingIndicator" class="loading-indicator">
+            <div class="spinner"></div>
+            <p>Loading Tails WebAssembly module...</p>
+        </div>
+
+        <!-- Status bar -->
+        <div class="status-bar">
+            <span id="statusText">Ready</span>
+            <span id="versionText">v0.1.0</span>
+        </div>
+    </div>
+
+    <!-- Examples panel backdrop (initially hidden) -->
+    <div id="examplesBackdrop" class="examples-backdrop examples-hidden">
+        <div id="examplesPanel" class="examples-panel">
+            <div class="examples-header">
+                <h3>Example Programs</h3>
+                <button id="closeExamples" class="btn-close">&times;</button>
+            </div>
+            <div class="examples-list">
+                <div class="example-item" data-code='~name is ask "Your name?"\nsay "Hello, " ~name'>
+                    <h4>Hello World</h4>
+                    <p>Basic variable assignment and output</p>
+                </div>
+                <div class="example-item" data-code='~a is 10\n~b is 20\n~sum is ~a + ~b\nsay "The sum of " ~a " and " ~b " is " ~sum'>
+                    <h4>Variables & Math</h4>
+                    <p>Simple arithmetic operations</p>
+                </div>
+                <div class="example-item" data-code='~weather is "sunny"\n~temp is 25\n\nif ~weather == "sunny" (\n    if ~temp > 20 (\n        say "Perfect day for a picnic! 🌞"\n    ) else (\n        say "Sunny but chilly - bring a jacket"\n    )\n) else (\n    say "Maybe stay inside today"\n)\n\n~score is 85\nif ~score >= 90 (\n    say "Grade: A - Excellent!"\n) else if ~score >= 80 (\n    say "Grade: B - Well done!"\n) else (\n    say "Grade: C - Keep trying!"\n)'>
+                    <h4>Conditionals</h4>
+                    <p>Nested if statements and else-if chains</p>
+                </div>
+                <div class="example-item" data-code='~user is {name: "Alice", age: 30, city: "Paris"}\nsay "User: " ~user.name " is " ~user.age " years old and lives in " ~user.city'>
+                    <h4>Objects</h4>
+                    <p>Working with object properties</p>
+                </div>
+                <div class="example-item" data-code='action convert-temperature ~temp ~from ~to (\n    if ~from == "C" (\n        if ~to == "F" (\n            ~result is (~temp * 9/5) + 32\n            say ~temp "°C = " ~result "°F"\n        ) else if ~to == "K" (\n            ~result is ~temp + 273.15\n            say ~temp "°C = " ~result "K"\n        )\n    ) else if ~from == "F" (\n        if ~to == "C" (\n            ~result is (~temp - 32) * 5/9\n            say ~temp "°F = " ~result "°C"\n        )\n    )\n)\n\n*convert-temperature 25 "C" "F"\n*convert-temperature 77 "F" "C"\n*convert-temperature 0 "C" "K"'>
+                    <h4>Actions (Functions)</h4>
+                    <p>Define and call custom actions with parameters</p>
+                </div>
+                <div class="example-item" data-code='action fibonacci ~n (\n    if ~n <= 1 (\n        give ~n\n    )\n    ~a is 0\n    ~b is 1\n    ~i is 2\n    loop (\n        if ~i > ~n break-loop\n        ~temp is ~b\n        ~b is ~a + ~b\n        ~a is ~temp\n        ~i is ~i + 1\n    )\n    give ~b\n)\n\nsay "Fibonacci sequence:"\n~i is 0\nloop (\n    if ~i > 10 break-loop\n    ~fib is *fibonacci ~i\n    say "F(" ~i ") = " ~fib\n    ~i is ~i + 1\n)'>
+                    <h4>Fibonacci Sequence</h4>
+                    <p>Functions with return values and loops</p>
+                </div>
+                <div class="example-item" data-code='action is-prime ~num (\n    if ~num < 2 (\n        give false\n    ) else if ~num == 2 (\n        give true\n    ) else if ~num % 2 == 0 (\n        give false\n    ) else (\n        ~is_prime is true\n        ~i is 3\n        loop (\n            if ~i * ~i > ~num break-loop\n            if ~num % ~i == 0 (\n                ~is_prime is false\n                break-loop\n            )\n            ~i is ~i + 2\n        )\n        give ~is_prime\n    )\n)\n\nsay "Prime numbers from 1 to 30:"\n~num is 2\nloop (\n    if ~num > 30 break-loop\n    if *is-prime ~num (\n        say ~num " is prime ✓"\n    )\n    ~num is ~num + 1\n)'>
+                    <h4>Prime Number Checker</h4>
+                    <p>Advanced functions with mathematical logic</p>
+                </div>
+                <div class="example-item" data-code='action factorial ~n (\n    if ~n <= 1 (\n        give 1\n    ) else (\n        ~n-minus-one is ~n - 1\n        ~recursive is *factorial ~n-minus-one\n        give ~n * ~recursive\n    )\n)\n\nsay "Calculating factorials:"\n~i is 0\nloop (\n    if ~i > 8 break-loop\n    ~result is *factorial ~i\n    say ~i "! = " ~result\n    ~i is ~i + 1\n)'>
+                    <h4>Recursive Factorial</h4>
+                    <p>Recursive functions and mathematical computations</p>
+                </div>
+                <div class="example-item" data-code='~tasks is ["Learn Tails", "Build a project", "Share with friends"]\n~completed is [false, false, false]\n\nsay "📋 Todo List Manager"\nsay "=================="\n\nif ~completed.0 say "1. ✅ " ~tasks.0 else say "1. ⭕ " ~tasks.0\nif ~completed.1 say "2. ✅ " ~tasks.1 else say "2. ⭕ " ~tasks.1  \nif ~completed.2 say "3. ✅ " ~tasks.2 else say "3. ⭕ " ~tasks.2\n\nsay ""\nsay "Marking task 1 as complete..."\n~completed.0 is true\n\nsay ""\nsay "Updated list:"\nif ~completed.0 say "1. ✅ " ~tasks.0 else say "1. ⭕ " ~tasks.0\nif ~completed.1 say "2. ✅ " ~tasks.1 else say "2. ⭕ " ~tasks.1\nif ~completed.2 say "3. ✅ " ~tasks.2 else say "3. ⭕ " ~tasks.2'>
+                    <h4>Todo List Manager</h4>
+                    <p>Lists and single-line conditionals</p>
+                </div>
+                <div class="example-item" data-code='action generate-pattern ~size ~char (\n    ~row is 0\n    loop (\n        if ~row >= ~size break-loop\n        ~line is ""\n        ~col is 0\n        loop (\n            if ~col >= ~size break-loop\n            if ~row == 0 or ~row == (~size - 1) or ~col == 0 or ~col == (~size - 1) (\n                ~line is ~line + ~char\n            ) else (\n                ~line is ~line + " "\n            )\n            ~col is ~col + 1\n        )\n        say ~line\n        ~row is ~row + 1\n    )\n)\n\nsay "🎨 Pattern Generator"\nsay "==================="\nsay "Square border (5x5):"\n*generate-pattern 5 "*"\n\nsay ""\nsay "Smaller pattern:"\n*generate-pattern 3 "#"'>
+                    <h4>Pattern Generator</h4>
+                    <p>Nested loops and creative ASCII art</p>
+                </div>
+                <div class="example-item" data-code='~user is get "https://api.github.com/users/octocat"\nsay "Found user: " ~user.name " with " ~user.public_repos " repos"'>
+                    <h4>Network Request</h4>
+                    <p>Fetch data from APIs and display results</p>
+                </div>
+                <div class="example-item" data-code='say "🗺️ Traveling Salesman Problem - Classic Algorithm"\nsay "================================================"\n\n~distance_matrix is [\n    [0, 10, 15, 20],\n    [10, 0, 35, 25],\n    [15, 35, 0, 30],\n    [20, 25, 30, 0]\n]\n\naction calculate-distance ~path ~distances (\n    ~total is 0\n    ~i is 0\n    ~path_len is length ~path\n    loop (\n        ~next_i is ~i + 1\n        if ~next_i >= ~path_len break-loop\n        ~from is ~path.~i\n        ~to is ~path.~next_i\n        ~from_row is ~distances.~from\n        ~dist is ~from_row.~to\n        ~total is ~total + ~dist\n        ~i is ~next_i\n    )\n    give ~total\n)\n\nsay "Testing all possible 4-city routes:"\n\n~all_paths is [\n    [0, 1, 2, 3],\n    [0, 1, 3, 2],\n    [0, 2, 1, 3],\n    [0, 2, 3, 1],\n    [0, 3, 1, 2],\n    [0, 3, 2, 1]\n]\n\n~best_distance is 999999\n~best_path is []\n~i is 0\n~paths_len is length ~all_paths\n\nloop (\n    if ~i >= ~paths_len break-loop\n    ~path is ~all_paths.~i\n    ~distance is *calculate-distance ~path ~distance_matrix\n\n    say "Path " ~path " = distance " ~distance\n\n    if ~distance < ~best_distance (\n        ~best_distance is ~distance\n        ~best_path is ~path\n        say "  ✅ New best path!"\n    )\n    ~i is ~i + 1\n)\n\nsay ""\nsay "🏆 OPTIMAL SOLUTION:"\nsay "Best path: " ~best_path\nsay "Total distance: " ~best_distance'>
+                    <h4>🗺️ Traveling Salesman Problem</h4>
+                    <p>Classic NP-hard optimization problem with brute force solution</p>
+                </div>
+            </div>
         </div>
     </div>
 

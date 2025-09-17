@@ -1,0 +1,2 @@
+~user is {name: "Alice" age: 30 city: "Paris"}
+say "User: " ~user.name " is " ~user.age " years old and lives in " ~user.city

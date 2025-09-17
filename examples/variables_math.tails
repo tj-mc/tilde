@@ -1,0 +1,4 @@
+~a is 10
+~b is 20
+~sum is ~a + ~b
+say "The sum of " ~a " and " ~b " is " ~sum

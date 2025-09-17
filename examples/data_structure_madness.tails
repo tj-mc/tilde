@@ -1,0 +1,79 @@
+# Data Structure Manipulation with Nested Calls
+# Showcasing functional programming patterns in Tails
+
+action sum_list ~list (
+    ~sum is 0
+    ~i is 0
+    ~len is length ~list
+    loop (
+        if ~i >= ~len break-loop
+        ~sum is ~sum + ~list.~i
+        ~i is ~i + 1
+    )
+    give ~sum
+)
+
+action max_list ~list (
+    if (length ~list) == 0 give 0
+    ~max_val is ~list.0
+    ~i is 1
+    ~len is length ~list
+    loop (
+        if ~i >= ~len break-loop
+        if ~list.~i > ~max_val (
+            ~max_val is ~list.~i
+        )
+        ~i is ~i + 1
+    )
+    give ~max_val
+)
+
+action create_range ~start ~end (
+    ~result is []
+    ~i is ~start
+    loop (
+        if ~i > ~end break-loop
+        ~result is append ~result ~i
+        ~i is ~i + 1
+    )
+    give ~result
+)
+
+action filter_even ~list (
+    ~result is []
+    ~i is 0
+    ~len is length ~list
+    loop (
+        if ~i >= ~len break-loop
+        if ~list.~i % 2 == 0 (
+            ~result is append ~result ~list.~i
+        )
+        ~i is ~i + 1
+    )
+    give ~result
+)
+
+say "🚀 FUNCTIONAL PROGRAMMING WITH NESTED CALLS"
+say "==========================================="
+
+say "Sum of even numbers 1-20: " (*sum_list (*filter_even (*create_range 1 20)))
+
+say "Max of filtered range 10-30: " (*max_list (*filter_even (*create_range 10 30)))
+
+# Complex nested object with computed values
+~range_1_5 is *create_range 1 5
+~range_5_15 is *create_range 5 15
+~range_1_10 is *create_range 1 10
+~even_1_10 is *filter_even ~range_1_10
+
+~stats is {
+    total: *sum_list ~range_1_5
+    max: *max_list ~range_5_15
+    even_sum: *sum_list ~even_1_10
+}
+
+say "Computed stats: " ~stats
+say "Total: " ~stats.total " | Max: " ~stats.max " | Even sum: " ~stats.even_sum
+
+say ""
+say "✨ Functional composition makes complex data transformations elegant!"
