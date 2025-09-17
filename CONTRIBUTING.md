@@ -146,6 +146,25 @@ Please include:
 - How it fits with existing language features
 - Any implementation ideas you have
 
+## Version Management
+
+To update the project version across all files:
+
+```bash
+# Update to new version (updates all files automatically)
+./tools/update_version.sh 0.2.0
+
+# Get current version
+./tools/get_version.sh
+```
+
+This ensures version consistency across:
+- `Cargo.toml` and `Cargo.lock`
+- WebAssembly package configuration
+- Web REPL interface
+- GitHub Actions workflows
+- Documentation
+
 ## Questions and Support
 
 - **General questions**: Open a discussion on GitHub

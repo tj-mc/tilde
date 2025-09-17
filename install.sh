@@ -5,7 +5,14 @@
 
 set -e
 
-VERSION="0.1.0"
+# Get version from GitHub releases API (latest tag)
+VERSION=$(curl -s https://api.github.com/repos/tj-mc/tails/releases/latest | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4 | sed 's/^v//')
+
+# Fallback if API fails
+if [ -z "$VERSION" ]; then
+    VERSION="0.1.0"
+    echo "⚠️  Could not fetch latest version, using fallback: $VERSION"
+fi
 INSTALL_DIR="/usr/local/bin"
 TEMP_DIR=$(mktemp -d)
 
