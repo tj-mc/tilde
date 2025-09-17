@@ -14,6 +14,10 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   build:
     name: Build ${{ matrix.target }}
@@ -24,7 +28,7 @@ jobs:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             name: linux-x64
-          - os: windows-latest
+          - os: windows-2022
             target: x86_64-pc-windows-gnu
             name: windows-x64
           - os: macos-latest
@@ -70,7 +74,7 @@ jobs:
         # Copy documentation
         cp ../README.md ./ 2>/dev/null || echo "README.md not found"
         cp ../LICENSE ./ 2>/dev/null || echo "LICENSE not found"
-        cp ../SYNTAX.md ./ 2>/dev/null || echo "SYNTAX.md not found"
+        cp ../docs/SYNTAX.md ./ 2>/dev/null || echo "SYNTAX.md not found"
 
         # Copy examples if they exist
         if [ -d "../examples" ]; then
