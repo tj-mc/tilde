@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2025-01-20
+
+### Added
+- **Comprehensive Standard Library**: Complete functional programming toolkit using `*.` syntax
+  - **List Operations**: `*.map`, `*.filter`, `*.reduce`, `*.sort`, `*.reverse`
+  - **Helper Functions**: 20+ functional programming helpers with `.` prefix
+    - **Predicates**: `.is-even`, `.is-odd`, `.is-positive`, `.is-negative`, `.is-zero`
+    - **Transformations**: `.double`, `.triple`, `.quadruple`, `.half`, `.square`, `.increment`, `.decrement`
+    - **Reductions**: `.add`, `.multiply`, `.max`, `.min`
+    - **String Operations**: `.uppercase`, `.lowercase`
+    - **Math Functions**: `.absolute`, `.square-root`
+  - **String Functions**: `*.join`, `*.split`, `*.trim`, `*.length`
+  - **Math Operations**: `*.min`, `*.max`, `*.absolute`, `*.square-root`
+- **Enhanced Variable Operations**:
+  - `~var up amount` - Increment variables by specified amount
+  - `~var down amount` - Decrement variables by specified amount
+- **Collection Iteration**: `for-each` for processing lists with custom actions
+- **Terminal Control**: `clear` function for screen clearing in animations/games
+- **Negative Number Literals**: Direct support for negative numbers (e.g., `-42`, `-3.14`)
+- **Advanced Examples**:
+  - `stdlib_demo.tails` - Comprehensive standard library showcase
+  - `functional_programming.tails` - Real-world functional programming patterns
+  - `foreach_advanced.tails` - Advanced iteration techniques
+  - Multiple graphics examples (bouncing ball, matrix rain, simple game)
+
+### Enhanced
+- **Function Reference System**: Functions can be passed by name using `.function-name` syntax
+- **Parser Improvements**: Enhanced handling of dot-prefixed identifiers for stdlib functions
+- **Error Messages**: More descriptive error messages for stdlib function usage
+- **Code Organization**: Refactored stdlib with utility functions to reduce duplication
+
+### Technical Improvements
+- **Test Coverage**: 60+ new tests covering all stdlib functionality
+- **Documentation**: Complete stdlib documentation with examples
+- **Performance**: Optimized stdlib functions with shared validation utilities
+- **Type Safety**: Enhanced argument validation for all stdlib functions
+
+### Breaking Changes
+- Standard library functions now use `*.` prefix (e.g., `*.map` instead of `map`)
+- Helper functions referenced with `.` prefix when passed to higher-order functions
+- Function calls vs function references now clearly distinguished
+
 ## [0.1.3] - 2025-01-19
 
 ### Added
@@ -52,6 +94,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Memory-efficient interpreter design
 - Cross-platform HTTP client support
 
-[unreleased]: https://github.com/tj-mc/tails/compare/v0.1.3...HEAD
+[unreleased]: https://github.com/tj-mc/tails/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/tj-mc/tails/compare/v0.1.3...v0.2.0
 [0.1.3]: https://github.com/tj-mc/tails/compare/v0.1.0...v0.1.3
 [0.1.0]: https://github.com/tj-mc/tails/releases/tag/v0.1.0
