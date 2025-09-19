@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2025-01-19
+
+### Added
+- **File I/O Operations**: Complete file reading and writing functionality
+  - `read "path"` - Read files with metadata (content, size, exists, error)
+  - `write "path" content` - Write any data type to files with result status
+  - Support for all data types in file operations
+  - Comprehensive error handling and file metadata
+- **Web REPL Improvements**: Version display now updates automatically
+
+### Fixed
+- Version consistency across all project files and web interface
+
 ## [0.1.0] - 2025-01-17
 
 ### Added
@@ -39,5 +52,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Memory-efficient interpreter design
 - Cross-platform HTTP client support
 
-[unreleased]: https://github.com/tj-mc/tails/compare/v0.1.0...HEAD
+[unreleased]: https://github.com/tj-mc/tails/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/tj-mc/tails/compare/v0.1.0...v0.1.3
 [0.1.0]: https://github.com/tj-mc/tails/releases/tag/v0.1.0
