@@ -262,6 +262,7 @@ impl Parser {
             Token::Random => self.parse_simple_function_call("random"),
             Token::Read => self.parse_simple_function_call("read"),
             Token::Write => self.parse_simple_function_call("write"),
+            Token::Clear => self.parse_simple_function_call("clear"),
             Token::KeysOf => {
                 self.advance();
                 if *self.current_token() == Token::LeftParen {

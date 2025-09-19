@@ -368,6 +368,43 @@ The content argument can be any data type:
 - Objects and lists are written as their string representation
 - Null is written as "null"
 
+### Terminal Control
+Clear the terminal screen for graphics and animation:
+```
+clear
+```
+
+The `clear` command:
+- Takes no arguments
+- Clears the entire terminal screen
+- Positions cursor at top-left (0,0)
+- Returns null
+- Works on all platforms (ANSI escape sequences)
+
+**Terminal Graphics Examples:**
+```
+# Simple animation loop
+~frame is 0
+loop (
+    if ~frame >= 10 break-loop
+    clear
+    say "Frame: " ~frame
+    say "    🐈‍⬛"  # Moving cat
+    wait 0.2
+    ~frame is ~frame + 1
+)
+
+# Interactive dashboard
+loop (
+    clear
+    say "┌─── TAILS DASHBOARD ───┐"
+    say "│ Status: Running       │"
+    say "│ Memory: 42MB          │"
+    say "└───────────────────────┘"
+    wait 1.0
+)
+```
+
 
 ## Objects and Properties
 
@@ -492,7 +529,7 @@ loop (
 
 ### Token Types
 - **Variables**: Tokens starting with `~`
-- **Keywords**: `is`, `if`, `else`, `loop`, `break-loop`, `say`, `ask`, `get`, `run`, `wait`, `random`, `read`, `write`, `action`, `give`, `length`, `append`
+- **Keywords**: `is`, `if`, `else`, `loop`, `break-loop`, `say`, `ask`, `get`, `run`, `wait`, `random`, `read`, `write`, `clear`, `action`, `give`, `length`, `append`
 - **Literals**: Numbers and double-quoted strings
 - **Operators**: Mathematical and comparison operators
 - **Delimiters**: `(` and `)`

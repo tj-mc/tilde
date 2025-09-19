@@ -1,0 +1,63 @@
+# Bouncing Ball Animation
+# A simple ball that bounces left and right across the screen
+
+say "🏀 Starting bouncing ball animation..."
+say "Press Ctrl+C to stop"
+wait 1
+
+~ball_pos is 0
+~direction is 1
+~max_pos is 20
+~frame is 0
+
+loop (
+    if ~frame >= 40 break-loop
+
+    clear
+
+    # Draw the top border
+    say "┌──────────────────────┐"
+
+    # Draw the ball line with proper spacing
+    ~spaces is ""
+    ~other-spaces is ""
+    ~i is 0
+    loop (
+        if ~i >= ~ball_pos (
+            ~i2 is 0
+            loop (
+              if ~i2 >= (~max_pos - ~i) break-loop
+              ~i2 is ~i2 + 1
+              ~other-spaces is "`~other-spaces` "
+            )
+            break-loop
+
+        )
+        ~spaces is ~spaces + " "
+        ~i is ~i + 1
+    )
+
+    say "│" ~spaces "🏀" ~other-spaces "│"
+
+    # Draw the bottom border
+    say "└──────────────────────┘"
+    say "Position: " ~ball_pos " Direction: " ~direction " Frame: " ~frame
+
+    # Update ball position based on direction
+    if ~direction == 1 (
+        ~ball_pos is ~ball_pos + 1
+    ) else (
+        ~ball_pos is ~ball_pos - 1
+    )
+
+    # Bounce off walls - flip direction
+    if ~ball_pos >= ~max_pos (
+        ~direction is 0
+    )
+    if ~ball_pos <= 0 (
+        ~direction is 1
+    )
+
+    ~frame is ~frame + 1
+    wait 0.05
+)

@@ -1,0 +1,65 @@
+# Animated Progress Bar
+# Shows a realistic loading animation with percentage
+
+say "💾 Starting download simulation..."
+wait 1
+
+~progress is 0
+~total is 100
+
+loop (
+    if ~progress > ~total break-loop
+
+    clear
+
+    # Header
+    say "╔══════════════════════════════╗"
+    say "║       FILE DOWNLOAD          ║"
+    say "╠══════════════════════════════╣"
+
+    # Progress bar
+    ~filled is ~progress / 4  # Scale to fit width
+    ~empty is 25 - ~filled
+
+    ~bar is "["
+    ~i is 0
+
+    # Add filled portion
+    loop (
+        if ~i >= ~filled break-loop
+        ~bar is ~bar + "█"
+        ~i is ~i + 1
+    )
+
+    # Add empty portion
+    ~i is 0
+    loop (
+        if ~i >= ~empty break-loop
+        ~bar is ~bar + "░"
+        ~i is ~i + 1
+    )
+
+    ~bar is ~bar + "]"
+
+    say "║ " ~bar " ║"
+    say "║                              ║"
+    say "║ Progress: " ~progress "%" "               ║"
+    say "║ Speed: 2.4 MB/s              ║"
+    say "║ Time remaining: " (100 - ~progress)             "           ║"
+    say "╚══════════════════════════════╝"
+
+    # Simulate variable download speed
+    if ~progress < 20 (
+        ~progress is ~progress + 1
+    ) else if ~progress < 80 (
+        ~progress is ~progress + 3
+    ) else (
+        ~progress is ~progress + 1
+    )
+
+    wait 0.1
+)
+
+clear
+say "✅ Download complete!"
+say "🎉 File saved successfully!"

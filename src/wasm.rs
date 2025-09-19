@@ -14,6 +14,10 @@ unsafe extern "C" {
     // JavaScript function to handle HTTP fetch (will be implemented in JS)
     #[wasm_bindgen(js_namespace = window, js_name = tailsFetch)]
     pub fn fetch_url(url: &str) -> String;
+
+    // JavaScript function to clear console (will be implemented in JS)
+    #[wasm_bindgen(js_namespace = window, js_name = tailsClearConsole)]
+    pub fn clear_console();
 }
 
 // Define a macro for console logging

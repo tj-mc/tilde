@@ -5,6 +5,7 @@ pub mod intern;
 pub mod lexer;
 pub mod parser;
 pub mod random;
+pub mod terminal;
 pub mod value;
 
 #[cfg(target_arch = "wasm32")]

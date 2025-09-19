@@ -1,0 +1,64 @@
+# Matrix Rain Effect
+# Simulates the "digital rain" effect from The Matrix
+
+say "🟢 Entering The Matrix..."
+wait 1
+
+~frame is 0
+
+loop (
+    if ~frame >= 50 break-loop  # Run for 50 frames
+
+    clear
+
+    # Matrix header
+    say "╔════════════════════════════════╗"
+    say "║         THE MATRIX             ║"
+    say "╚════════════════════════════════╝"
+
+    # Generate different "rain" patterns based on frame
+    ~pattern is ~frame % 5
+
+    if ~pattern == 0 (
+        say "  01001 10110 11001 01010 11101"
+        say "01110   00111 10101   11001 0010"
+        say "  11001 01001   10110 00111 1101"
+        say "10101   11010 01001   10011   01"
+        say "  00111 10101   11010 01001 1001"
+    ) else if ~pattern == 1 (
+        say "11001   01110 10101 00111   1001"
+        say "  01001 10110   11001 01010 1110"
+        say "10110 11001   01010 11101   0100"
+        say "  00111 10101 11010   01001 1001"
+        say "01001   10110 11001   01010 1110"
+    ) else if ~pattern == 2 (
+        say "10101 00111   10011 01001   1001"
+        say "  11010 01001 10110   11001 0101"
+        say "01110   00111 10101 11001   0010"
+        say "  01001 10110 11001   01010 1110"
+        say "11001 01010   11101 00111   1010"
+    ) else if ~pattern == 3 (
+        say "  00111 10101 11010 01001   1001"
+        say "10110   11001 01010   11101 0011"
+        say "  01001 10110 11001 01010   1110"
+        say "11010 01001   10110 11001 01010"
+        say "  10101 00111 10011   01001 1001"
+    ) else (
+        say "01001 10110   11001 01010   1110"
+        say "  11010 01001 10110 11001   0101"
+        say "10101   00111 10011 01001 10011"
+        say "  01110 00111   10101 11001 0010"
+        say "11001 01010 11101   00111 10101"
+    )
+
+    # Status line
+    say ""
+    say "Frame: " ~frame " | Reality Status: DISCONNECTED"
+
+    ~frame is ~frame + 1
+    wait 0.15
+)
+
+clear
+say "🔴 Connection to Matrix terminated."
+say "💊 Welcome back to reality."

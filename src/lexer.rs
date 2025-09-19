@@ -39,6 +39,7 @@ pub enum Token {
     Random,
     Read,
     Write,
+    Clear,
 
     // Operators
     Plus,
@@ -481,6 +482,7 @@ impl Lexer {
                     "random" => Token::Random,
                     "read" => Token::Read,
                     "write" => Token::Write,
+                    "clear" => Token::Clear,
                     "true" => Token::Boolean(true),
                     "false" => Token::Boolean(false),
                     _ => Token::Identifier(ident),

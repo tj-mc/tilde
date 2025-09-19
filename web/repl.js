@@ -255,6 +255,14 @@ window.tailsPrompt = function(message) {
     return prompt(message) || '';
 };
 
+window.tailsClearConsole = function() {
+    // Clear the output area in the web REPL
+    const outputElement = document.getElementById('output');
+    if (outputElement) {
+        outputElement.innerHTML = '';
+    }
+};
+
 window.tailsFetch = function(url) {
     // Note: This uses deprecated synchronous XMLHttpRequest for WASM compatibility
     // This will block the main thread but allows HTTP requests to work in WASM

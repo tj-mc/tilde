@@ -64,6 +64,7 @@ impl Evaluator {
             "random" => crate::random::eval_random_positional(args, self),
             "read" => crate::file_io::eval_read_positional(args, self),
             "write" => crate::file_io::eval_write_positional(args, self),
+            "clear" => crate::terminal::eval_clear_positional(args, self),
             _ => Err(format!("Unknown positional function: {}", name)),
         }
     }
@@ -388,7 +389,7 @@ impl Evaluator {
 
                         Ok(Value::String(message))
                     }
-                    "get" | "run" | "wait" | "random" | "read" | "write" => self.eval_positional_function(&name, args),
+                    "get" | "run" | "wait" | "random" | "read" | "write" | "clear" => self.eval_positional_function(&name, args),
                     "ask" => {
                         #[cfg(target_arch = "wasm32")]
                         {
