@@ -384,6 +384,13 @@ impl Lexer {
             }
             Some('-') => {
                 self.advance();
+                // Check if this is a negative number literal
+                if let Some(ch) = self.current_char {
+                    if ch.is_ascii_digit() {
+                        let (num, was_float) = self.read_number();
+                        return Token::Number(-num, was_float);
+                    }
+                }
                 Token::Minus
             }
             Some('*') => {

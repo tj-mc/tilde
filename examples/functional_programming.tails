@@ -1,0 +1,133 @@
+# Functional Programming with Stdlib Helpers
+# Real-world examples using built-in helper functions
+
+say "🔧 Functional Programming with Stdlib Helpers"
+say "=============================================="
+
+# Example 1: Processing sales data
+say ""
+say "1. Sales Data Analysis:"
+~sales is [150, 0, 300, 75, 0, 450, 220, 0, 180]
+say "   Raw sales data: " ~sales
+
+# Remove zero sales (filter out zeros using .is-zero + negation via custom action)
+action is_not_zero ~x (give ~x > 0)
+~non_zero_sales is *.filter ~sales is_not_zero
+say "   Non-zero sales: " ~non_zero_sales
+
+# Double all sales for bonus calculation
+~bonus_amounts is *.map ~non_zero_sales .double
+say "   Bonus amounts (doubled): " ~bonus_amounts
+
+# Calculate total bonuses
+~total_bonus is *.reduce ~bonus_amounts .add 0
+say "   Total bonus payout: $" ~total_bonus
+
+# Find highest sale
+~max_sale is *.reduce ~non_zero_sales .max 0
+say "   Highest sale: $" ~max_sale
+
+# Example 2: Text processing pipeline
+say ""
+say "2. Text Processing Pipeline:"
+~user_inputs is ["  Hello World  ", "TAILS ROCKS", "  functional programming  "]
+say "   Raw inputs: " ~user_inputs
+
+# Clean and normalize text
+~trimmed is *.map ~user_inputs .trim
+say "   Trimmed: " ~trimmed
+
+~normalized is *.map ~trimmed .lowercase
+say "   Normalized (lowercase): " ~normalized
+
+# Join into a sentence
+~sentence is *.join ~normalized " | "
+say "   Final sentence: " ~sentence
+
+# Example 3: Number sequence transformations
+say ""
+say "3. Number Sequence Transformations:"
+~sequence is [1, 2, 3, 4, 5]
+say "   Starting sequence: " ~sequence
+
+# Create various transformations
+~doubled is *.map ~sequence .double
+~tripled is *.map ~sequence .triple
+~squared is *.map ~sequence .square
+~incremented is *.map ~sequence .increment
+
+say "   Doubled: " ~doubled
+say "   Tripled: " ~tripled
+say "   Squared: " ~squared
+say "   Incremented: " ~incremented
+
+# Example 4: Data validation and filtering
+say ""
+say "4. Data Validation and Filtering:"
+~test_scores is [85, 92, 67, 78, 94, 88, 71, 96]
+say "   Test scores: " ~test_scores
+
+# Define custom predicates for score filtering
+action is_high ~x (give ~x >= 90)
+action is_passing ~x (give ~x >= 70)
+
+# Find different score categories
+~high_scores is *.filter ~test_scores is_high
+~passing_scores is *.filter ~test_scores is_passing
+
+say "   High scores (>=90): " ~high_scores
+say "   Passing scores (>=70): " ~passing_scores
+
+# Calculate statistics
+~total_score is *.reduce ~test_scores .add 0
+~average is ~total_score / (length ~test_scores)
+~highest is *.reduce ~test_scores .max 0
+
+say "   Total: " ~total_score " | Average: " ~average " | Highest: " ~highest
+
+# Example 5: Mathematical operations on datasets
+say ""
+say "5. Mathematical Operations on Datasets:"
+~prices is [19.99, 45.50, 12.25, 67.80, 34.90]
+say "   Original prices: " ~prices
+
+# Apply transformations for different scenarios
+~doubled_prices is *.map ~prices .double
+~half_prices is *.map ~prices .half
+
+say "   Premium prices (doubled): " ~doubled_prices
+say "   Sale prices (halved): " ~half_prices
+
+# Calculate totals
+~total_original is *.reduce ~prices .add 0
+~total_premium is *.reduce ~doubled_prices .add 0
+~total_sale is *.reduce ~half_prices .add 0
+
+say "   Revenue scenarios:"
+say "     Original total: $" ~total_original
+say "     Premium total: $" ~total_premium
+say "     Sale total: $" ~total_sale
+
+# Example 6: String case transformations for UI
+say ""
+say "6. String Case Transformations for UI:"
+~menu_items is ["home", "about", "contact", "services"]
+say "   Menu items: " ~menu_items
+
+~uppercase_headers is *.map ~menu_items .uppercase
+~lowercase_nav is *.map ~menu_items .lowercase
+
+say "   Header format: " ~uppercase_headers
+say "   Navigation format: " ~lowercase_nav
+
+# Mixed case data cleanup
+~messy_data is ["Hello", "WORLD", "TeSt", "DATA"]
+~clean_data is *.map ~messy_data .lowercase
+say "   Cleaned data: " ~messy_data " → " ~clean_data
+
+say ""
+say "🚀 Stdlib helper functions enable powerful data processing pipelines!"
+say "   • Predicates: .is-even, .is-odd, .is-positive, .is-negative, .is-zero"
+say "   • Transformations: .double, .triple, .quadruple, .half, .square, .increment, .decrement"
+say "   • Reductions: .add, .multiply, .max, .min"
+say "   • String ops: .uppercase, .lowercase"

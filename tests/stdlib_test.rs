@@ -209,7 +209,7 @@ fn test_sort_errors() {
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("sort argument must be a list"));
+    assert!(result.unwrap_err().contains("sort first argument must be a list"));
 }
 
 // ============================================================================

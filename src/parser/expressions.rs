@@ -207,7 +207,8 @@ impl Parser {
                                 break;
                             }
                         } else {
-                            args.push(self.parse_primary()?);
+                            // For action calls, parse arguments one by one without property access
+                            args.push(self.parse_action_argument()?);
                         }
                     }
 
@@ -261,7 +262,7 @@ impl Parser {
 
                 // Parse arguments until we hit a terminator
                 while !self.is_expression_terminator() && !matches!(self.current_token(), Token::Is) && !self.is_binary_operator(self.current_token()) {
-                    args.push(self.parse_primary()?);
+                    args.push(self.parse_action_argument()?);
                 }
 
                 Ok(Expression::StdlibCall {
@@ -378,6 +379,17 @@ impl Parser {
             }
             Token::LeftBrace => self.parse_object_literal(),
             Token::LeftBracket => self.parse_list_literal(),
+            Token::Dot => {
+                // Parse dot-prefixed stdlib function reference like .is-even
+                self.advance();
+                match self.current_token().clone() {
+                    Token::Identifier(name) => {
+                        self.advance();
+                        Ok(Expression::Variable(format!(".{}", name)))
+                    }
+                    _ => Err("Expected identifier after '.' for stdlib function reference".to_string()),
+                }
+            }
             _ => Err(format!("Unexpected token: {:?}", self.current_token())),
         }
     }
@@ -408,5 +420,61 @@ impl Parser {
         }
 
         Ok(args)
+    }
+
+    /// Parse a single action argument without property access chains
+    /// This prevents ~var .prop from being parsed as property access
+    fn parse_action_argument(&mut self) -> Result<Expression, String> {
+        match self.current_token().clone() {
+            Token::Number(n, was_float) => {
+                self.advance();
+                Ok(Expression::Number(n, was_float))
+            }
+            Token::String(s) => {
+                self.advance();
+                Ok(Expression::String(s))
+            }
+            Token::InterpolatedString(parts) => {
+                self.advance();
+                Ok(Expression::InterpolatedString(parts))
+            }
+            Token::Boolean(b) => {
+                self.advance();
+                Ok(Expression::Boolean(b))
+            }
+            Token::Variable(name) => {
+                self.advance();
+                // Don't parse property access - just return the variable
+                Ok(Expression::Variable(name))
+            }
+            Token::Identifier(name) => {
+                self.advance();
+                // Don't allow function calls in action arguments - just identifiers
+                Ok(Expression::FunctionCall {
+                    name,
+                    args: Vec::new(),
+                })
+            }
+            Token::Dot => {
+                // Parse dot-prefixed stdlib function reference like .is-even
+                self.advance();
+                match self.current_token().clone() {
+                    Token::Identifier(name) => {
+                        self.advance();
+                        Ok(Expression::Variable(format!(".{}", name)))
+                    }
+                    _ => Err("Expected identifier after '.' for stdlib function reference".to_string()),
+                }
+            }
+            Token::LeftParen => {
+                self.advance();
+                let expr = self.parse_expression()?;
+                self.expect(Token::RightParen)?;
+                Ok(expr)
+            }
+            Token::LeftBrace => self.parse_object_literal(),
+            Token::LeftBracket => self.parse_list_literal(),
+            _ => Err(format!("Unexpected token in action argument: {:?}", self.current_token())),
+        }
     }
 }

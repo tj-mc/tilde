@@ -1,6 +1,7 @@
 use crate::ast::Expression;
 use crate::evaluator::Evaluator;
 use crate::value::Value;
+use super::utils::*;
 
 /// Transforms each element in a list using the provided function.
 ///
@@ -31,10 +32,33 @@ pub fn eval_map(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Valu
     let function_name = match &args[1] {
         Expression::Variable(name) => name.clone(),
         Expression::FunctionCall { name, args } if args.is_empty() => name.clone(),
-        _ => return Err("map second argument must be a function name (use function name without *, like 'double')".to_string()),
+        _ => return Err("map second argument must be a function name (like 'double' or '.double' for stdlib)".to_string()),
     };
 
-    // Check if the action exists
+    // Check if it's a stdlib function (starts with .)
+    if function_name.starts_with('.') {
+        let stdlib_name = &function_name[1..]; // Remove the . prefix
+        if let Some(stdlib_func) = crate::stdlib::get_stdlib_function(stdlib_name) {
+            let mut result = Vec::new();
+            for item in list {
+                // Create expression for the item
+                let arg_expr = match &item {
+                    Value::Number(n) => Expression::Number(*n, false),
+                    Value::String(s) => Expression::String(s.clone()),
+                    Value::Boolean(b) => Expression::Boolean(*b),
+                    _ => return Err("map can only work with numbers, strings, and booleans for now".to_string()),
+                };
+
+                let mapped_value = stdlib_func(vec![arg_expr], evaluator)?;
+                result.push(mapped_value);
+            }
+            return Ok(Value::List(result));
+        } else {
+            return Err(format!("Unknown stdlib function: .{}", stdlib_name));
+        }
+    }
+
+    // Check if the action exists (user-defined function)
     if !evaluator.actions.contains_key(&function_name) {
         return Err(format!("Action '{}' not found", function_name));
     }
@@ -90,10 +114,35 @@ pub fn eval_filter(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<V
     let function_name = match &args[1] {
         Expression::Variable(name) => name.clone(),
         Expression::FunctionCall { name, args } if args.is_empty() => name.clone(),
-        _ => return Err("filter second argument must be a function name (use function name without *, like 'is_even')".to_string()),
+        _ => return Err("filter second argument must be a function name (like 'is_even' or '.is-even' for stdlib)".to_string()),
     };
 
-    // Check if the action exists
+    // Check if it's a stdlib function (starts with .)
+    if function_name.starts_with('.') {
+        let stdlib_name = &function_name[1..]; // Remove the . prefix
+        if let Some(stdlib_func) = crate::stdlib::get_stdlib_function(stdlib_name) {
+            let mut result = Vec::new();
+            for item in list {
+                // Create expression for the item
+                let arg_expr = match &item {
+                    Value::Number(n) => Expression::Number(*n, false),
+                    Value::String(s) => Expression::String(s.clone()),
+                    Value::Boolean(b) => Expression::Boolean(*b),
+                    _ => return Err("filter can only work with numbers, strings, and booleans for now".to_string()),
+                };
+
+                let predicate_result = stdlib_func(vec![arg_expr], evaluator)?;
+                if let Value::Boolean(true) = predicate_result {
+                    result.push(item);
+                }
+            }
+            return Ok(Value::List(result));
+        } else {
+            return Err(format!("Unknown stdlib function: .{}", stdlib_name));
+        }
+    }
+
+    // Check if the action exists (user-defined function)
     if !evaluator.actions.contains_key(&function_name) {
         return Err(format!("Action '{}' not found", function_name));
     }
@@ -138,10 +187,40 @@ pub fn eval_reduce(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<V
     let function_name = match &args[1] {
         Expression::Variable(name) => name.clone(),
         Expression::FunctionCall { name, args } if args.is_empty() => name.clone(),
-        _ => return Err("reduce second argument must be a function name (use function name without *, like 'add')".to_string()),
+        _ => return Err("reduce second argument must be a function name (like 'add' or '.add' for stdlib)".to_string()),
     };
 
-    // Check if the action exists
+    let mut accumulator = evaluator.eval_expression(args[2].clone())?;
+
+    // Check if it's a stdlib function (starts with .)
+    if function_name.starts_with('.') {
+        let stdlib_name = &function_name[1..]; // Remove the . prefix
+        if let Some(stdlib_func) = crate::stdlib::get_stdlib_function(stdlib_name) {
+            for item in list {
+                // Create arguments for the accumulator and current item
+                let acc_expr = match &accumulator {
+                    Value::Number(n) => Expression::Number(*n, false),
+                    Value::String(s) => Expression::String(s.clone()),
+                    Value::Boolean(b) => Expression::Boolean(*b),
+                    _ => return Err("reduce can only work with numbers, strings, and booleans for now".to_string()),
+                };
+
+                let item_expr = match &item {
+                    Value::Number(n) => Expression::Number(*n, false),
+                    Value::String(s) => Expression::String(s.clone()),
+                    Value::Boolean(b) => Expression::Boolean(*b),
+                    _ => return Err("reduce can only work with numbers, strings, and booleans for now".to_string()),
+                };
+
+                accumulator = stdlib_func(vec![acc_expr, item_expr], evaluator)?;
+            }
+            return Ok(accumulator);
+        } else {
+            return Err(format!("Unknown stdlib function: .{}", stdlib_name));
+        }
+    }
+
+    // Check if the action exists (user-defined function)
     if !evaluator.actions.contains_key(&function_name) {
         return Err(format!("Action '{}' not found", function_name));
     }
@@ -181,12 +260,7 @@ pub fn eval_sort(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Val
     if args.len() != 1 {
         return Err("sort requires exactly 1 argument (list)".to_string());
     }
-
-    let list_val = evaluator.eval_expression(args[0].clone())?;
-    let mut list = match list_val {
-        Value::List(items) => items,
-        _ => return Err("sort argument must be a list".to_string()),
-    };
+    let mut list = extract_list_arg(&args, evaluator, "sort")?;
 
     // Sort based on value type
     list.sort_by(|a, b| {
@@ -205,13 +279,7 @@ pub fn eval_reverse(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<
     if args.len() != 1 {
         return Err("reverse requires exactly 1 argument (list)".to_string());
     }
-
-    let list_val = evaluator.eval_expression(args[0].clone())?;
-    let mut list = match list_val {
-        Value::List(items) => items,
-        _ => return Err("reverse argument must be a list".to_string()),
-    };
-
+    let mut list = extract_list_arg(&args, evaluator, "reverse")?;
     list.reverse();
     Ok(Value::List(list))
 }

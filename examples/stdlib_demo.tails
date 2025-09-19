@@ -1,29 +1,9 @@
 # Standard Library Demo
-# Showcasing the power of functional programming in Tails!
+# Showcasing the power of functional programming with built-in helper functions!
 
 say "🚀 Standard Library Demo"
 say "======================="
-
-# Define some helper actions
-action double ~x (
-    give ~x * 2
-)
-
-action is_even ~x (
-    give ~x % 2 == 0
-)
-
-action is_positive ~x (
-    give ~x > 0
-)
-
-action add ~a ~b (
-    give ~a + ~b
-)
-
-action multiply ~a ~b (
-    give ~a * ~b
-)
+say "Using built-in helper functions with .function syntax"
 
 # Start with some data
 ~numbers is [1, 2, 3, 4, 5, 0]
@@ -38,27 +18,39 @@ say "🔢 Sorted: " ~sorted
 ~reversed is *.reverse ~numbers
 say "🔄 Reversed: " ~reversed
 
-# Map: transform each element
-~doubled is *.map ~numbers double
+# Map: transform each element using stdlib helpers
+~doubled is *.map ~numbers .double
 say "✖️ Doubled: " ~doubled
 
-# Filter: keep only elements that match
-~evens is *.filter ~numbers is_even
+~tripled is *.map ~numbers .triple
+say "✖️ Tripled: " ~tripled
+
+~squares is *.map ~numbers .square
+say "² Squared: " ~squares
+
+# Filter: keep only elements that match using stdlib predicates
+~evens is *.filter ~numbers .is-even
 say "➗ Even numbers: " ~evens
 
-~positives is *.filter ~numbers is_positive
+~positives is *.filter ~numbers .is-positive
 say "➕ Positive numbers: " ~positives
 
-# Reduce: combine all elements into one
-~sum is *.reduce ~numbers add 0
+~odds is *.filter ~numbers .is-odd
+say "🔢 Odd numbers: " ~odds
+
+# Reduce: combine all elements using stdlib functions
+~sum is *.reduce ~numbers .add 0
 say "➕ Sum of all: " ~sum
 
-~product is *.reduce ~positives multiply 1
+~product is *.reduce ~positives .multiply 1
 say "✖️ Product of positives: " ~product
 
+~maximum is *.reduce ~numbers .max 0
+say "🔝 Maximum: " ~maximum
+
 # Chain operations together
-~even_positives is *.filter ~positives is_even
-~doubled_even_positives is *.map ~even_positives double
+~even_positives is *.filter ~positives .is-even
+~doubled_even_positives is *.map ~even_positives .double
 say ""
 say "🔗 Chained operations:"
 say "   Positive → " ~positives
@@ -80,11 +72,34 @@ say "Split back: " ~parts
 ~trimmed is *.trim "  hello world  "
 say "Trimmed: '" ~trimmed "'"
 
-# Math operations
+# String case transformations using stdlib helpers
+~uppercase_words is *.map ~words .uppercase
+say "UPPERCASE: " ~uppercase_words
+
+~mixed_case is ["Hello", "WORLD", "FrOm", "tails"]
+~lowercase_words is *.map ~mixed_case .lowercase
+say "lowercase: " ~lowercase_words
+
+# Math operations and more transformations
 say ""
 say "🧮 Math Operations:"
 ~number is 16
 say "Square root of " ~number ": " (*.square-root ~number)
 
+~negative is -42
+say "Absolute value of " ~negative ": " (*.absolute ~negative)
+
+# More transformation examples
+~test_numbers is [1, 2, 3, 4, 5]
+~incremented is *.map ~test_numbers .increment
+say "Incremented: " ~incremented
+
+~decremented is *.map ~test_numbers .decrement
+say "Decremented: " ~decremented
+
+~halved is *.map [2, 4, 6, 8] .half
+say "Halved [2,4,6,8]: " ~halved
+
 say ""
-say "🎉 Standard library makes functional programming easy and readable!"
+say "🎉 Built-in helper functions make functional programming concise and expressive!"
+say "No need to define your own actions for common operations!"
