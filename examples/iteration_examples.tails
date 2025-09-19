@@ -1,0 +1,102 @@
+# Iteration Examples with for-each
+# Demonstrates various ways to use for-each for data processing
+
+say "📋 for-each Examples - Data Processing Made Simple"
+say "=================================================="
+
+# Example 1: Simple list processing
+say ""
+say "1. Processing a shopping list:"
+~shopping_list is ["apples", "bananas", "bread", "milk"]
+~total_items is 0
+
+for-each ~item in ~shopping_list (
+    say "   ✓ " ~item
+    ~total_items is ~total_items + 1
+)
+say "   Total items: " ~total_items
+
+# Example 2: List with indices
+say ""
+say "2. Numbered todo list:"
+~todos is ["finish project", "grocery shopping", "call dentist", "workout"]
+
+for-each ~task ~number in ~todos (
+    ~display_num is ~number + 1
+    say "   " ~display_num ". " ~task
+)
+
+# Example 3: Processing object data
+say ""
+say "3. User profile information:"
+~user is {
+    "name": "Alice Johnson",
+    "email": "alice@example.com",
+    "age": 28,
+    "city": "Seattle",
+    "premium": true
+}
+
+for-each ~key ~value in ~user (
+    say "   " ~key ": " ~value
+)
+
+# Example 4: Calculating statistics
+say ""
+say "4. Grade analysis:"
+~grades is [85, 92, 78, 96, 84, 88]
+~total is 0
+~count is 0
+~highest is 0
+
+for-each ~grade in ~grades (
+    ~total is ~total + ~grade
+    ~count is ~count + 1
+    if ~grade > ~highest (
+        ~highest is ~grade
+    )
+)
+
+~average is ~total / ~count
+say "   Total students: " ~count
+say "   Average grade: " ~average
+say "   Highest grade: " ~highest
+
+# Example 5: Text processing
+say ""
+say "5. Processing word list:"
+~words is ["hello", "world", "tails", "programming"]
+~long_words is []
+
+for-each ~word in ~words (
+    ~word_length is length ~word
+    say "   '" ~word "' has " ~word_length " letters"
+
+    if ~word_length > 5 (
+        ~long_words is append ~long_words ~word
+    )
+)
+
+say "   Long words (>5 letters): " ~long_words
+
+# Example 6: Nested data processing
+say ""
+say "6. Processing nested sales data:"
+~sales_data is [
+    {"product": "laptop", "price": 999, "quantity": 2},
+    {"product": "mouse", "price": 25, "quantity": 5},
+    {"product": "keyboard", "price": 75, "quantity": 3}
+]
+
+~total_revenue is 0
+
+for-each ~sale in ~sales_data (
+    ~revenue is ~sale.price * ~sale.quantity
+    ~total_revenue is ~total_revenue + ~revenue
+    say "   " ~sale.product ": $" ~sale.price " x " ~sale.quantity " = $" ~revenue
+)
+
+say "   📊 Total Revenue: $" ~total_revenue
+
+say ""
+say "✨ for-each makes data processing elegant and readable!"

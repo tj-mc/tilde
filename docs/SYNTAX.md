@@ -110,6 +110,74 @@ loop (
 )
 ```
 
+### For-Each Loops
+For-each loops provide elegant iteration over lists and objects:
+
+#### Iterating Over Lists
+```
+~items is ["apple", "banana", "cherry"]
+
+# Iterate over values only
+for-each ~item in ~items (
+    say "Processing: " ~item
+)
+
+# Iterate with index
+for-each ~item ~index in ~items (
+    say ~index ": " ~item
+)
+```
+
+#### Iterating Over Objects
+```
+~person is {"name": "Alice", "age": 30, "city": "Boston"}
+
+# Iterate over values only
+for-each ~value in ~person (
+    say "Value: " ~value
+)
+
+# Iterate over key-value pairs
+for-each ~key ~value in ~person (
+    say ~key " = " ~value
+)
+```
+
+#### For-Each Features
+- **Variable Scoping**: Loop variables are automatically scoped to the loop and don't affect outer variables
+- **Break Support**: Use `break-loop` to exit early
+- **Nested Loops**: For-each loops can be nested for processing complex data structures
+- **Type Flexibility**: Works with both lists and objects seamlessly
+
+#### Practical Examples
+```
+# Data processing
+~grades is [85, 92, 78, 96]
+~total is 0
+~count is 0
+
+for-each ~grade in ~grades (
+    ~total is ~total + ~grade
+    ~count is ~count + 1
+)
+
+~average is ~total / ~count
+say "Average grade: " ~average
+
+# Nested data processing
+~departments is [
+    {"name": "Engineering", "employees": ["Alice", "Bob"]},
+    {"name": "Marketing", "employees": ["Carol", "David"]}
+]
+
+for-each ~dept in ~departments (
+    say "Department: " ~dept.name
+    for-each ~employee in ~dept.employees (
+        say "  Employee: " ~employee
+    )
+)
+```
+
 ## Actions
 
 Actions are reusable blocks of code that can be defined once and executed multiple times with different parameters. They provide a way to encapsulate logic and create custom functions in the language.
@@ -529,7 +597,7 @@ loop (
 
 ### Token Types
 - **Variables**: Tokens starting with `~`
-- **Keywords**: `is`, `if`, `else`, `loop`, `break-loop`, `say`, `ask`, `get`, `run`, `wait`, `random`, `read`, `write`, `clear`, `action`, `give`, `length`, `append`
+- **Keywords**: `is`, `if`, `else`, `loop`, `for-each`, `in`, `break-loop`, `say`, `ask`, `get`, `run`, `wait`, `random`, `read`, `write`, `clear`, `action`, `give`, `length`, `append`
 - **Literals**: Numbers and double-quoted strings
 - **Operators**: Mathematical and comparison operators
 - **Delimiters**: `(` and `)`

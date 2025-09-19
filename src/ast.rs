@@ -17,6 +17,11 @@ pub enum Statement {
     Loop {
         body: Vec<Statement>,
     },
+    ForEach {
+        variables: Vec<String>,
+        iterable: Expression,
+        body: Vec<Statement>,
+    },
     Block {
         body: Vec<Statement>,
     },

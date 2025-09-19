@@ -80,6 +80,7 @@ impl Parser {
             }
             Token::If => self.parse_if(),
             Token::Loop => self.parse_loop(),
+            Token::ForEach => self.parse_for_each(),
             Token::Breakloop => {
                 self.advance();
                 Ok(Statement::Breakloop)
@@ -142,6 +143,57 @@ impl Parser {
         self.expect(Token::RightParen)?;
 
         Ok(Statement::Loop { body })
+    }
+
+    pub fn parse_for_each(&mut self) -> Result<Statement, String> {
+        self.expect(Token::ForEach)?;
+
+        // Parse variables (~item or ~item ~index)
+        let mut variables = Vec::new();
+
+        // First variable (required)
+        if let Token::Variable(var) = self.current_token() {
+            variables.push(var.clone());
+            self.advance();
+        } else {
+            return Err("Expected variable after 'for-each'".to_string());
+        }
+
+        // Check for optional second variable
+        if let Token::Variable(var) = self.current_token() {
+            variables.push(var.clone());
+            self.advance();
+        }
+
+        // Check for a third variable (which is an error)
+        if let Token::Variable(_) = self.current_token() {
+            return Err("for-each expects at most 2 variables".to_string());
+        }
+
+        // Expect 'in' keyword
+        self.expect(Token::In)?;
+
+        // Parse the iterable expression
+        let iterable = self.parse_expression()?;
+
+        // Parse body
+        self.expect(Token::LeftParen)?;
+        self.skip_newlines();
+
+        let mut body = Vec::new();
+
+        while *self.current_token() != Token::RightParen && *self.current_token() != Token::Eof {
+            self.skip_newlines();
+            if *self.current_token() == Token::RightParen {
+                break;
+            }
+            body.push(self.parse_statement()?);
+            self.skip_newlines();
+        }
+
+        self.expect(Token::RightParen)?;
+
+        Ok(Statement::ForEach { variables, iterable, body })
     }
 
     pub fn parse_block(&mut self) -> Result<Statement, String> {

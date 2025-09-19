@@ -1,0 +1,200 @@
+# Advanced for-each Patterns
+# Complex iteration scenarios and best practices
+
+say "🚀 Advanced for-each Patterns"
+say "=============================="
+
+# Example 1: Matrix operations
+say ""
+say "1. Matrix Processing:"
+~matrix is [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+
+say "   Original Matrix:"
+for-each ~row ~row_index in ~matrix (
+    ~row_display is ""
+    for-each ~value ~col_index in ~row (
+        ~row_display is ~row_display + " " + "`~value`"
+    )
+    say "   Row " ~row_index ":" ~row_display
+)
+
+# Calculate row sums
+say ""
+say "   Row Sums:"
+for-each ~row ~row_index in ~matrix (
+    ~row_sum is 0
+    for-each ~value in ~row (
+        ~row_sum is ~row_sum + ~value
+    )
+    say "   Row " ~row_index " sum: " ~row_sum
+)
+
+# Example 2: Nested object processing
+say ""
+say "2. Department Employee Analysis:"
+~departments is [
+    {
+        "name": "Engineering",
+        "employees": [
+            {"name": "Alice", "salary": 95000, "experience": 5},
+            {"name": "Bob", "salary": 87000, "experience": 3},
+            {"name": "Carol", "salary": 102000, "experience": 7}
+        ]
+    },
+    {
+        "name": "Marketing",
+        "employees": [
+            {"name": "David", "salary": 75000, "experience": 4},
+            {"name": "Eve", "salary": 68000, "experience": 2}
+        ]
+    }
+]
+
+~company_total_salary is 0
+~total_employees is 0
+
+for-each ~dept in ~departments (
+    say "   📋 " ~dept.name " Department:"
+
+    ~dept_total_salary is 0
+    ~dept_employee_count is 0
+
+    for-each ~employee in ~dept.employees (
+        ~dept_total_salary is ~dept_total_salary + ~employee.salary
+        ~dept_employee_count is ~dept_employee_count + 1
+        ~total_employees is ~total_employees + 1
+        ~company_total_salary is ~company_total_salary + ~employee.salary
+
+        say "     👤 " ~employee.name " - $" ~employee.salary " (" ~employee.experience " years)"
+    )
+
+    ~dept_avg_salary is ~dept_total_salary / ~dept_employee_count
+    say "     💰 Average Salary: $" ~dept_avg_salary
+    say "     👥 Employee Count: " ~dept_employee_count
+    say ""
+)
+
+~company_avg_salary is ~company_total_salary / ~total_employees
+say "   🏢 Company Overview:"
+say "     Total Employees: " ~total_employees
+say "     Average Salary: $" ~company_avg_salary
+say "     Total Payroll: $" ~company_total_salary
+
+# Example 3: Search and filter operations
+say ""
+say "3. Product Search and Filtering:"
+~products is [
+    {"name": "Laptop Pro", "category": "Electronics", "price": 1299, "rating": 4.5, "in_stock": true},
+    {"name": "Coffee Maker", "category": "Appliances", "price": 89, "rating": 4.2, "in_stock": false},
+    {"name": "Gaming Mouse", "category": "Electronics", "price": 79, "rating": 4.7, "in_stock": true},
+    {"name": "Office Chair", "category": "Furniture", "price": 299, "rating": 4.1, "in_stock": true},
+    {"name": "Smartphone", "category": "Electronics", "price": 699, "rating": 4.6, "in_stock": true}
+]
+
+# Find all electronics under $100 that are in stock
+say "   🔍 Electronics Under $100 (In Stock):"
+~found_products is []
+
+for-each ~product in ~products (
+    if ~product.category == "Electronics" and ~product.price < 100 and ~product.in_stock == true (
+        ~found_products is append ~found_products ~product.name
+        say "     ✅ " ~product.name " - $" ~product.price " (⭐" ~product.rating ")"
+    )
+)
+
+say "   📝 Found " (length ~found_products) " matching products"
+
+# Example 4: Data transformation
+say ""
+say "4. Data Transformation Pipeline:"
+~raw_data is [
+    {"user_id": "u001", "purchases": [25, 50, 15], "signup_date": "2023-01-15"},
+    {"user_id": "u002", "purchases": [100, 200], "signup_date": "2023-02-20"},
+    {"user_id": "u003", "purchases": [75, 25, 45, 30], "signup_date": "2023-01-10"}
+]
+
+~transformed_users is []
+
+for-each ~user in ~raw_data (
+    # Calculate total purchases
+    ~total_purchases is 0
+    ~purchase_count is 0
+
+    for-each ~purchase in ~user.purchases (
+        ~total_purchases is ~total_purchases + ~purchase
+        ~purchase_count is ~purchase_count + 1
+    )
+
+    ~average_purchase is ~total_purchases / ~purchase_count
+
+    # Determine user tier
+    ~tier is "Bronze"
+    if ~total_purchases > 200 (
+        ~tier is "Gold"
+    ) else if ~total_purchases > 100 (
+        ~tier is "Silver"
+    )
+
+    # Create transformed user object
+    ~transformed_user is {
+        "id": ~user.user_id,
+        "total_spent": ~total_purchases,
+        "average_purchase": ~average_purchase,
+        "purchase_frequency": ~purchase_count,
+        "tier": ~tier
+    }
+
+    ~transformed_users is append ~transformed_users ~transformed_user
+
+    say "   👤 User " ~user.user_id ":"
+    say "     💳 Total Spent: $" ~total_purchases
+    say "     📊 Average Purchase: $" ~average_purchase
+    say "     🏅 Tier: " ~tier
+    say ""
+)
+
+# Example 5: Aggregation and grouping simulation
+say "5. Sales Data Aggregation:"
+~sales is [
+    {"product": "Laptop", "region": "North", "amount": 1200},
+    {"product": "Mouse", "region": "North", "amount": 45},
+    {"product": "Laptop", "region": "South", "amount": 1100},
+    {"product": "Monitor", "region": "North", "amount": 300},
+    {"product": "Mouse", "region": "South", "amount": 40},
+    {"product": "Laptop", "region": "North", "amount": 1300}
+]
+
+# Calculate totals by region
+~north_total is 0
+~south_total is 0
+~laptop_total is 0
+
+for-each ~sale in ~sales (
+    if ~sale.region == "North" (
+        ~north_total is ~north_total + ~sale.amount
+    )
+    if ~sale.region == "South" (
+        ~south_total is ~south_total + ~sale.amount
+    )
+    if ~sale.product == "Laptop" (
+        ~laptop_total is ~laptop_total + ~sale.amount
+    )
+
+    say "   📦 " ~sale.product " in " ~sale.region ": $" ~sale.amount
+)
+
+say ""
+say "   📊 Regional Summary:"
+say "     North Region: $" ~north_total
+say "     South Region: $" ~south_total
+say "     Laptop Sales: $" ~laptop_total
+
+~total_sales is ~north_total + ~south_total
+say "     🎯 Total Sales: $" ~total_sales
+
+say ""
+say "🎊 for-each enables sophisticated data processing patterns!"

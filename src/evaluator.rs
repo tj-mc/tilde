@@ -195,6 +195,108 @@ impl Evaluator {
                     }
                 }
             },
+            Statement::ForEach { variables, iterable, body } => {
+                let iterable_value = self.eval_expression(iterable)?;
+
+                match iterable_value {
+                    Value::List(items) => {
+                        for (index, item) in items.iter().enumerate() {
+                            // Create a new scope for loop variables
+                            let saved_vars = variables.iter().map(|var| {
+                                (var.clone(), self.variables.get(var).cloned())
+                            }).collect::<Vec<_>>();
+
+                            // Set loop variables based on count
+                            match variables.len() {
+                                1 => {
+                                    // for-each ~item in ~list
+                                    self.variables.insert(variables[0].clone(), item.clone());
+                                }
+                                2 => {
+                                    // for-each ~item ~index in ~list
+                                    self.variables.insert(variables[0].clone(), item.clone());
+                                    self.variables.insert(variables[1].clone(), Value::Number(index as f64));
+                                }
+                                _ => return Err("for-each expects 1 or 2 variables".to_string()),
+                            }
+
+                            // Execute loop body
+                            for stmt in &body {
+                                let (_, control) = self.eval_statement_with_control(stmt.clone())?;
+                                if control == ControlFlow::BreakLoop {
+                                    // Restore variables and exit
+                                    for (var, old_value) in saved_vars {
+                                        if let Some(value) = old_value {
+                                            self.variables.insert(var, value);
+                                        } else {
+                                            self.variables.remove(&var);
+                                        }
+                                    }
+                                    return Ok((Value::Null, ControlFlow::Continue));
+                                }
+                            }
+
+                            // Restore variables after each iteration
+                            for (var, old_value) in saved_vars {
+                                if let Some(value) = old_value {
+                                    self.variables.insert(var, value);
+                                } else {
+                                    self.variables.remove(&var);
+                                }
+                            }
+                        }
+                    }
+                    Value::Object(obj) => {
+                        for (key, value) in obj.iter() {
+                            // Create a new scope for loop variables
+                            let saved_vars = variables.iter().map(|var| {
+                                (var.clone(), self.variables.get(var).cloned())
+                            }).collect::<Vec<_>>();
+
+                            // Set loop variables based on count
+                            match variables.len() {
+                                1 => {
+                                    // for-each ~value in ~object (values only)
+                                    self.variables.insert(variables[0].clone(), value.clone());
+                                }
+                                2 => {
+                                    // for-each ~key ~value in ~object
+                                    self.variables.insert(variables[0].clone(), Value::String(key.clone()));
+                                    self.variables.insert(variables[1].clone(), value.clone());
+                                }
+                                _ => return Err("for-each expects 1 or 2 variables".to_string()),
+                            }
+
+                            // Execute loop body
+                            for stmt in &body {
+                                let (_, control) = self.eval_statement_with_control(stmt.clone())?;
+                                if control == ControlFlow::BreakLoop {
+                                    // Restore variables and exit
+                                    for (var, old_value) in saved_vars {
+                                        if let Some(value) = old_value {
+                                            self.variables.insert(var, value);
+                                        } else {
+                                            self.variables.remove(&var);
+                                        }
+                                    }
+                                    return Ok((Value::Null, ControlFlow::Continue));
+                                }
+                            }
+
+                            // Restore variables after each iteration
+                            for (var, old_value) in saved_vars {
+                                if let Some(value) = old_value {
+                                    self.variables.insert(var, value);
+                                } else {
+                                    self.variables.remove(&var);
+                                }
+                            }
+                        }
+                    }
+                    _ => return Err("for-each can only iterate over lists and objects".to_string()),
+                }
+                Ok((Value::Null, ControlFlow::Continue))
+            },
             Statement::Block { body } => {
                 let mut last_value = Value::Null;
                 for stmt in body {
