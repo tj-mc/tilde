@@ -5,6 +5,7 @@ pub mod intern;
 pub mod lexer;
 pub mod parser;
 pub mod random;
+pub mod stdlib;
 pub mod terminal;
 pub mod value;
 

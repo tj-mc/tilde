@@ -9,6 +9,7 @@ pub enum Token {
     Boolean(bool),
     Variable(String),
     Identifier(String),
+    StdlibCall(String),
 
     // Keywords
     Is,
@@ -387,9 +388,14 @@ impl Lexer {
             }
             Some('*') => {
                 self.advance();
-                // Check if this is an action call (*identifier) or multiplication
+                // Check if this is a stdlib call (*.identifier), action call (*identifier), or multiplication
                 if let Some(ch) = self.current_char {
-                    if ch.is_alphabetic() {
+                    if ch == '.' {
+                        // This is a stdlib call (*.function)
+                        self.advance(); // Skip the dot
+                        let name = self.read_identifier();
+                        return Token::StdlibCall(name);
+                    } else if ch.is_alphabetic() {
                         // This is an action call
                         let name = self.read_identifier();
                         return Token::Identifier(format!("*{}", name));

@@ -14,8 +14,8 @@ type EvalResult = Result<(Value, ControlFlow), String>;
 
 #[derive(Debug, Clone)]
 pub struct Action {
-    params: Vec<String>,
-    body: Vec<Statement>,
+    pub params: Vec<String>,
+    pub body: Vec<Statement>,
 }
 
 #[derive(Debug)]
@@ -53,6 +53,10 @@ impl Evaluator {
             Value::Object(o) => !o.is_empty(),
             Value::Null => false,
         }
+    }
+
+    pub fn set_variable(&mut self, name: String, value: Value) {
+        self.variables.insert(name, value);
     }
 
     // Helper function to call positional evaluation functions
@@ -758,6 +762,14 @@ impl Evaluator {
                 }
                 Ok(Value::Object(map))
             }
+            Expression::StdlibCall { name, args } => {
+                // Handle standard library function calls (*.function syntax)
+                if let Some(func) = crate::stdlib::get_stdlib_function(&name) {
+                    func(args, self)
+                } else {
+                    Err(format!("Unknown standard library function: {}", name))
+                }
+            }
         }
     }
 
@@ -1005,7 +1017,7 @@ impl Evaluator {
         Ok(Value::Null)
     }
 
-    fn eval_action(&mut self, action: Action, args: Vec<Expression>) -> Result<Value, String> {
+    pub fn eval_action(&mut self, action: Action, args: Vec<Expression>) -> Result<Value, String> {
         // Check call depth to prevent stack overflow
         if self.scope_stack.len() >= self.max_call_depth {
             return Err(format!("Maximum call depth ({}) exceeded", self.max_call_depth));

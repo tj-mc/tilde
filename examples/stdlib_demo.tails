@@ -1,0 +1,90 @@
+# Standard Library Demo
+# Showcasing the power of functional programming in Tails!
+
+say "🚀 Standard Library Demo"
+say "======================="
+
+# Define some helper actions
+action double ~x (
+    give ~x * 2
+)
+
+action is_even ~x (
+    give ~x % 2 == 0
+)
+
+action is_positive ~x (
+    give ~x > 0
+)
+
+action add ~a ~b (
+    give ~a + ~b
+)
+
+action multiply ~a ~b (
+    give ~a * ~b
+)
+
+# Start with some data
+~numbers is [1, 2, 3, 4, 5, 0]
+say ""
+say "📊 Original data: " ~numbers
+
+# Sort the numbers
+~sorted is *.sort ~numbers
+say "🔢 Sorted: " ~sorted
+
+# Reverse the numbers
+~reversed is *.reverse ~numbers
+say "🔄 Reversed: " ~reversed
+
+# Map: transform each element
+~doubled is *.map ~numbers double
+say "✖️ Doubled: " ~doubled
+
+# Filter: keep only elements that match
+~evens is *.filter ~numbers is_even
+say "➗ Even numbers: " ~evens
+
+~positives is *.filter ~numbers is_positive
+say "➕ Positive numbers: " ~positives
+
+# Reduce: combine all elements into one
+~sum is *.reduce ~numbers add 0
+say "➕ Sum of all: " ~sum
+
+~product is *.reduce ~positives multiply 1
+say "✖️ Product of positives: " ~product
+
+# Chain operations together
+~even_positives is *.filter ~positives is_even
+~doubled_even_positives is *.map ~even_positives double
+say ""
+say "🔗 Chained operations:"
+say "   Positive → " ~positives
+say "   Even positives → " ~even_positives
+say "   Doubled even positives → " ~doubled_even_positives
+
+# Working with strings
+say ""
+say "📝 String Operations:"
+~words is ["hello", "world", "from", "tails"]
+say "Words: " ~words
+
+~text is *.join ~words " "
+say "Joined: " ~text
+
+~parts is *.split ~text " "
+say "Split back: " ~parts
+
+~trimmed is *.trim "  hello world  "
+say "Trimmed: '" ~trimmed "'"
+
+# Math operations
+say ""
+say "🧮 Math Operations:"
+~number is 16
+say "Square root of " ~number ": " (*.square-root ~number)
+
+say ""
+say "🎉 Standard library makes functional programming easy and readable!"

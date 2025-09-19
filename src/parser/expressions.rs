@@ -254,6 +254,21 @@ impl Parser {
                     }
                 }
             }
+            Token::StdlibCall(name) => {
+                self.advance();
+                // Parse stdlib call arguments (space-separated until terminator)
+                let mut args = Vec::new();
+
+                // Parse arguments until we hit a terminator
+                while !self.is_expression_terminator() && !matches!(self.current_token(), Token::Is) && !self.is_binary_operator(self.current_token()) {
+                    args.push(self.parse_primary()?);
+                }
+
+                Ok(Expression::StdlibCall {
+                    name,
+                    args,
+                })
+            }
             Token::Say => self.parse_simple_function_call("say"),
             Token::Ask => self.parse_simple_function_call("ask"),
             Token::Get => self.parse_simple_function_call("get"),
