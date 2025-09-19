@@ -55,7 +55,7 @@ loop (
     say ""
     say "Frame: " ~frame " | Reality Status: DISCONNECTED"
 
-    ~frame is ~frame + 1
+    ~frame up 1
     wait 0.15
 )
 
