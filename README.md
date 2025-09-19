@@ -158,9 +158,12 @@ cargo run --bin performance_main your_program.tails
 **[📖 Complete Language Reference → SYNTAX.md](docs/SYNTAX.md)**
 
 Discover all of Tails' features including:
+- **Standard Library** (`*.map`, `*.filter`, `*.reduce`) for functional programming
 - Advanced object manipulation and property access
 - Comprehensive control flow (`loop`, `if`/`else`, `break-loop`)
 - HTTP operations (`get`, `wait`) and error handling
 - Function definitions with `action` and calling with `*`
 - String interpolation patterns and data types
 - And much more!
+
+**📚 [Standard Library Documentation → STDLIB.md](docs/STDLIB.md)**

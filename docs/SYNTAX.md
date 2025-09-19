@@ -677,6 +677,48 @@ Program {
 }
 ```
 
+## Standard Library
+
+Tails includes a comprehensive standard library for functional programming and common operations. All stdlib functions use the `*.` prefix to avoid conflicts with user-defined actions.
+
+### List Operations
+```tails
+action double ~x (give ~x * 2)
+action is_even ~x (give ~x % 2 == 0)
+action add ~a ~b (give ~a + ~b)
+
+~numbers is [1, 2, 3, 4, 5]
+~doubled is *.map ~numbers double        # [2, 4, 6, 8, 10]
+~evens is *.filter ~numbers is_even      # [2, 4]
+~sum is *.reduce ~numbers add 0          # 15
+~sorted is *.sort [3, 1, 4, 1, 5]        # [1, 1, 3, 4, 5]
+~reversed is *.reverse ~numbers          # [5, 4, 3, 2, 1]
+```
+
+### String Operations
+```tails
+~words is *.split "hello,world,tails" ","    # ["hello", "world", "tails"]
+~sentence is *.join ~words " "               # "hello world tails"
+~clean is *.trim "  hello world  "           # "hello world"
+```
+
+### Math Operations
+```tails
+~positive is *.absolute -42                  # 42
+~root is *.square-root 16                    # 4
+```
+
+### Functional Programming Patterns
+```tails
+# Chain operations for data processing
+~data is [1, -2, 3, -4, 5]
+~positives is *.filter ~data is_positive
+~squares is *.map ~positives square
+~result is *.reduce ~squares add 0
+```
+
+**📖 See [STDLIB.md](STDLIB.md) for complete standard library documentation with examples and best practices.**
+
 ## Design Principles
 - **Simplicity**: Minimal syntax, easy to parse
 - **Whitespace-delimited**: No complex tokenization needed
