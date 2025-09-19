@@ -6,6 +6,8 @@ This document outlines the standard procedure for adding new features to the Tai
 
 Adding a new feature requires modifications across multiple layers of the interpreter. Follow this systematic approach to ensure consistency and maintainability.
 
+> Important: To avoid every-growing files, try to make self-contained features as individual modules
+
 ## Step-by-Step Procedure
 
 ### 1. Define the Feature Specification
@@ -237,6 +239,7 @@ Before considering a feature complete:
 - [ ] Code formatted (`cargo fmt`)
 - [ ] Linter passing (`cargo clippy`)
 - [ ] All tests passing (`cargo test`)
+- [ ] Where practical, the new feature is a distinct module
 
 ## Common Pitfalls
 

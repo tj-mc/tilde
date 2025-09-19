@@ -272,6 +272,102 @@ wait 2.5  # Wait 2.5 seconds
 wait ~delay  # Wait 1 second
 ```
 
+### Random Numbers
+Generate random numbers within a specified range:
+```
+~dice is random 1 6          # Random integer 1-6 (inclusive)
+~probability is random 0.0 1.0  # Random float 0.0-1.0 (inclusive)
+~mixed is random 5 10.5      # Random float 5-10.5 (inclusive)
+
+# Can be used in expressions
+~total is (random 1 3) + (random 4 6)
+
+# Can be used with variables
+~min is 10
+~max is 20
+~value is random ~min ~max
+
+# As a standalone statement (discards result)
+random 1 100
+```
+
+The `random` function takes exactly two numeric arguments:
+- If both arguments are integers (no decimal part), returns a random integer in the range
+- If either argument is a float, returns a random float in the range
+- Range is inclusive on both ends
+- Minimum value cannot be greater than maximum value
+
+### File Reading
+Read files from the filesystem:
+```
+~file is read "config.txt"
+say ~file.content           # File contents as string
+say ~file.size              # File size in bytes
+say ~file.exists            # true if file exists
+
+# Handle errors
+if ~file.error (
+    say "Error reading file: " ~file.error
+) else (
+    say "File content: " ~file.content
+)
+
+# Can be used with variables
+~filename is "data.json"
+~data is read ~filename
+
+# As a standalone statement (discards result)
+read "log.txt"
+```
+
+The `read` function takes exactly one string argument (the file path) and returns an object with:
+- `content`: File contents as a string (empty string if file doesn't exist or error occurs)
+- `size`: File size in bytes (0 if file doesn't exist or error occurs)
+- `exists`: Boolean indicating if the file exists
+- `error`: Error message string if an error occurred, otherwise null
+
+### File Writing
+Write content to files on the filesystem:
+```
+~result is write "output.txt" "Hello, World!"
+say ~result.success         # true if write succeeded
+say ~result.bytes_written   # Number of bytes written
+say ~result.path            # File path that was written to
+
+# Handle errors
+if ~result.error (
+    say "Error writing file: " ~result.error
+) else (
+    say "Successfully wrote " ~result.bytes_written " bytes"
+)
+
+# Can write different data types
+~result1 is write "number.txt" 42.5      # Writes "42.5"
+~result2 is write "bool.txt" true        # Writes "true"
+~result3 is write "object.txt" {"a": 1}  # Writes object string representation
+
+# Can be used with variables
+~filename is "data.txt"
+~content is "File content"
+~result is write ~filename ~content
+
+# As a standalone statement (discards result)
+write "log.txt" "Log entry"
+```
+
+The `write` function takes exactly two arguments (file path and content) and returns an object with:
+- `success`: Boolean indicating if the write operation succeeded
+- `path`: The file path that was written to
+- `bytes_written`: Number of bytes written to the file (0 if write failed)
+- `error`: Error message string if an error occurred, otherwise null
+
+The content argument can be any data type:
+- Strings are written as-is
+- Numbers are converted to their string representation
+- Booleans are written as "true" or "false"
+- Objects and lists are written as their string representation
+- Null is written as "null"
+
 
 ## Objects and Properties
 
@@ -396,7 +492,7 @@ loop (
 
 ### Token Types
 - **Variables**: Tokens starting with `~`
-- **Keywords**: `is`, `if`, `else`, `loop`, `break-loop`, `say`, `ask`, `get`, `run`, `wait`, `action`, `give`, `length`, `append`
+- **Keywords**: `is`, `if`, `else`, `loop`, `break-loop`, `say`, `ask`, `get`, `run`, `wait`, `random`, `read`, `write`, `action`, `give`, `length`, `append`
 - **Literals**: Numbers and double-quoted strings
 - **Operators**: Mathematical and comparison operators
 - **Delimiters**: `(` and `)`

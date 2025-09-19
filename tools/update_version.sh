@@ -26,9 +26,8 @@ sed -i.bak "s/^version = \".*\"/version = \"$NEW_VERSION\"/" .wasm-pack.toml
 echo "📱 Updating web/package.json..."
 sed -i.bak "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" web/package.json
 
-# Update web/index.html version display
-echo "🖥️  Updating web/index.html..."
-sed -i.bak "s/v[0-9]\+\.[0-9]\+\.[0-9]\+/v$NEW_VERSION/g" web/index.html
+# web/index.html version is now dynamic (loaded from WASM)
+echo "🖥️  web/index.html version is now dynamic"
 
 # Update build-web.sh
 echo "🔧 Updating build-web.sh..."

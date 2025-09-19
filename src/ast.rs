@@ -21,12 +21,7 @@ pub enum Statement {
         body: Vec<Statement>,
     },
     Breakloop,
-    Say(Vec<Expression>),
-    Ask(Vec<Expression>),
     Open(Expression),
-    Get(Vec<Expression>),
-    Run(Vec<Expression>),
-    Wait(Vec<Expression>),
     ActionDefinition {
         name: String,
         params: Vec<String>,
@@ -45,7 +40,7 @@ pub enum InterpolationPart {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Expression {
-    Number(f64),
+    Number(f64, bool), // value, was_float_literal
     String(String),
     InterpolatedString(Vec<InterpolationPart>),
     Boolean(bool),

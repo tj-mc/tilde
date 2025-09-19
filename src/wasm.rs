@@ -49,43 +49,26 @@ impl WasmTailsRepl {
             Ok(program) => {
                 match self.evaluator.eval_program(program) {
                     Ok(value) => {
-                        let result = ExecutionResult {
-                            success: true,
-                            value: if self.evaluator.output_buffer.is_empty() && value != Value::Null {
-                                Some(value_to_js_value(&value))
-                            } else {
-                                None
-                            },
-                            error: None,
-                            output: self.evaluator.output_buffer.clone(),
+                        let result_value = if self.evaluator.output_buffer.is_empty() && value != Value::Null {
+                            Some(value_to_js_value(&value))
+                        } else {
+                            None
                         };
-                        serde_json::to_string(&result).unwrap_or_else(|_|
-                            r#"{"success":false,"error":"Failed to serialize result"}"#.to_string()
-                        )
+                        ExecutionResult::success(result_value, self.evaluator.output_buffer.clone()).to_json()
                     }
                     Err(e) => {
-                        let result = ExecutionResult {
-                            success: false,
-                            value: None,
-                            error: Some(format!("Runtime error: {}", e)),
-                            output: self.evaluator.output_buffer.clone(),
-                        };
-                        serde_json::to_string(&result).unwrap_or_else(|_|
-                            r#"{"success":false,"error":"Failed to serialize error"}"#.to_string()
-                        )
+                        ExecutionResult::error(
+                            format!("Runtime error: {}", e),
+                            self.evaluator.output_buffer.clone()
+                        ).to_json()
                     }
                 }
             }
             Err(e) => {
-                let result = ExecutionResult {
-                    success: false,
-                    value: None,
-                    error: Some(format!("Parse error: {}", e)),
-                    output: Vec::new(),
-                };
-                serde_json::to_string(&result).unwrap_or_else(|_|
-                    r#"{"success":false,"error":"Failed to serialize parse error"}"#.to_string()
-                )
+                ExecutionResult::error(
+                    format!("Parse error: {}", e),
+                    Vec::new()
+                ).to_json()
             }
         }
     }
@@ -108,6 +91,12 @@ impl WasmTailsRepl {
         self.evaluator = Evaluator::new();
     }
 
+    /// Get the current version of Tails
+    #[wasm_bindgen]
+    pub fn get_version(&self) -> String {
+        env!("CARGO_PKG_VERSION").to_string()
+    }
+
     /// Add output to the buffer (called internally by Tails operations)
     pub fn add_output(&mut self, output: String) {
         self.evaluator.output_buffer.push(output);
@@ -120,6 +109,32 @@ struct ExecutionResult {
     value: Option<serde_json::Value>,
     error: Option<String>,
     output: Vec<String>,
+}
+
+impl ExecutionResult {
+    fn success(value: Option<serde_json::Value>, output: Vec<String>) -> Self {
+        Self {
+            success: true,
+            value,
+            error: None,
+            output,
+        }
+    }
+
+    fn error(error: String, output: Vec<String>) -> Self {
+        Self {
+            success: false,
+            value: None,
+            error: Some(error),
+            output,
+        }
+    }
+
+    fn to_json(&self) -> String {
+        serde_json::to_string(self).unwrap_or_else(|_|
+            r#"{"success":false,"error":"Failed to serialize result"}"#.to_string()
+        )
+    }
 }
 
 /// Convert Tails Value to JSON Value for JavaScript interop

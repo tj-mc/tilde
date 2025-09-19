@@ -1,0 +1,43 @@
+{
+  "timestamp": 1758258627,
+  "commit": "ffc7b09",
+  "rustc_version": "rustc --version",
+  "results": [
+    {
+      "test_name": "lexer_simple".
+      "iterations": 10000,
+      "avg_time_ns": 149,
+      "ops_per_sec": 6711409
+    },
+    {
+      "test_name": "lexer_complex".
+      "iterations": 1000,
+      "avg_time_ns": 1048,
+      "ops_per_sec": 954198
+    },
+    {
+      "test_name": "parser_simple".
+      "iterations": 5000,
+      "avg_time_ns": 364,
+      "ops_per_sec": 2747252
+    },
+    {
+      "test_name": "parser_complex".
+      "iterations": 1000,
+      "avg_time_ns": 1847,
+      "ops_per_sec": 541418
+    },
+    {
+      "test_name": "evaluator_simple".
+      "iterations": 5000,
+      "avg_time_ns": 149,
+      "ops_per_sec": 6711409
+    },
+    {
+      "test_name": "evaluator_fibonacci10".
+      "iterations": 1000,
+      "avg_time_ns": 5439,
+      "ops_per_sec": 183857
+    }
+  ]
+}

@@ -3,7 +3,7 @@ use crate::ast::{Expression, InterpolationPart};
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token {
     // Literals
-    Number(f64),
+    Number(f64, bool), // value, was_float_literal
     String(String),
     InterpolatedString(Vec<InterpolationPart>),
     Boolean(bool),
@@ -36,6 +36,9 @@ pub enum Token {
     Give,
     And,
     Or,
+    Random,
+    Read,
+    Write,
 
     // Operators
     Plus,
@@ -117,11 +120,16 @@ impl Lexer {
         }
     }
 
-    fn read_number(&mut self) -> f64 {
+    fn read_number(&mut self) -> (f64, bool) {
         let mut num_str = String::new();
+        let mut has_decimal = false;
 
         while let Some(ch) = self.current_char {
-            if ch.is_ascii_digit() || ch == '.' {
+            if ch.is_ascii_digit() {
+                num_str.push(ch);
+                self.advance();
+            } else if ch == '.' && !has_decimal {
+                has_decimal = true;
                 num_str.push(ch);
                 self.advance();
             } else {
@@ -129,7 +137,32 @@ impl Lexer {
             }
         }
 
-        num_str.parse().unwrap_or(0.0)
+        let value = num_str.parse().unwrap_or(0.0);
+        (value, has_decimal)
+    }
+
+    // Helper function to handle escape sequences
+    fn handle_escape_sequence(&mut self, string: &mut String) {
+        // Handle escape sequences
+        self.advance();
+        if let Some(escaped_char) = self.current_char {
+            match escaped_char {
+                'n' => string.push('\n'),
+                't' => string.push('\t'),
+                'r' => string.push('\r'),
+                '\\' => string.push('\\'),
+                '"' => string.push('"'),
+                '\'' => string.push('\''),
+                _ => {
+                    // For unknown escape sequences, keep the backslash
+                    string.push('\\');
+                    string.push(escaped_char);
+                }
+            }
+            self.advance();
+        } else {
+            string.push('\\');
+        }
     }
 
     fn read_string(&mut self) -> String {
@@ -144,26 +177,7 @@ impl Lexer {
             }
 
             if ch == '\\' {
-                // Handle escape sequences
-                self.advance();
-                if let Some(escaped_char) = self.current_char {
-                    match escaped_char {
-                        'n' => string.push('\n'),
-                        't' => string.push('\t'),
-                        'r' => string.push('\r'),
-                        '\\' => string.push('\\'),
-                        '"' => string.push('"'),
-                        '\'' => string.push('\''),
-                        _ => {
-                            // For unknown escape sequences, keep the backslash
-                            string.push('\\');
-                            string.push(escaped_char);
-                        }
-                    }
-                    self.advance();
-                } else {
-                    string.push('\\');
-                }
+                self.handle_escape_sequence(&mut string);
             } else {
                 string.push(ch);
                 self.advance();
@@ -230,24 +244,7 @@ impl Lexer {
                 }
             } else if ch == '\\' {
                 // Handle escape sequences in interpolated strings too
-                self.advance();
-                if let Some(escaped_char) = self.current_char {
-                    match escaped_char {
-                        'n' => current_text.push('\n'),
-                        't' => current_text.push('\t'),
-                        'r' => current_text.push('\r'),
-                        '\\' => current_text.push('\\'),
-                        '"' => current_text.push('"'),
-                        '\'' => current_text.push('\''),
-                        _ => {
-                            current_text.push('\\');
-                            current_text.push(escaped_char);
-                        }
-                    }
-                    self.advance();
-                } else {
-                    current_text.push('\\');
-                }
+                self.handle_escape_sequence(&mut current_text);
             } else {
                 current_text.push(ch);
                 self.advance();
@@ -449,8 +446,8 @@ impl Lexer {
                 }
             }
             Some(ch) if ch.is_ascii_digit() => {
-                let num = self.read_number();
-                Token::Number(num)
+                let (num, was_float) = self.read_number();
+                Token::Number(num, was_float)
             }
             Some(ch) if ch.is_alphabetic() => {
                 let ident = self.read_identifier();
@@ -481,6 +478,9 @@ impl Lexer {
                     "give" => Token::Give,
                     "and" => Token::And,
                     "or" => Token::Or,
+                    "random" => Token::Random,
+                    "read" => Token::Read,
+                    "write" => Token::Write,
                     "true" => Token::Boolean(true),
                     "false" => Token::Boolean(false),
                     _ => Token::Identifier(ident),
@@ -520,7 +520,7 @@ mod tests {
 
         assert_eq!(tokens[0], Token::Variable("counter".to_string()));
         assert_eq!(tokens[1], Token::Is);
-        assert_eq!(tokens[2], Token::Number(0.0));
+        assert_eq!(tokens[2], Token::Number(0.0, false));
     }
 
     #[test]
@@ -567,7 +567,7 @@ mod tests {
         assert_eq!(tokens[0], Token::LeftParen);
         assert_eq!(tokens[1], Token::Variable("counter".to_string()));
         assert_eq!(tokens[2], Token::Plus);
-        assert_eq!(tokens[3], Token::Number(1.0));
+        assert_eq!(tokens[3], Token::Number(1.0, false));
         assert_eq!(tokens[4], Token::RightParen);
     }
 
@@ -586,8 +586,8 @@ mod tests {
         let tokens = lexer.tokenize();
 
         assert_eq!(tokens[0], Token::Identifier("*add".to_string()));
-        assert_eq!(tokens[1], Token::Number(3.0));
-        assert_eq!(tokens[2], Token::Number(5.0));
+        assert_eq!(tokens[1], Token::Number(3.0, false));
+        assert_eq!(tokens[2], Token::Number(5.0, false));
     }
 
     #[test]
@@ -595,9 +595,9 @@ mod tests {
         let mut lexer = Lexer::new("3 * 5 *multiply");
         let tokens = lexer.tokenize();
 
-        assert_eq!(tokens[0], Token::Number(3.0));
+        assert_eq!(tokens[0], Token::Number(3.0, false));
         assert_eq!(tokens[1], Token::Multiply);
-        assert_eq!(tokens[2], Token::Number(5.0));
+        assert_eq!(tokens[2], Token::Number(5.0, false));
         assert_eq!(tokens[3], Token::Identifier("*multiply".to_string()));
     }
 
@@ -642,7 +642,7 @@ mod tests {
         assert_eq!(tokens[0], Token::Newline);
         assert_eq!(tokens[1], Token::Variable("x".to_string()));
         assert_eq!(tokens[2], Token::Is);
-        assert_eq!(tokens[3], Token::Number(5.0));
+        assert_eq!(tokens[3], Token::Number(5.0, false));
     }
 
     #[test]
@@ -652,7 +652,7 @@ mod tests {
 
         assert_eq!(tokens[0], Token::Variable("x".to_string()));
         assert_eq!(tokens[1], Token::Is);
-        assert_eq!(tokens[2], Token::Number(10.0));
+        assert_eq!(tokens[2], Token::Number(10.0, false));
         assert_eq!(tokens[3], Token::Newline);
         // Comment at end should be skipped, leaving EOF
         assert_eq!(tokens[4], Token::Eof);
@@ -668,7 +668,7 @@ mod tests {
         assert_eq!(tokens[1], Token::Newline);
         assert_eq!(tokens[2], Token::Variable("y".to_string()));
         assert_eq!(tokens[3], Token::Is);
-        assert_eq!(tokens[4], Token::Number(20.0));
+        assert_eq!(tokens[4], Token::Number(20.0, false));
     }
 
     #[test]

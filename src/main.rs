@@ -3,13 +3,17 @@ use std::fs;
 use std::io::{self, Write};
 use tails::{evaluator::Evaluator, parser::Parser};
 
+fn version_string() -> String {
+    format!("~tails 🐈‍⬛ v{}", env!("CARGO_PKG_VERSION"))
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
 
     if args.len() > 1 {
         match args[1].as_str() {
             "--version" | "-v" => {
-                println!("~tails 🐈‍⬛ v{}", env!("CARGO_PKG_VERSION"));
+                println!("{}", version_string());
                 return;
             }
             "--help" | "-h" => {
@@ -52,7 +56,7 @@ fn run_file(filename: &str) {
 }
 
 fn run_repl() {
-    println!("~tails 🐈‍⬛ v{}", env!("CARGO_PKG_VERSION"));
+    println!("{}", version_string());
     println!("Type 'exit' to quit\n");
 
     let mut evaluator = Evaluator::new();
@@ -168,7 +172,7 @@ fn should_execute_buffer(buffer: &str) -> bool {
 }
 
 fn print_help() {
-    println!("~tails 🐈‍⬛ v{}", env!("CARGO_PKG_VERSION"));
+    println!("{}", version_string());
     println!("A simple, readable scripting language");
     println!("");
     println!("USAGE:");

@@ -7,6 +7,22 @@ impl Parser {
         self.parse_or()
     }
 
+    // Helper function to parse simple function calls with arguments until terminator
+    fn parse_simple_function_call(&mut self, function_name: &str) -> Result<Expression, String> {
+        self.advance();
+        let mut args = Vec::new();
+
+        // Parse all arguments until we hit a statement terminator
+        while !self.is_expression_terminator() {
+            args.push(self.parse_expression()?);
+        }
+
+        Ok(Expression::FunctionCall {
+            name: function_name.to_string(),
+            args,
+        })
+    }
+
     pub fn parse_or(&mut self) -> Result<Expression, String> {
         let mut expr = self.parse_and()?;
 
@@ -123,9 +139,9 @@ impl Parser {
 
     pub fn parse_primary(&mut self) -> Result<Expression, String> {
         match self.current_token().clone() {
-            Token::Number(n) => {
+            Token::Number(n, was_float) => {
                 self.advance();
-                Ok(Expression::Number(n))
+                Ok(Expression::Number(n, was_float))
             }
             Token::String(s) => {
                 self.advance();
@@ -149,7 +165,7 @@ impl Parser {
                     let property = match self.current_token() {
                         Token::Identifier(prop_name) => prop_name.clone(),
                         Token::Variable(prop_name) => format!("~{}", prop_name),
-                        Token::Number(n) => {
+                        Token::Number(n, _) => {
                             // Convert number to integer string if it's a whole number
                             if n.fract() == 0.0 {
                                 (*n as i64).to_string()
@@ -178,25 +194,7 @@ impl Parser {
                     let mut args = Vec::new();
 
                     // Parse arguments until we hit a terminator
-                    while !matches!(
-                        self.current_token(),
-                        Token::Eof
-                            | Token::Newline
-                            | Token::If
-                            | Token::Else
-                            | Token::Loop
-                            | Token::Breakloop
-                            | Token::Say
-                            | Token::Ask
-                            | Token::Open
-                            | Token::Get
-                            | Token::Run
-                            | Token::Wait
-                            | Token::Give
-                            | Token::Action
-                            | Token::RightParen
-                            | Token::Is
-                    ) && !self.is_binary_operator(self.current_token()) {
+                    while !self.is_expression_terminator() && !matches!(self.current_token(), Token::Is) && !self.is_binary_operator(self.current_token()) {
                         // Check if we're at a parenthesized expression that might be part of a calculation
                         if *self.current_token() == Token::LeftParen {
                             // Save position to potentially backtrack
@@ -242,26 +240,7 @@ impl Parser {
                         let mut args = Vec::new();
 
                         // Parse arguments until we hit a terminator
-                        while !matches!(
-                            self.current_token(),
-                            Token::Eof
-                                | Token::Newline
-                                | Token::If
-                                | Token::Else
-                                | Token::Loop
-                                | Token::Breakloop
-                                | Token::Say
-                                | Token::Ask
-                                | Token::Open
-                                | Token::Get
-                                | Token::Run
-                                | Token::Wait
-                                | Token::Give
-                                | Token::Action
-                                | Token::LeftParen
-                                | Token::RightParen
-                                | Token::Is
-                        ) && !self.is_binary_operator(self.current_token()) {
+                        while !self.is_expression_terminator() && !matches!(self.current_token(), Token::LeftParen | Token::Is) && !self.is_binary_operator(self.current_token()) {
                             args.push(self.parse_primary()?);
                         }
 
@@ -275,156 +254,14 @@ impl Parser {
                     }
                 }
             }
-            Token::Say => {
-                self.advance();
-                let mut args = Vec::new();
-
-                // Parse all arguments until we hit a statement terminator
-                while !matches!(
-                    self.current_token(),
-                    Token::Eof
-                        | Token::Newline
-                        | Token::If
-                        | Token::Else
-                        | Token::Loop
-                        | Token::Breakloop
-                        | Token::Say
-                        | Token::Ask
-                        | Token::Open
-                        | Token::Get
-                        | Token::Run
-                        | Token::Wait
-                        | Token::RightParen
-                        | Token::Comma
-                ) {
-                    args.push(self.parse_expression()?);
-                }
-
-                Ok(Expression::FunctionCall {
-                    name: "say".to_string(),
-                    args,
-                })
-            }
-            Token::Ask => {
-                self.advance();
-                let mut args = Vec::new();
-
-                // Parse all arguments until we hit a statement terminator
-                while !matches!(
-                    self.current_token(),
-                    Token::Eof
-                        | Token::Newline
-                        | Token::If
-                        | Token::Else
-                        | Token::Loop
-                        | Token::Breakloop
-                        | Token::Say
-                        | Token::Ask
-                        | Token::Open
-                        | Token::Get
-                        | Token::Run
-                        | Token::Wait
-                        | Token::RightParen
-                        | Token::Comma
-                ) {
-                    args.push(self.parse_expression()?);
-                }
-
-                Ok(Expression::FunctionCall {
-                    name: "ask".to_string(),
-                    args,
-                })
-            }
-            Token::Get => {
-                self.advance();
-                let mut args = Vec::new();
-
-                // Parse all arguments until we hit a statement terminator
-                while !matches!(
-                    self.current_token(),
-                    Token::Eof
-                        | Token::Newline
-                        | Token::If
-                        | Token::Else
-                        | Token::Loop
-                        | Token::Breakloop
-                        | Token::Say
-                        | Token::Ask
-                        | Token::Open
-                        | Token::Get
-                        | Token::Run
-                        | Token::Wait
-                        | Token::RightParen
-                        | Token::Comma
-                ) {
-                    args.push(self.parse_expression()?);
-                }
-
-                Ok(Expression::FunctionCall {
-                    name: "get".to_string(),
-                    args,
-                })
-            }
-            Token::Run => {
-                self.advance();
-                let mut args = Vec::new();
-
-                // Parse all arguments until we hit a statement terminator
-                while !matches!(
-                    self.current_token(),
-                    Token::Eof
-                        | Token::Newline
-                        | Token::If
-                        | Token::Else
-                        | Token::Loop
-                        | Token::Breakloop
-                        | Token::Say
-                        | Token::Ask
-                        | Token::Open
-                        | Token::Get
-                        | Token::Run
-                        | Token::Wait
-                        | Token::RightParen
-                        | Token::Comma
-                ) {
-                    args.push(self.parse_expression()?);
-                }
-
-                Ok(Expression::FunctionCall {
-                    name: "run".to_string(),
-                    args,
-                })
-            }
-            Token::Wait => {
-                self.advance();
-                let mut args = Vec::new();
-
-                // Parse all arguments until we hit a statement terminator
-                while !matches!(
-                    self.current_token(),
-                    Token::Eof
-                        | Token::Newline
-                        | Token::If
-                        | Token::Else
-                        | Token::Loop
-                        | Token::Breakloop
-                        | Token::Say
-                        | Token::Ask
-                        | Token::Open
-                        | Token::Get
-                        | Token::Run
-                        | Token::Wait
-                        | Token::RightParen
-                        | Token::Comma
-                ) {
-                    args.push(self.parse_expression()?);
-                }
-
-                Ok(Expression::FunctionCall {
-                    name: "wait".to_string(),
-                    args,
-                })
-            }
+            Token::Say => self.parse_simple_function_call("say"),
+            Token::Ask => self.parse_simple_function_call("ask"),
+            Token::Get => self.parse_simple_function_call("get"),
+            Token::Run => self.parse_simple_function_call("run"),
+            Token::Wait => self.parse_simple_function_call("wait"),
+            Token::Random => self.parse_simple_function_call("random"),
+            Token::Read => self.parse_simple_function_call("read"),
+            Token::Write => self.parse_simple_function_call("write"),
             Token::KeysOf => {
                 self.advance();
                 if *self.current_token() == Token::LeftParen {
@@ -445,23 +282,7 @@ impl Parser {
                     let mut args = Vec::new();
 
                     // Parse all arguments until we hit a statement terminator
-                    while !matches!(
-                        self.current_token(),
-                        Token::Eof
-                            | Token::Newline
-                            | Token::If
-                            | Token::Else
-                            | Token::Loop
-                            | Token::Breakloop
-                            | Token::Say
-                            | Token::Ask
-                            | Token::Open
-                            | Token::Get
-                            | Token::Run
-                            | Token::Wait
-                            | Token::RightParen
-                            | Token::Comma
-                    ) {
+                    while !self.is_expression_terminator() {
                         args.push(self.parse_expression()?);
                     }
 
@@ -491,23 +312,7 @@ impl Parser {
                     let mut args = Vec::new();
 
                     // Parse all arguments until we hit a statement terminator
-                    while !matches!(
-                        self.current_token(),
-                        Token::Eof
-                            | Token::Newline
-                            | Token::If
-                            | Token::Else
-                            | Token::Loop
-                            | Token::Breakloop
-                            | Token::Say
-                            | Token::Ask
-                            | Token::Open
-                            | Token::Get
-                            | Token::Run
-                            | Token::Wait
-                            | Token::RightParen
-                            | Token::Comma
-                    ) {
+                    while !self.is_expression_terminator() {
                         args.push(self.parse_expression()?);
                     }
 
@@ -537,23 +342,7 @@ impl Parser {
                     let mut args = Vec::new();
 
                     // Parse all arguments until we hit a statement terminator
-                    while !matches!(
-                        self.current_token(),
-                        Token::Eof
-                            | Token::Newline
-                            | Token::If
-                            | Token::Else
-                            | Token::Loop
-                            | Token::Breakloop
-                            | Token::Say
-                            | Token::Ask
-                            | Token::Open
-                            | Token::Get
-                            | Token::Run
-                            | Token::Wait
-                            | Token::RightParen
-                            | Token::Comma
-                    ) {
+                    while !self.is_expression_terminator() {
                         args.push(self.parse_expression()?);
                     }
 
@@ -563,66 +352,8 @@ impl Parser {
                     })
                 }
             }
-            Token::Length => {
-                self.advance();
-                let mut args = Vec::new();
-
-                // Parse all arguments until we hit a statement terminator
-                while !matches!(
-                    self.current_token(),
-                    Token::Eof
-                        | Token::Newline
-                        | Token::If
-                        | Token::Else
-                        | Token::Loop
-                        | Token::Breakloop
-                        | Token::Say
-                        | Token::Ask
-                        | Token::Open
-                        | Token::Get
-                        | Token::Run
-                        | Token::Wait
-                        | Token::RightParen
-                        | Token::Comma
-                ) {
-                    args.push(self.parse_expression()?);
-                }
-
-                Ok(Expression::FunctionCall {
-                    name: "length".to_string(),
-                    args,
-                })
-            }
-            Token::Append => {
-                self.advance();
-                let mut args = Vec::new();
-
-                // Parse all arguments until we hit a statement terminator
-                while !matches!(
-                    self.current_token(),
-                    Token::Eof
-                        | Token::Newline
-                        | Token::If
-                        | Token::Else
-                        | Token::Loop
-                        | Token::Breakloop
-                        | Token::Say
-                        | Token::Ask
-                        | Token::Open
-                        | Token::Get
-                        | Token::Run
-                        | Token::Wait
-                        | Token::RightParen
-                        | Token::Comma
-                ) {
-                    args.push(self.parse_expression()?);
-                }
-
-                Ok(Expression::FunctionCall {
-                    name: "append".to_string(),
-                    args,
-                })
-            }
+            Token::Length => self.parse_simple_function_call("length"),
+            Token::Append => self.parse_simple_function_call("append"),
             Token::LeftParen => {
                 self.advance();
                 let expr = self.parse_expression()?;

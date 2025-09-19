@@ -55,6 +55,19 @@ impl Evaluator {
         }
     }
 
+    // Helper function to call positional evaluation functions
+    fn eval_positional_function(&mut self, name: &str, args: Vec<Expression>) -> Result<Value, String> {
+        match name {
+            "get" => self.eval_get_positional(args),
+            "run" => self.eval_run_positional(args),
+            "wait" => self.eval_wait_positional(args),
+            "random" => crate::random::eval_random_positional(args, self),
+            "read" => crate::file_io::eval_read_positional(args, self),
+            "write" => crate::file_io::eval_write_positional(args, self),
+            _ => Err(format!("Unknown positional function: {}", name)),
+        }
+    }
+
     pub fn eval_program(&mut self, program: Program) -> Result<Value, String> {
         let mut last_value = Value::Null;
 
@@ -157,66 +170,6 @@ impl Evaluator {
                     Err("Property assignment only supported on variables and single-level nesting currently".to_string())
                 }
             }
-            Statement::Say(exprs) => {
-                let mut values = Vec::new();
-                for expr in exprs {
-                    values.push(self.eval_expression(expr)?);
-                }
-
-                // Join values without spaces
-                let output = values
-                    .iter()
-                    .map(|v| v.to_string())
-                    .collect::<Vec<String>>()
-                    .join("");
-
-                #[cfg(target_arch = "wasm32")]
-                {
-                    self.output_buffer.push(output.clone());
-                }
-                #[cfg(not(target_arch = "wasm32"))]
-                {
-                    println!("{}", output);
-                }
-
-                // Return the joined string as a Value
-                Ok((Value::String(output), ControlFlow::Continue))
-            }
-            Statement::Ask(exprs) => {
-                use std::io::{self, Write};
-
-                // If there are prompt expressions, evaluate and display them
-                if !exprs.is_empty() {
-                    let mut prompt_values = Vec::new();
-                    for expr in exprs {
-                        prompt_values.push(self.eval_expression(expr)?);
-                    }
-
-                    let prompt = prompt_values
-                        .iter()
-                        .map(|v| v.to_string())
-                        .collect::<Vec<String>>()
-                        .join(" ");
-
-                    print!("{}", prompt);
-                    io::stdout().flush().unwrap();
-                }
-
-                // Read user input
-                let mut input = String::new();
-                io::stdin()
-                    .read_line(&mut input)
-                    .map_err(|e| format!("Failed to read input: {}", e))?;
-
-                let input = input.trim().to_string();
-
-                // Try to parse as number first, fall back to string
-                if let Ok(num) = input.parse::<f64>() {
-                    Ok((Value::Number(num), ControlFlow::Continue))
-                } else {
-                    Ok((Value::String(input), ControlFlow::Continue))
-                }
-            }
             Statement::Expression(expr) => Ok((self.eval_expression(expr)?, ControlFlow::Continue)),
             Statement::If {
                 condition,
@@ -257,9 +210,6 @@ impl Evaluator {
                 Value::String("open not implemented yet".to_string()),
                 ControlFlow::Continue,
             )),
-            Statement::Get(args) => Ok((self.eval_get_positional(args)?, ControlFlow::Continue)),
-            Statement::Run(args) => Ok((self.eval_run_positional(args)?, ControlFlow::Continue)),
-            Statement::Wait(args) => Ok((self.eval_wait_positional(args)?, ControlFlow::Continue)),
             Statement::ActionDefinition { name, params, body } => {
                 // Store the action definition
                 self.actions.insert(
@@ -305,9 +255,9 @@ impl Evaluator {
     }
 
 
-    fn eval_expression(&mut self, expr: Expression) -> Result<Value, String> {
+    pub fn eval_expression(&mut self, expr: Expression) -> Result<Value, String> {
         match expr {
-            Expression::Number(n) => Ok(Value::Number(n)),
+            Expression::Number(n, _) => Ok(Value::Number(n)),
             Expression::String(s) => Ok(Value::String(s)),
             Expression::InterpolatedString(parts) => {
                 let mut result = String::new();
@@ -436,11 +386,9 @@ impl Evaluator {
                             println!("{}", message);
                         }
 
-                        Ok(Value::Null)
+                        Ok(Value::String(message))
                     }
-                    "get" => self.eval_get_positional(args),
-                    "run" => self.eval_run_positional(args),
-                    "wait" => self.eval_wait_positional(args),
+                    "get" | "run" | "wait" | "random" | "read" | "write" => self.eval_positional_function(&name, args),
                     "ask" => {
                         #[cfg(target_arch = "wasm32")]
                         {
@@ -1109,10 +1057,11 @@ mod tests {
         let program = parser.parse().unwrap();
 
         assert_eq!(program.len(), 1);
-        if let Statement::Ask(args) = &program[0] {
+        if let Statement::Expression(Expression::FunctionCall { name, args }) = &program[0] {
+            assert_eq!(name, "ask");
             assert_eq!(args.len(), 1);
         } else {
-            panic!("Expected ask statement");
+            panic!("Expected ask function call");
         }
     }
 

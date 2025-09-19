@@ -43,6 +43,24 @@ impl Parser {
         }
     }
 
+    pub(crate) fn is_statement_terminator(&self) -> bool {
+        matches!(self.current_token(),
+            Token::Eof
+                | Token::Newline
+                | Token::If
+                | Token::Else
+                | Token::Loop
+                | Token::Breakloop
+                | Token::Open
+        )
+    }
+
+    pub(crate) fn is_expression_terminator(&self) -> bool {
+        self.is_statement_terminator() || matches!(self.current_token(),
+            Token::RightParen | Token::Comma
+        )
+    }
+
     pub(crate) fn expect(&mut self, expected: Token) -> Result<(), String> {
         if *self.current_token() == expected {
             self.advance();
@@ -113,7 +131,7 @@ mod tests {
         match &program[0] {
             Statement::Assignment { variable, value } => {
                 assert_eq!(variable, "x");
-                assert_eq!(*value, Expression::Number(42.0));
+                assert_eq!(*value, Expression::Number(42.0, false));
             }
             _ => panic!("Expected assignment statement"),
         }
@@ -148,12 +166,13 @@ mod tests {
 
         assert_eq!(program.len(), 1);
         match &program[0] {
-            Statement::Say(args) => {
+            Statement::Expression(Expression::FunctionCall { name, args }) => {
+                assert_eq!(name, "say");
                 assert_eq!(args.len(), 2);
                 assert_eq!(args[0], Expression::String("Hello".to_string()));
                 assert_eq!(args[1], Expression::Variable("name".to_string()));
             }
-            _ => panic!("Expected say statement"),
+            _ => panic!("Expected say function call"),
         }
     }
 
@@ -164,11 +183,12 @@ mod tests {
 
         assert_eq!(program.len(), 1);
         match &program[0] {
-            Statement::Say(args) => {
+            Statement::Expression(Expression::FunctionCall { name, args }) => {
+                assert_eq!(name, "say");
                 assert_eq!(args.len(), 1);
                 assert_eq!(args[0], Expression::String("Hello, World!".to_string()));
             }
-            _ => panic!("Expected say statement"),
+            _ => panic!("Expected say function call"),
         }
     }
 
@@ -188,13 +208,14 @@ mod tests {
                     Expression::BinaryOp { left, op, right } => {
                         assert_eq!(**left, Expression::Variable("x".to_string()));
                         assert_eq!(*op, BinaryOperator::GreaterThan);
-                        assert_eq!(**right, Expression::Number(5.0));
+                        assert_eq!(**right, Expression::Number(5.0, false));
                     }
                     _ => panic!("Expected comparison in condition"),
                 }
 
                 match then_stmt.as_ref() {
-                    Statement::Say(args) => {
+                    Statement::Expression(Expression::FunctionCall { name, args }) => {
+                        assert_eq!(name, "say");
                         assert_eq!(args.len(), 1);
                         assert_eq!(args[0], Expression::String("big".to_string()));
                     }
@@ -217,7 +238,7 @@ mod tests {
                 Expression::BinaryOp { left, op, right } => {
                     assert_eq!(**left, Expression::Variable("x".to_string()));
                     assert_eq!(*op, BinaryOperator::Multiply);
-                    assert_eq!(**right, Expression::Number(3.0));
+                    assert_eq!(**right, Expression::Number(3.0, false));
                 }
                 _ => panic!("Expected multiplication"),
             },
@@ -235,7 +256,7 @@ mod tests {
                 Expression::BinaryOp { left, op, right } => {
                     assert_eq!(**left, Expression::Variable("x".to_string()));
                     assert_eq!(*op, BinaryOperator::Divide);
-                    assert_eq!(**right, Expression::Number(2.0));
+                    assert_eq!(**right, Expression::Number(2.0, false));
                 }
                 _ => panic!("Expected division"),
             },
@@ -263,7 +284,7 @@ mod tests {
                             right: mult_right,
                         } => {
                             assert_eq!(**mult_left, Expression::Variable("y".to_string()));
-                            assert_eq!(**mult_right, Expression::Number(2.0));
+                            assert_eq!(**mult_right, Expression::Number(2.0, false));
                         }
                         _ => panic!("Expected multiplication with higher precedence"),
                     }
@@ -305,7 +326,7 @@ mod tests {
                     assert_eq!(pairs[0].0, "name");
                     assert_eq!(pairs[0].1, Expression::String("John".to_string()));
                     assert_eq!(pairs[1].0, "age");
-                    assert_eq!(pairs[1].1, Expression::Number(30.0));
+                    assert_eq!(pairs[1].1, Expression::Number(30.0, false));
                 }
                 _ => panic!("Expected object literal"),
             },
@@ -337,7 +358,8 @@ mod tests {
         let program = parser.parse().unwrap();
 
         match &program[0] {
-            Statement::Get(args) => {
+            Statement::Expression(Expression::FunctionCall { name, args }) => {
+                assert_eq!(name, "get");
                 assert_eq!(args.len(), 1);
                 assert_eq!(
                     args[0],
@@ -374,13 +396,14 @@ mod tests {
         let program = parser.parse().unwrap();
 
         match &program[0] {
-            Statement::Get(args) => {
+            Statement::Expression(Expression::FunctionCall { name, args }) => {
+                assert_eq!(name, "get");
                 assert_eq!(args.len(), 2);
                 assert_eq!(
                     args[0],
                     Expression::String("http://example.com".to_string())
                 );
-                assert_eq!(args[1], Expression::Number(5000.0));
+                assert_eq!(args[1], Expression::Number(5000.0, false));
             }
             _ => panic!("Expected get statement"),
         }
@@ -392,9 +415,10 @@ mod tests {
         let program = parser.parse().unwrap();
 
         match &program[0] {
-            Statement::Wait(args) => {
+            Statement::Expression(Expression::FunctionCall { name, args }) => {
+                assert_eq!(name, "wait");
                 assert_eq!(args.len(), 1);
-                assert_eq!(args[0], Expression::Number(2.0));
+                assert_eq!(args[0], Expression::Number(2.0, false));
             }
             _ => panic!("Expected wait statement"),
         }
@@ -464,18 +488,20 @@ mod tests {
             Statement::Block { body } => {
                 assert_eq!(body.len(), 2);
                 match &body[0] {
-                    Statement::Say(args) => {
+                    Statement::Expression(Expression::FunctionCall { name, args }) => {
+                        assert_eq!(name, "say");
                         assert_eq!(args.len(), 1);
                         assert_eq!(args[0], Expression::String("hello".to_string()));
                     }
-                    _ => panic!("Expected say statement"),
+                    _ => panic!("Expected say function call"),
                 }
                 match &body[1] {
-                    Statement::Say(args) => {
+                    Statement::Expression(Expression::FunctionCall { name, args }) => {
+                        assert_eq!(name, "say");
                         assert_eq!(args.len(), 1);
                         assert_eq!(args[0], Expression::String("world".to_string()));
                     }
-                    _ => panic!("Expected say statement"),
+                    _ => panic!("Expected say function call"),
                 }
             }
             _ => panic!("Expected block statement"),
@@ -498,7 +524,7 @@ mod tests {
                     Expression::BinaryOp { left, op, right } => {
                         assert_eq!(**left, Expression::Variable("x".to_string()));
                         assert_eq!(*op, BinaryOperator::GreaterThan);
-                        assert_eq!(**right, Expression::Number(5.0));
+                        assert_eq!(**right, Expression::Number(5.0, false));
                     }
                     _ => panic!("Expected comparison in condition"),
                 }
@@ -507,18 +533,20 @@ mod tests {
                     Statement::Block { body } => {
                         assert_eq!(body.len(), 2);
                         match &body[0] {
-                            Statement::Say(args) => {
+                            Statement::Expression(Expression::FunctionCall { name, args }) => {
+                                assert_eq!(name, "say");
                                 assert_eq!(args.len(), 1);
                                 assert_eq!(args[0], Expression::String("big".to_string()));
                             }
-                            _ => panic!("Expected say statement"),
+                            _ => panic!("Expected say function call"),
                         }
                         match &body[1] {
-                            Statement::Say(args) => {
+                            Statement::Expression(Expression::FunctionCall { name, args }) => {
+                                assert_eq!(name, "say");
                                 assert_eq!(args.len(), 1);
                                 assert_eq!(args[0], Expression::String("number".to_string()));
                             }
-                            _ => panic!("Expected say statement"),
+                            _ => panic!("Expected say function call"),
                         }
                     }
                     _ => panic!("Expected block statement in then clause"),
@@ -541,21 +569,23 @@ mod tests {
             Statement::Block { body } => {
                 assert_eq!(body.len(), 2);
                 match &body[0] {
-                    Statement::Say(args) => {
+                    Statement::Expression(Expression::FunctionCall { name, args }) => {
+                        assert_eq!(name, "say");
                         assert_eq!(args.len(), 1);
                         assert_eq!(args[0], Expression::String("outer".to_string()));
                     }
-                    _ => panic!("Expected say statement"),
+                    _ => panic!("Expected say function call"),
                 }
                 match &body[1] {
                     Statement::Block { body: inner_body } => {
                         assert_eq!(inner_body.len(), 1);
                         match &inner_body[0] {
-                            Statement::Say(args) => {
+                            Statement::Expression(Expression::FunctionCall { name, args }) => {
+                                assert_eq!(name, "say");
                                 assert_eq!(args.len(), 1);
                                 assert_eq!(args[0], Expression::String("inner".to_string()));
                             }
-                            _ => panic!("Expected say statement"),
+                            _ => panic!("Expected say function call"),
                         }
                     }
                     _ => panic!("Expected block statement"),
@@ -571,11 +601,12 @@ mod tests {
         let stmt = parser.parse_statement().unwrap();
 
         match stmt {
-            Statement::Run(args) => {
+            Statement::Expression(Expression::FunctionCall { name, args }) => {
+                assert_eq!(name, "run");
                 assert_eq!(args.len(), 1);
                 assert_eq!(args[0], Expression::String("echo hello".to_string()));
             }
-            _ => panic!("Expected run statement"),
+            _ => panic!("Expected run function call"),
         }
     }
 

@@ -112,6 +112,10 @@ class TailsWebREPL {
             // Create the REPL instance
             this.repl = new WasmTailsRepl();
 
+            // Update version display dynamically
+            const version = this.repl.get_version();
+            document.getElementById('versionText').textContent = `v${version}`;
+
             this.hideLoading();
             this.updateStatus('Ready');
             const isMac = navigator.userAgent.includes('Mac') || /iPad|iPhone|iPod/.test(navigator.userAgent);
