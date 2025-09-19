@@ -12,7 +12,7 @@ say "1. Processing a shopping list:"
 
 for-each ~item in ~shopping_list (
     say "   ✓ " ~item
-    ~total_items is ~total_items + 1
+    ~total_items up 1
 )
 say "   Total items: " ~total_items
 
@@ -22,7 +22,8 @@ say "2. Numbered todo list:"
 ~todos is ["finish project", "grocery shopping", "call dentist", "workout"]
 
 for-each ~task ~number in ~todos (
-    ~display_num is ~number + 1
+    ~display_num is ~number
+    ~display_num up 1
     say "   " ~display_num ". " ~task
 )
 
@@ -50,8 +51,8 @@ say "4. Grade analysis:"
 ~highest is 0
 
 for-each ~grade in ~grades (
-    ~total is ~total + ~grade
-    ~count is ~count + 1
+    ~total up ~grade
+    ~count up 1
     if ~grade > ~highest (
         ~highest is ~grade
     )
@@ -92,7 +93,7 @@ say "6. Processing nested sales data:"
 
 for-each ~sale in ~sales_data (
     ~revenue is ~sale.price * ~sale.quantity
-    ~total_revenue is ~total_revenue + ~revenue
+    ~total_revenue up ~revenue
     say "   " ~sale.product ": $" ~sale.price " x " ~sale.quantity " = $" ~revenue
 )
 

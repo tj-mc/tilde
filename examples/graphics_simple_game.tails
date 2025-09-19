@@ -36,12 +36,12 @@ loop (
             ) else (
                 ~line is ~line + " "
             )
-            ~x is ~x + 1
+            ~x up 1
         )
         ~line is ~line + " ║"
         say ~line
 
-        ~y is ~y + 1
+        ~y up 1
     )
 
     # Game stats
@@ -53,21 +53,21 @@ loop (
     # Move cat randomly
     ~direction is (~game_time % 4)
     if ~direction == 0 and ~cat_x < 24 (
-        ~cat_x is ~cat_x + 1
+        ~cat_x up 1
     ) else if ~direction == 1 and ~cat_x > 0 (
-        ~cat_x is ~cat_x - 1
+        ~cat_x down 1
     ) else if ~direction == 2 and ~cat_y < 4 (
-        ~cat_y is ~cat_y + 1
+        ~cat_y up 1
     ) else if ~direction == 3 and ~cat_y > 0 (
-        ~cat_y is ~cat_y - 1
+        ~cat_y down 1
     )
 
     # Update score based on cat position
     if ~cat_x > 10 and ~cat_x < 15 (
-        ~score is ~score + 1
+        ~score up 1
     )
 
-    ~game_time is ~game_time + 1
+    ~game_time up 1
     wait 0.3
 )
 

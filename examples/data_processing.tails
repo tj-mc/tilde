@@ -21,13 +21,13 @@ say "1. Log File Analysis:"
 
 for-each ~entry in ~log_entries (
     if ~entry.level == "ERROR" (
-        ~error_count is ~error_count + 1
+        ~error_count up 1
         say "   🔴 ERROR at " ~entry.timestamp ": " ~entry.message
     ) else if ~entry.level == "WARNING" (
-        ~warning_count is ~warning_count + 1
+        ~warning_count up 1
         say "   🟡 WARNING at " ~entry.timestamp ": " ~entry.message
     ) else (
-        ~info_count is ~info_count + 1
+        ~info_count up 1
     )
 )
 
@@ -54,12 +54,12 @@ say "2. E-commerce Order Processing:"
 for-each ~order in ~orders (
     if ~order.status == "pending" (
         ~pending_orders is append ~pending_orders ~order.id
-        ~total_pending_amount is ~total_pending_amount + ~order.total
+        ~total_pending_amount up ~order.total
 
         ~item_count is length ~order.items
         say "   📦 " ~order.id " (Pending): " ~item_count " items, $" ~order.total
     ) else if ~order.status == "shipped" (
-        ~shipped_count is ~shipped_count + 1
+        ~shipped_count up 1
         say "   🚚 " ~order.id " (Shipped): $" ~order.total
     ) else (
         say "   ✅ " ~order.id " (Delivered): $" ~order.total
@@ -90,15 +90,15 @@ say "3. Survey Response Analysis:"
 ~response_count is 0
 
 for-each ~response in ~survey_responses (
-    ~total_satisfaction is ~total_satisfaction + ~response.satisfaction
-    ~response_count is ~response_count + 1
+    ~total_satisfaction up ~response.satisfaction
+    ~response_count up 1
 
     if ~response.department == "Engineering" (
-        ~engineering_responses is ~engineering_responses + 1
+        ~engineering_responses up 1
     )
 
     if ~response.age < 30 (
-        ~young_employees is ~young_employees + 1
+        ~young_employees up 1
     )
 
     say "   👤 Age: " ~response.age " | Satisfaction: " ~response.satisfaction "/10 | Dept: " ~response.department
@@ -129,7 +129,7 @@ say "4. Inventory Management:"
 say "   📋 Inventory Status:"
 for-each ~item in ~inventory (
     ~item_value is ~item.quantity * ~item.price
-    ~total_inventory_value is ~total_inventory_value + ~item_value
+    ~total_inventory_value up ~item_value
 
     if ~item.quantity == 0 (
         ~out_of_stock_items is append ~out_of_stock_items ~item.sku

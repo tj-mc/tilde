@@ -297,6 +297,42 @@ impl Evaluator {
                 }
                 Ok((Value::Null, ControlFlow::Continue))
             },
+            Statement::Increment { variable, amount } => {
+                let amount_value = self.eval_expression(amount)?;
+
+                // Get current variable value
+                let current_value = self.variables.get(&variable)
+                    .ok_or_else(|| format!("Variable '{}' not found for increment", variable))?
+                    .clone();
+
+                // Ensure both values are numbers
+                match (&current_value, &amount_value) {
+                    (Value::Number(current), Value::Number(increment)) => {
+                        let new_value = current + increment;
+                        self.variables.insert(variable.clone(), Value::Number(new_value));
+                        Ok((Value::Null, ControlFlow::Continue))
+                    }
+                    _ => Err(format!("Cannot increment '{}': both variable and amount must be numbers", variable))
+                }
+            },
+            Statement::Decrement { variable, amount } => {
+                let amount_value = self.eval_expression(amount)?;
+
+                // Get current variable value
+                let current_value = self.variables.get(&variable)
+                    .ok_or_else(|| format!("Variable '{}' not found for decrement", variable))?
+                    .clone();
+
+                // Ensure both values are numbers
+                match (&current_value, &amount_value) {
+                    (Value::Number(current), Value::Number(decrement)) => {
+                        let new_value = current - decrement;
+                        self.variables.insert(variable.clone(), Value::Number(new_value));
+                        Ok((Value::Null, ControlFlow::Continue))
+                    }
+                    _ => Err(format!("Cannot decrement '{}': both variable and amount must be numbers", variable))
+                }
+            },
             Statement::Block { body } => {
                 let mut last_value = Value::Null;
                 for stmt in body {

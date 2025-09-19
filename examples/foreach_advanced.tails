@@ -64,10 +64,10 @@ for-each ~dept in ~departments (
     ~dept_employee_count is 0
 
     for-each ~employee in ~dept.employees (
-        ~dept_total_salary is ~dept_total_salary + ~employee.salary
-        ~dept_employee_count is ~dept_employee_count + 1
-        ~total_employees is ~total_employees + 1
-        ~company_total_salary is ~company_total_salary + ~employee.salary
+        ~dept_total_salary up ~employee.salary
+        ~dept_employee_count up 1
+        ~total_employees up 1
+        ~company_total_salary up ~employee.salary
 
         say "     👤 " ~employee.name " - $" ~employee.salary " (" ~employee.experience " years)"
     )
@@ -125,8 +125,8 @@ for-each ~user in ~raw_data (
     ~purchase_count is 0
 
     for-each ~purchase in ~user.purchases (
-        ~total_purchases is ~total_purchases + ~purchase
-        ~purchase_count is ~purchase_count + 1
+        ~total_purchases up ~purchase
+        ~purchase_count up 1
     )
 
     ~average_purchase is ~total_purchases / ~purchase_count
@@ -175,13 +175,13 @@ say "5. Sales Data Aggregation:"
 
 for-each ~sale in ~sales (
     if ~sale.region == "North" (
-        ~north_total is ~north_total + ~sale.amount
+        ~north_total up ~sale.amount
     )
     if ~sale.region == "South" (
-        ~south_total is ~south_total + ~sale.amount
+        ~south_total up ~sale.amount
     )
     if ~sale.product == "Laptop" (
-        ~laptop_total is ~laptop_total + ~sale.amount
+        ~laptop_total up ~sale.amount
     )
 
     say "   📦 " ~sale.product " in " ~sale.region ": $" ~sale.amount

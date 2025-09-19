@@ -31,6 +31,52 @@ say ~message  # outputs: Hello Alice, you are 30 years old!
 - **Comparison**: `<`, `>`, `<=`, `>=`, `==`, `!=`
 - **Logical**: `and`, `or` (with short-circuit evaluation)
 - **Assignment**: `is`
+- **Increment/Decrement**: `up`, `down`
+
+#### Increment and Decrement Operations
+The `up` and `down` operators provide convenient increment and decrement operations for numeric variables:
+
+```
+~counter is 5
+~counter up 3        # counter becomes 8
+~counter down 2      # counter becomes 6
+~counter up 1        # counter becomes 7
+
+# Works with variables and expressions
+~amount is 10
+~counter up ~amount  # counter becomes 17
+~counter down (~amount / 2)  # counter becomes 12
+```
+
+**Key Features:**
+- Both variable and amount must be numbers
+- Variable must exist before using `up` or `down`
+- Supports any numeric expression as the amount
+- Much cleaner than `~var is ~var + amount` syntax
+- Works with both integers and floating-point numbers
+
+**Practical Examples:**
+```
+# Loop counters
+~i is 0
+loop (
+    if ~i >= 10 break-loop
+    say "Count: " ~i
+    ~i up 1
+)
+
+# Accumulating totals
+~total is 0
+for-each ~value in ~numbers (
+    ~total up ~value
+)
+
+# Game scoring
+~score is 0
+~score up 100        # Player scored!
+~lives is 3
+~lives down 1        # Player lost a life
+```
 
 #### Integer Division and Modulo
 The `\` operator performs integer division (floors the result), while `%` gives the remainder:
@@ -597,7 +643,7 @@ loop (
 
 ### Token Types
 - **Variables**: Tokens starting with `~`
-- **Keywords**: `is`, `if`, `else`, `loop`, `for-each`, `in`, `break-loop`, `say`, `ask`, `get`, `run`, `wait`, `random`, `read`, `write`, `clear`, `action`, `give`, `length`, `append`
+- **Keywords**: `is`, `if`, `else`, `loop`, `for-each`, `in`, `break-loop`, `up`, `down`, `say`, `ask`, `get`, `run`, `wait`, `random`, `read`, `write`, `clear`, `action`, `give`, `length`, `append`
 - **Literals**: Numbers and double-quoted strings
 - **Operators**: Mathematical and comparison operators
 - **Delimiters**: `(` and `)`

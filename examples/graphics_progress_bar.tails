@@ -28,7 +28,7 @@ loop (
     loop (
         if ~i >= ~filled break-loop
         ~bar is ~bar + "█"
-        ~i is ~i + 1
+        ~i up 1
     )
 
     # Add empty portion
@@ -36,7 +36,7 @@ loop (
     loop (
         if ~i >= ~empty break-loop
         ~bar is ~bar + "░"
-        ~i is ~i + 1
+        ~i up 1
     )
 
     ~bar is ~bar + "]"
@@ -50,11 +50,11 @@ loop (
 
     # Simulate variable download speed
     if ~progress < 20 (
-        ~progress is ~progress + 1
+        ~progress up 1
     ) else if ~progress < 80 (
-        ~progress is ~progress + 3
+        ~progress up 3
     ) else (
-        ~progress is ~progress + 1
+        ~progress up 1
     )
 
     wait 0.1

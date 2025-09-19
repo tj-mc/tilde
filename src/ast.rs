@@ -22,6 +22,14 @@ pub enum Statement {
         iterable: Expression,
         body: Vec<Statement>,
     },
+    Increment {
+        variable: String,
+        amount: Expression,
+    },
+    Decrement {
+        variable: String,
+        amount: Expression,
+    },
     Block {
         body: Vec<Statement>,
     },

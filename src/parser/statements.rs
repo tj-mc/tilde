@@ -19,6 +19,22 @@ impl Parser {
                         variable: var_name,
                         value,
                     })
+                } else if *self.current_token() == Token::Up {
+                    // Increment: ~var up amount
+                    self.advance();
+                    let amount = self.parse_expression()?;
+                    Ok(Statement::Increment {
+                        variable: var_name,
+                        amount,
+                    })
+                } else if *self.current_token() == Token::Down {
+                    // Decrement: ~var down amount
+                    self.advance();
+                    let amount = self.parse_expression()?;
+                    Ok(Statement::Decrement {
+                        variable: var_name,
+                        amount,
+                    })
                 } else if *self.current_token() == Token::Dot {
                     // This might be a property access assignment: ~var.prop is value
                     let saved_position = self.position;

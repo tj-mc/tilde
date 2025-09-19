@@ -41,6 +41,8 @@ pub enum Token {
     Read,
     Write,
     Clear,
+    Up,
+    Down,
 
     // Operators
     Plus,
@@ -485,6 +487,8 @@ impl Lexer {
                     "read" => Token::Read,
                     "write" => Token::Write,
                     "clear" => Token::Clear,
+                    "up" => Token::Up,
+                    "down" => Token::Down,
                     "true" => Token::Boolean(true),
                     "false" => Token::Boolean(false),
                     _ => Token::Identifier(ident),

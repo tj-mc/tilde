@@ -45,9 +45,9 @@ loop (
 
     # Update ball position based on direction
     if ~direction == 1 (
-        ~ball_pos is ~ball_pos + 1
+        ~ball_pos up 1
     ) else (
-        ~ball_pos is ~ball_pos - 1
+        ~ball_pos down 1
     )
 
     # Bounce off walls - flip direction
@@ -58,6 +58,6 @@ loop (
         ~direction is 1
     )
 
-    ~frame is ~frame + 1
+    ~frame up 1
     wait 0.05
 )
