@@ -11,8 +11,6 @@ wait 1
 ~frame is 0
 
 loop (
-    if ~frame >= 40 break-loop
-
     clear
 
     # Draw the top border
