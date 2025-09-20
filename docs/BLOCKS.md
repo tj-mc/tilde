@@ -31,7 +31,7 @@ The `:core:` block provides access to the standard library functions, bypassing 
 Tails follows this priority order when resolving function names:
 
 1. **Block syntax** (`:core:function`) - Always uses the specified block
-2. **User-defined actions** - Functions you define with `action`
+2. **User-defined functions** - Functions you define with `function`
 3. **Standard library** - Built-in functions without block prefix
 
 ## Examples
@@ -52,7 +52,7 @@ say ~doubled  # 10
 
 ```tails
 # Define a custom is-even that always returns false
-action is-even ~x (
+function is-even ~x (
     give false
 )
 
@@ -83,7 +83,7 @@ say ~doubled  # [2, 4, 6, 8, 10]
 
 ```tails
 # You can mix user functions and core functions
-action custom-transform ~x (
+function custom-transform ~x (
     give ~x * 10
 )
 
@@ -131,14 +131,14 @@ import :string: from "string-utils"
 
 2. **Prefer bare names for user-defined functions**
    ```tails
-   action my-custom-logic ~x ( ... )
+   function my-custom-logic ~x ( ... )
    ~result is map ~data my-custom-logic
    ```
 
 3. **Use block syntax in libraries to avoid conflicts**
    ```tails
    # In a library, use :core: to ensure predictable behavior
-   action validate-positive ~x (
+   function validate-positive ~x (
        if :core:is-positive ~x (
            give true
        ) else (

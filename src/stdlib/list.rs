@@ -3,7 +3,7 @@ use crate::evaluator::Evaluator;
 use crate::value::Value;
 use super::utils::*;
 
-/// Helper function to evaluate a predicate function (either user action or stdlib function)
+/// Helper function to evaluate a predicate function (either user function or stdlib function)
 fn eval_predicate(function_name: &str, item: &Value, evaluator: &mut Evaluator) -> Result<Value, String> {
     eval_function_on_item(function_name, item, evaluator)
 }
@@ -42,16 +42,16 @@ fn eval_function_on_item(function_name: &str, item: &Value, evaluator: &mut Eval
         }
     }
 
-    // First try user actions
-    if let Some(action) = evaluator.actions.get(function_name) {
-        let action = action.clone();
-        if action.params.len() != 1 {
+    // First try user functions
+    if let Some(function) =evaluator.functions.get(function_name) {
+        let function =function.clone();
+        if function.params.len() != 1 {
             return Err(format!("Function {} must take exactly one parameter", function_name));
         }
 
-        let arg_expr = Expression::Variable(action.params[0].clone());
-        evaluator.set_variable(action.params[0].clone(), item.clone());
-        return evaluator.eval_action(action, vec![arg_expr]);
+        let arg_expr = Expression::Variable(function.params[0].clone());
+        evaluator.set_variable(function.params[0].clone(), item.clone());
+        return evaluator.eval_function(function, vec![arg_expr]);
     }
 
     // Then try stdlib functions
@@ -74,7 +74,7 @@ fn eval_function_on_item(function_name: &str, item: &Value, evaluator: &mut Eval
 ///
 /// # Arguments
 /// * `list` - The list to transform
-/// * `function_name` - Name of the action that takes one parameter and returns a value
+/// * `function_name` - Name of the function that takes one parameter and returns a value
 ///
 /// # Returns
 /// A new list with each element transformed by the function
@@ -115,7 +115,7 @@ pub fn eval_map(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Valu
 ///
 /// # Arguments
 /// * `list` - The list to filter
-/// * `function_name` - Name of the action that takes one parameter and returns a boolean
+/// * `function_name` - Name of the function that takes one parameter and returns a boolean
 ///
 /// # Returns
 /// A new list containing only elements for which the predicate returns true
@@ -195,16 +195,16 @@ pub fn eval_reduce(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<V
             return Ok(accumulator);
     }
 
-    // Check if the action exists (user-defined function)
-    if !evaluator.actions.contains_key(&function_name) {
-        return Err(format!("Action '{}' not found", function_name));
+    // Check if the function exists (user-defined function)
+    if !evaluator.functions.contains_key(&function_name) {
+        return Err(format!("Function '{}' not found", function_name));
     }
 
-    let action = evaluator.actions.get(&function_name).unwrap().clone();
+    let function =evaluator.functions.get(&function_name).unwrap().clone();
 
-    // Check that the action takes exactly two params
-    if action.params.len() != 2 {
-        return Err(format!("Action '{}' must take exactly two parameters for reduce", function_name));
+    // Check that the function takes exactly two params
+    if function.params.len() != 2 {
+        return Err(format!("Function '{}' must take exactly two parameters for reduce", function_name));
     }
 
     let mut accumulator = evaluator.eval_expression(args[2].clone())?;
@@ -225,7 +225,7 @@ pub fn eval_reduce(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<V
             _ => return Err("reduce can only work with numbers, strings, and booleans for now".to_string()),
         };
 
-        accumulator = evaluator.eval_action(action.clone(), vec![acc_expr, item_expr])?;
+        accumulator = evaluator.eval_function(function.clone(), vec![acc_expr, item_expr])?;
     }
 
     Ok(accumulator)

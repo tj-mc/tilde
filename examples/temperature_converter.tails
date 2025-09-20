@@ -1,4 +1,4 @@
-action convert-temperature ~temp ~from ~to (
+function convert-temperature ~temp ~from ~to (
     if ~from == "C" (
         if ~to == "F" (
             ~result is (~temp * 9/5) + 32

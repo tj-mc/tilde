@@ -5,7 +5,7 @@ say "=== Block Syntax Demo ==="
 say ""
 
 # Define a custom is-even function that has different behavior
-action is-even ~x (
+function is-even ~x (
     say "Using custom is-even function"
     # Custom logic: only multiples of 4 are "even"
     give ~x % 4 == 0
@@ -68,7 +68,7 @@ say ""
 # Demo combining user and core functions
 say "5. Combining user and core functions:"
 
-action custom-transform ~x (
+function custom-transform ~x (
     ~doubled is :core:double ~x
     ~squared is :core:square ~doubled
     give ~squared

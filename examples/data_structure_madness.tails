@@ -1,7 +1,7 @@
 # Data Structure Manipulation with Nested Calls
 # Showcasing functional programming patterns in Tails
 
-action sum_list ~list (
+function sum_list ~list (
     ~sum is 0
     ~i is 0
     ~len is length ~list
@@ -13,7 +13,7 @@ action sum_list ~list (
     give ~sum
 )
 
-action max_list ~list (
+function max_list ~list (
     if (length ~list) == 0 give 0
     ~max_val is ~list.0
     ~i is 1
@@ -28,7 +28,7 @@ action max_list ~list (
     give ~max_val
 )
 
-action create_range ~start ~end (
+function create_range ~start ~end (
     ~result is []
     ~i is ~start
     loop (
@@ -39,7 +39,7 @@ action create_range ~start ~end (
     give ~result
 )
 
-action filter_even ~list (
+function filter_even ~list (
     ~result is []
     ~i is 0
     ~len is length ~list

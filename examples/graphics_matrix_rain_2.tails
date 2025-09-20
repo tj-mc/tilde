@@ -1,4 +1,4 @@
-action random-character (
+function random-character (
     ~dice is random 0 6
     if ~dice == 0 give "0"
     if ~dice == 1  give "1"
@@ -9,7 +9,7 @@ action random-character (
     if ~dice == 6 give "."
 )
 
-action build-row (
+function build-row (
     ~this-row is ""
     ~row-length is 80
 

@@ -35,7 +35,7 @@ pub enum Statement {
     },
     Breakloop,
     Open(Expression),
-    ActionDefinition {
+    FunctionDefinition {
         name: String,
         params: Vec<String>,
         body: Vec<Statement>,

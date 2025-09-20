@@ -10,8 +10,8 @@ say "1. Sales Data Analysis:"
 ~sales is [150, 0, 300, 75, 0, 450, 220, 0, 180]
 say "   Raw sales data: " ~sales
 
-# Remove zero sales (filter out zeros using .is-zero + negation via custom action)
-action is_not_zero ~x (give ~x > 0)
+# Remove zero sales (filter out zeros using .is-zero + negation via custom function)
+function is_not_zero ~x (give ~x > 0)
 ~non_zero_sales is filter ~sales is_not_zero
 say "   Non-zero sales: " ~non_zero_sales
 
@@ -68,8 +68,8 @@ say "4. Data Validation and Filtering:"
 say "   Test scores: " ~test_scores
 
 # Define custom predicates for score filtering
-action is_high ~x (give ~x >= 90)
-action is_passing ~x (give ~x >= 70)
+function is_high ~x (give ~x >= 90)
+function is_passing ~x (give ~x >= 70)
 
 # Find different score categories
 ~high_scores is filter ~test_scores is_high

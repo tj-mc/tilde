@@ -102,4 +102,4 @@ say "Halved [2,4,6,8]: " ~halved
 
 say ""
 say "🎉 Built-in helper functions make functional programming concise and expressive!"
-say "No need to define your own actions for common operations!"
+say "No need to define your own functions for common operations!"

@@ -1,15 +1,15 @@
 # Nested Function Calls - The New Power of Tails!
 # This demonstrates the new ability to use parentheses for nested function calls
 
-action sum ~first ~second (
+function sum ~first ~second (
     ~first + ~second
 )
 
-action multiply ~a ~b (
+function multiply ~a ~b (
     ~a * ~b
 )
 
-action power ~base ~exp (
+function power ~base ~exp (
     if ~exp == 0 (
         give 1
     ) else (
@@ -24,7 +24,7 @@ action power ~base ~exp (
     )
 )
 
-action factorial ~n (
+function factorial ~n (
     if ~n <= 1 (
         give 1
     ) else (

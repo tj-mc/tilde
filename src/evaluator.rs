@@ -13,7 +13,7 @@ enum ControlFlow {
 type EvalResult = Result<(Value, ControlFlow), String>;
 
 #[derive(Debug, Clone)]
-pub struct Action {
+pub struct Function {
     pub params: Vec<String>,
     pub body: Vec<Statement>,
 }
@@ -21,7 +21,7 @@ pub struct Action {
 #[derive(Debug)]
 pub struct Evaluator {
     pub variables: HashMap<String, Value>,
-    pub actions: HashMap<String, Action>,
+    pub functions: HashMap<String, Function>,
     scope_stack: Vec<HashMap<String, Value>>,
     max_call_depth: usize,
     pub output_buffer: Vec<String>,
@@ -37,7 +37,7 @@ impl Evaluator {
     pub fn new() -> Self {
         Evaluator {
             variables: HashMap::new(),
-            actions: HashMap::new(),
+            functions: HashMap::new(),
             scope_stack: Vec::new(),
             max_call_depth: 1000,
             output_buffer: Vec::new(),
@@ -361,11 +361,11 @@ impl Evaluator {
                 Value::String("open not implemented yet".to_string()),
                 ControlFlow::Continue,
             )),
-            Statement::ActionDefinition { name, params, body } => {
+            Statement::FunctionDefinition { name, params, body } => {
                 // Store the action definition
-                self.actions.insert(
+                self.functions.insert(
                     name.clone(),
-                    Action {
+                    Function {
                         params: params.clone(),
                         body: body.clone(),
                     },
@@ -648,8 +648,8 @@ impl Evaluator {
                             }
                         } else {
                             // Check if this is a user-defined action first
-                            if let Some(action) = self.actions.get(&name).cloned() {
-                                self.eval_action(action, args)
+                            if let Some(function) = self.functions.get(&name).cloned() {
+                                self.eval_function(function, args)
                             } else if let Some(func) = crate::stdlib::get_stdlib_function(&name) {
                                 // Check if this is a stdlib function
                                 func(args, self)
@@ -996,17 +996,17 @@ impl Evaluator {
         Ok(Value::Null)
     }
 
-    pub fn eval_action(&mut self, action: Action, args: Vec<Expression>) -> Result<Value, String> {
+    pub fn eval_function(&mut self, function: Function, args: Vec<Expression>) -> Result<Value, String> {
         // Check call depth to prevent stack overflow
         if self.scope_stack.len() >= self.max_call_depth {
             return Err(format!("Maximum call depth ({}) exceeded", self.max_call_depth));
         }
 
         // Check argument count
-        if args.len() != action.params.len() {
+        if args.len() != function.params.len() {
             return Err(format!(
                 "Action expects {} arguments, but {} were provided",
-                action.params.len(),
+                function.params.len(),
                 args.len()
             ));
         }
@@ -1019,8 +1019,8 @@ impl Evaluator {
 
         // Performance optimization: Pre-allocate HashMap with known capacity
         // This reduces memory allocations for recursive functions
-        let mut local_scope = HashMap::with_capacity(action.params.len());
-        for (param, value) in action.params.iter().zip(arg_values.into_iter()) {
+        let mut local_scope = HashMap::with_capacity(function.params.len());
+        for (param, value) in function.params.iter().zip(arg_values.into_iter()) {
             local_scope.insert(param.clone(), value); // Avoid cloning value
         }
 
@@ -1029,7 +1029,7 @@ impl Evaluator {
 
         // Execute action body
         let mut last_value = Value::Null;
-        for stmt in action.body {
+        for stmt in function.body {
             let (value, control) = self.eval_statement_with_control(stmt)?;
 
             match control {
@@ -1923,7 +1923,7 @@ mod tests {
         use crate::parser::Parser;
 
         // Define a user function that conflicts with stdlib
-        let mut parser = Parser::new("action is-even ~x ( give false )\n~user_result is is-even 4\n~core_result is :core:is-even 4");
+        let mut parser = Parser::new("function is-even ~x ( give false )\n~user_result is is-even 4\n~core_result is :core:is-even 4");
         let program = parser.parse().unwrap();
 
         let mut evaluator = Evaluator::new();
@@ -1940,7 +1940,7 @@ mod tests {
     fn test_block_syntax_unknown_block() {
         use crate::parser::Parser;
 
-        let mut parser = Parser::new("~result is :unknown:function 1");
+        let mut parser = Parser::new("~result is :unknown:test-func 1");
         let program = parser.parse().unwrap();
 
         let mut evaluator = Evaluator::new();
@@ -2012,7 +2012,7 @@ mod tests {
 
         // Test mixing user functions and core functions in the same script
         let mut parser = Parser::new(
-            "action custom-double ~x ( give ~x * 2 )\n\
+            "function custom-double ~x ( give ~x * 2 )\n\
              ~nums is [1, 2, 3]\n\
              ~user_doubled is map ~nums custom-double\n\
              ~core_doubled is map ~nums :core:double"
@@ -2087,7 +2087,7 @@ mod tests {
 
         // Test the library pattern mentioned in docs - using :core: for predictable behavior
         let mut parser = Parser::new(
-            "action validate-positive ~x (\n\
+            "function validate-positive ~x (\n\
                  if :core:is-positive ~x (\n\
                      give true\n\
                  ) else (\n\

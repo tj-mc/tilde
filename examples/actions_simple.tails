@@ -1,10 +1,10 @@
-action greet ~name (
+function greet ~name (
     say "Hello, " ~name "!"
 )
 
 *greet "World"
 
-action add ~a ~b (
+function add ~a ~b (
     give ~a + ~b
 )
 
@@ -13,7 +13,7 @@ say "10 + 20 = " ~sum
 
 ~counter is 0
 
-action increment (
+function increment (
     ~counter up 1
     give ~counter
 )
@@ -23,7 +23,7 @@ say "Counter before: " ~counter
 say "Counter after increment: " ~counter
 say "Result: " ~result
 
-action factorial ~n (
+function factorial ~n (
     if ~n <= 1 give 1
     ~recurse is *factorial (~n - 1)
     give ~n * ~recurse

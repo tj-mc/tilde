@@ -1,10 +1,10 @@
-action greet ~name (
+function greet ~name (
     say "Hello, " ~name "!"
 )
 
 *greet "World"
 
-action add ~a ~b (
+function add ~a ~b (
     give ~a + ~b
 )
 
@@ -13,7 +13,7 @@ say "10 + 20 = " ~sum
 
 ~counter is 0
 
-action increment (
+function increment (
     ~counter is ~counter + 1
     give ~counter
 )
@@ -23,7 +23,7 @@ say "Counter before: " ~counter
 say "Counter after increment: " ~counter
 say "Result: " ~result
 
-action factorial ~n (
+function factorial ~n (
     if ~n <= 1 give 1
     ~recurse is *factorial (~n - 1)
     give ~n * ~recurse
@@ -32,7 +32,7 @@ action factorial ~n (
 ~fact5 is *factorial 5
 say "5! = " ~fact5
 
-action fib ~n (
+function fib ~n (
     if ~n <= 1 give ~n
     ~a is *fib (~n - 1)
     ~b is *fib (~n - 2)
@@ -42,14 +42,14 @@ action fib ~n (
 ~fib10 is *fib 10
 say "Fibonacci(10) = " ~fib10
 
-action make_greeting ~title ~name (
+function make_greeting ~title ~name (
     give ~title + " " + ~name
 )
 
 ~greeting is *make_greeting "Dr." "Smith"
 say ~greeting
 
-action max ~a ~b (
+function max ~a ~b (
     if ~a > ~b give ~a
     give ~b
 )
@@ -57,14 +57,14 @@ action max ~a ~b (
 ~bigger is *max 42 37
 say "Max of 42 and 37 is: " ~bigger
 
-action double ~x (
+function double ~x (
     give *add ~x ~x
 )
 
 ~doubled is *double 15
 say "Double of 15 is: " ~doubled
 
-action test_implicit_return ~x (
+function test_implicit_return ~x (
    ~x * 2
 )
 

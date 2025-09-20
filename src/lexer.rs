@@ -31,7 +31,7 @@ pub enum Token {
     KeysOf,
     ValuesOf,
     HasKey,
-    Action,
+    Function,
     Give,
     And,
     Or,
@@ -496,7 +496,7 @@ impl Lexer {
                     "keys-of" => Token::KeysOf,
                     "values-of" => Token::ValuesOf,
                     "has-key" => Token::HasKey,
-                    "action" => Token::Action,
+                    "function" => Token::Function,
                     "give" => Token::Give,
                     "and" => Token::And,
                     "or" => Token::Or,
@@ -597,16 +597,16 @@ mod tests {
     }
 
     #[test]
-    fn test_action_keywords() {
-        let mut lexer = Lexer::new("action give");
+    fn test_function_keywords() {
+        let mut lexer = Lexer::new("function give");
         let tokens = lexer.tokenize();
 
-        assert_eq!(tokens[0], Token::Action);
+        assert_eq!(tokens[0], Token::Function);
         assert_eq!(tokens[1], Token::Give);
     }
 
     #[test]
-    fn test_action_call() {
+    fn test_function_call() {
         let mut lexer = Lexer::new("*add 3 5");
         let tokens = lexer.tokenize();
 
@@ -616,7 +616,7 @@ mod tests {
     }
 
     #[test]
-    fn test_multiplication_vs_action_call() {
+    fn test_multiplication_vs_function_call() {
         let mut lexer = Lexer::new("3 * 5 *multiply");
         let tokens = lexer.tokenize();
 

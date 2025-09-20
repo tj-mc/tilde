@@ -1,11 +1,11 @@
-action fib ~n (
+function fib ~n (
     if ~n <= 1 give ~n
     ~a is *fib (~n - 1)
     ~b is *fib (~n - 2)
     give ~a + ~b
 )
 
-say "Fibonacci sequence using actions:"
+say "Fibonacci sequence using functions:"
 ~i is 0
 loop (
     if ~i > 10 break-loop

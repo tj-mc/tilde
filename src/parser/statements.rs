@@ -107,7 +107,7 @@ impl Parser {
                 Ok(Statement::Open(path))
             }
             Token::LeftParen => self.parse_block(),
-            Token::Action => self.parse_action_definition(),
+            Token::Function => self.parse_function_definition(),
             Token::Give => {
                 self.advance();
                 let expr = self.parse_expression()?;
@@ -232,13 +232,13 @@ impl Parser {
         Ok(Statement::Block { body })
     }
 
-    pub fn parse_action_definition(&mut self) -> Result<Statement, String> {
-        self.expect(Token::Action)?;
+    pub fn parse_function_definition(&mut self) -> Result<Statement, String> {
+        self.expect(Token::Function)?;
 
-        // Parse action name
+        // Parse function name
         let name = match self.current_token() {
             Token::Identifier(n) => n.clone(),
-            _ => return Err("Expected action name after 'action'".to_string()),
+            _ => return Err("Expected function name after 'function'".to_string()),
         };
         self.advance();
 
@@ -265,7 +265,7 @@ impl Parser {
 
         self.expect(Token::RightParen)?;
 
-        Ok(Statement::ActionDefinition {
+        Ok(Statement::FunctionDefinition {
             name,
             params,
             body,

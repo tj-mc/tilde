@@ -76,21 +76,21 @@ say "   - Orders: " ~pending_orders
 say ""
 say "3. Survey Response Analysis:"
 ~survey_responses is [
-    {"age": 25, "satisfaction": 8, "department": "Engineering"},
-    {"age": 34, "satisfaction": 9, "department": "Marketing"},
-    {"age": 28, "satisfaction": 6, "department": "Engineering"},
-    {"age": 31, "satisfaction": 7, "department": "Sales"},
-    {"age": 29, "satisfaction": 9, "department": "Marketing"},
-    {"age": 26, "satisfaction": 5, "department": "Sales"}
+    {"age": 25, "satisffunction": 8, "department": "Engineering"},
+    {"age": 34, "satisffunction": 9, "department": "Marketing"},
+    {"age": 28, "satisffunction": 6, "department": "Engineering"},
+    {"age": 31, "satisffunction": 7, "department": "Sales"},
+    {"age": 29, "satisffunction": 9, "department": "Marketing"},
+    {"age": 26, "satisffunction": 5, "department": "Sales"}
 ]
 
-~total_satisfaction is 0
+~total_satisffunction is 0
 ~engineering_responses is 0
 ~young_employees is 0
 ~response_count is 0
 
 for-each ~response in ~survey_responses (
-    ~total_satisfaction up ~response.satisfaction
+    ~total_satisffunction up ~response.satisffunction
     ~response_count up 1
 
     if ~response.department == "Engineering" (
@@ -101,14 +101,14 @@ for-each ~response in ~survey_responses (
         ~young_employees up 1
     )
 
-    say "   👤 Age: " ~response.age " | Satisfaction: " ~response.satisfaction "/10 | Dept: " ~response.department
+    say "   👤 Age: " ~response.age " | Satisffunction: " ~response.satisffunction "/10 | Dept: " ~response.department
 )
 
-~average_satisfaction is ~total_satisfaction / ~response_count
+~average_satisffunction is ~total_satisffunction / ~response_count
 
 say ""
 say "   Analysis Results:"
-say "   - Average Satisfaction: " ~average_satisfaction "/10"
+say "   - Average Satisffunction: " ~average_satisffunction "/10"
 say "   - Engineering Responses: " ~engineering_responses "/" ~response_count
 say "   - Employees Under 30: " ~young_employees "/" ~response_count
 

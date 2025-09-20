@@ -196,7 +196,7 @@ impl Parser {
                     // Parse arguments like any stdlib function
                     let mut args = Vec::new();
                     while !self.is_expression_terminator() && !matches!(self.current_token(), Token::LeftParen | Token::Is) && !self.is_binary_operator(self.current_token()) {
-                        args.push(self.parse_action_argument()?);
+                        args.push(self.parse_function_argument()?);
                     }
 
                     Ok(Expression::FunctionCall {
@@ -230,7 +230,7 @@ impl Parser {
                             }
                         } else {
                             // For action calls, parse arguments one by one without property access
-                            args.push(self.parse_action_argument()?);
+                            args.push(self.parse_function_argument()?);
                         }
                     }
 
@@ -265,7 +265,7 @@ impl Parser {
 
                         // Parse arguments until we hit a terminator
                         while !self.is_expression_terminator() && !matches!(self.current_token(), Token::LeftParen | Token::Is) && !self.is_binary_operator(self.current_token()) {
-                            args.push(self.parse_action_argument()?);
+                            args.push(self.parse_function_argument()?);
                         }
 
                         Ok(Expression::FunctionCall { name, args })
@@ -430,7 +430,7 @@ impl Parser {
 
     /// Parse a single action argument without property access chains
     /// This prevents ~var .prop from being parsed as property access
-    fn parse_action_argument(&mut self) -> Result<Expression, String> {
+    fn parse_function_argument(&mut self) -> Result<Expression, String> {
         match self.current_token().clone() {
             Token::Number(n, was_float) => {
                 self.advance();
@@ -522,7 +522,7 @@ impl Parser {
             }
             Token::LeftBrace => self.parse_object_literal(),
             Token::LeftBracket => self.parse_list_literal(),
-            _ => Err(format!("Unexpected token in action argument: {:?}", self.current_token())),
+            _ => Err(format!("Unexpected token in function argument: {:?}", self.current_token())),
         }
     }
 }
