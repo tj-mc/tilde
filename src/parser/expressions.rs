@@ -234,15 +234,16 @@ impl Parser {
                     Ok(Expression::FunctionCall { name, args })
                 } else {
                     // Check if this is a built-in function that can take arguments without parentheses
-                    let builtin_functions = ["length", "append", "keys-of", "values-of", "has-key"];
+                    let is_builtin = [].contains(&name.as_str()); // All functions are now in stdlib
+                    let is_stdlib = crate::stdlib::get_stdlib_function_names().contains(&name.as_str());
 
-                    if builtin_functions.contains(&name.as_str()) {
+                    if is_builtin || is_stdlib {
                         // Parse arguments like action calls (space-separated until terminator)
                         let mut args = Vec::new();
 
                         // Parse arguments until we hit a terminator
                         while !self.is_expression_terminator() && !matches!(self.current_token(), Token::LeftParen | Token::Is) && !self.is_binary_operator(self.current_token()) {
-                            args.push(self.parse_primary()?);
+                            args.push(self.parse_action_argument()?);
                         }
 
                         Ok(Expression::FunctionCall { name, args })
@@ -254,21 +255,6 @@ impl Parser {
                         })
                     }
                 }
-            }
-            Token::StdlibCall(name) => {
-                self.advance();
-                // Parse stdlib call arguments (space-separated until terminator)
-                let mut args = Vec::new();
-
-                // Parse arguments until we hit a terminator
-                while !self.is_expression_terminator() && !matches!(self.current_token(), Token::Is) && !self.is_binary_operator(self.current_token()) {
-                    args.push(self.parse_action_argument()?);
-                }
-
-                Ok(Expression::StdlibCall {
-                    name,
-                    args,
-                })
             }
             Token::Say => self.parse_simple_function_call("say"),
             Token::Ask => self.parse_simple_function_call("ask"),
@@ -292,7 +278,7 @@ impl Parser {
                     }
                     self.expect(Token::RightParen)?;
                     Ok(Expression::FunctionCall {
-                        name: "keys-of".to_string(),
+                        name: "keys".to_string(),
                         args,
                     })
                 } else {
@@ -304,7 +290,7 @@ impl Parser {
                     }
 
                     Ok(Expression::FunctionCall {
-                        name: "keys-of".to_string(),
+                        name: "keys".to_string(),
                         args,
                     })
                 }
@@ -322,7 +308,7 @@ impl Parser {
                     }
                     self.expect(Token::RightParen)?;
                     Ok(Expression::FunctionCall {
-                        name: "values-of".to_string(),
+                        name: "values".to_string(),
                         args,
                     })
                 } else {
@@ -334,7 +320,7 @@ impl Parser {
                     }
 
                     Ok(Expression::FunctionCall {
-                        name: "values-of".to_string(),
+                        name: "values".to_string(),
                         args,
                     })
                 }
@@ -352,7 +338,7 @@ impl Parser {
                     }
                     self.expect(Token::RightParen)?;
                     Ok(Expression::FunctionCall {
-                        name: "has-key".to_string(),
+                        name: "has".to_string(),
                         args,
                     })
                 } else {
@@ -364,13 +350,11 @@ impl Parser {
                     }
 
                     Ok(Expression::FunctionCall {
-                        name: "has-key".to_string(),
+                        name: "has".to_string(),
                         args,
                     })
                 }
             }
-            Token::Length => self.parse_simple_function_call("length"),
-            Token::Append => self.parse_simple_function_call("append"),
             Token::LeftParen => {
                 self.advance();
                 let expr = self.parse_expression()?;
@@ -444,8 +428,33 @@ impl Parser {
             }
             Token::Variable(name) => {
                 self.advance();
-                // Don't parse property access - just return the variable
-                Ok(Expression::Variable(name))
+                let mut expr = Expression::Variable(name);
+
+                // Handle property access chain for variables
+                while *self.current_token() == Token::Dot {
+                    self.advance();
+                    let property = match self.current_token() {
+                        Token::Identifier(prop_name) => prop_name.clone(),
+                        Token::Variable(prop_name) => format!("~{}", prop_name),
+                        Token::Number(n, _) => {
+                            // Convert number to integer string if it's a whole number
+                            if n.fract() == 0.0 {
+                                (*n as i64).to_string()
+                            } else {
+                                n.to_string()
+                            }
+                        }
+                        _ => return Err("Expected property name or number after '.'".to_string()),
+                    };
+                    self.advance();
+
+                    expr = Expression::PropertyAccess {
+                        object: Box::new(expr),
+                        property,
+                    };
+                }
+
+                Ok(expr)
             }
             Token::Identifier(name) => {
                 self.advance();

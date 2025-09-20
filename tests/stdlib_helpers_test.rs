@@ -11,7 +11,7 @@ fn test_is_even() {
     let mut evaluator = Evaluator::new();
 
     // Test even numbers
-    let program_text = "~result is *.is-even 4\nsay ~result";
+    let program_text = "~result is is-even 4\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -21,7 +21,7 @@ fn test_is_even() {
 
     // Test odd numbers
     let mut evaluator = Evaluator::new();
-    let program_text = "~result is *.is-even 3\nsay ~result";
+    let program_text = "~result is is-even 3\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -31,7 +31,7 @@ fn test_is_even() {
 
     // Test zero
     let mut evaluator = Evaluator::new();
-    let program_text = "~result is *.is-even 0\nsay ~result";
+    let program_text = "~result is is-even 0\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -45,7 +45,7 @@ fn test_is_odd() {
     let mut evaluator = Evaluator::new();
 
     // Test odd numbers
-    let program_text = "~result is *.is-odd 3\nsay ~result";
+    let program_text = "~result is is-odd 3\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -55,7 +55,7 @@ fn test_is_odd() {
 
     // Test even numbers
     let mut evaluator = Evaluator::new();
-    let program_text = "~result is *.is-odd 4\nsay ~result";
+    let program_text = "~result is is-odd 4\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -69,7 +69,7 @@ fn test_is_positive() {
     let mut evaluator = Evaluator::new();
 
     // Test positive number
-    let program_text = "~result is *.is-positive 5\nsay ~result";
+    let program_text = "~result is is-positive 5\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -79,7 +79,7 @@ fn test_is_positive() {
 
     // Test zero
     let mut evaluator = Evaluator::new();
-    let program_text = "~result is *.is-positive 0\nsay ~result";
+    let program_text = "~result is is-positive 0\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -93,7 +93,7 @@ fn test_is_negative() {
     let mut evaluator = Evaluator::new();
 
     // Test negative number - need to use expression since literals don't support negatives
-    let program_text = "~num is 0 - 5\n~result is *.is-negative ~num\nsay ~result";
+    let program_text = "~num is 0 - 5\n~result is is-negative ~num\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -103,7 +103,7 @@ fn test_is_negative() {
 
     // Test positive number
     let mut evaluator = Evaluator::new();
-    let program_text = "~result is *.is-negative 5\nsay ~result";
+    let program_text = "~result is is-negative 5\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -117,7 +117,7 @@ fn test_is_zero() {
     let mut evaluator = Evaluator::new();
 
     // Test zero
-    let program_text = "~result is *.is-zero 0\nsay ~result";
+    let program_text = "~result is is-zero 0\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -127,7 +127,7 @@ fn test_is_zero() {
 
     // Test non-zero
     let mut evaluator = Evaluator::new();
-    let program_text = "~result is *.is-zero 5\nsay ~result";
+    let program_text = "~result is is-zero 5\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -144,7 +144,7 @@ fn test_is_zero() {
 fn test_double() {
     let mut evaluator = Evaluator::new();
 
-    let program_text = "~result is *.double 5\nsay ~result";
+    let program_text = "~result is double 5\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -157,7 +157,7 @@ fn test_double() {
 fn test_triple() {
     let mut evaluator = Evaluator::new();
 
-    let program_text = "~result is *.triple 4\nsay ~result";
+    let program_text = "~result is triple 4\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -170,7 +170,7 @@ fn test_triple() {
 fn test_quadruple() {
     let mut evaluator = Evaluator::new();
 
-    let program_text = "~result is *.quadruple 3\nsay ~result";
+    let program_text = "~result is quadruple 3\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -183,7 +183,7 @@ fn test_quadruple() {
 fn test_half() {
     let mut evaluator = Evaluator::new();
 
-    let program_text = "~result is *.half 10\nsay ~result";
+    let program_text = "~result is half 10\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -196,7 +196,7 @@ fn test_half() {
 fn test_square() {
     let mut evaluator = Evaluator::new();
 
-    let program_text = "~result is *.square 4\nsay ~result";
+    let program_text = "~result is square 4\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -209,7 +209,7 @@ fn test_square() {
 fn test_increment() {
     let mut evaluator = Evaluator::new();
 
-    let program_text = "~result is *.increment 5\nsay ~result";
+    let program_text = "~result is increment 5\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -222,7 +222,7 @@ fn test_increment() {
 fn test_decrement() {
     let mut evaluator = Evaluator::new();
 
-    let program_text = "~result is *.decrement 5\nsay ~result";
+    let program_text = "~result is decrement 5\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -239,7 +239,7 @@ fn test_decrement() {
 fn test_add() {
     let mut evaluator = Evaluator::new();
 
-    let program_text = "~result is *.add 3 7\nsay ~result";
+    let program_text = "~result is add 3 7\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -252,7 +252,7 @@ fn test_add() {
 fn test_multiply() {
     let mut evaluator = Evaluator::new();
 
-    let program_text = "~result is *.multiply 4 5\nsay ~result";
+    let program_text = "~result is multiply 4 5\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -265,7 +265,7 @@ fn test_multiply() {
 fn test_max() {
     let mut evaluator = Evaluator::new();
 
-    let program_text = "~result is *.max 3 7\nsay ~result";
+    let program_text = "~result is max 3 7\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -275,7 +275,7 @@ fn test_max() {
 
     // Test equal values
     let mut evaluator = Evaluator::new();
-    let program_text = "~result is *.max 5 5\nsay ~result";
+    let program_text = "~result is max 5 5\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -288,7 +288,7 @@ fn test_max() {
 fn test_min() {
     let mut evaluator = Evaluator::new();
 
-    let program_text = "~result is *.min 3 7\nsay ~result";
+    let program_text = "~result is min 3 7\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -305,7 +305,7 @@ fn test_min() {
 fn test_uppercase() {
     let mut evaluator = Evaluator::new();
 
-    let program_text = "~result is *.uppercase \"hello world\"\nsay ~result";
+    let program_text = "~result is uppercase \"hello world\"\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -318,7 +318,7 @@ fn test_uppercase() {
 fn test_lowercase() {
     let mut evaluator = Evaluator::new();
 
-    let program_text = "~result is *.lowercase \"HELLO WORLD\"\nsay ~result";
+    let program_text = "~result is lowercase \"HELLO WORLD\"\nsay ~result";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
@@ -385,9 +385,9 @@ fn test_stdlib_helper_functions_direct_usage() {
 
     let program_text = r#"
 ~numbers is [2, 4, 6, 8]
-~first_doubled is *.double (~numbers.0)
-~first_squared is *.square (~numbers.0)
-~first_is_even is *.is-even (~numbers.0)
+~first_doubled is double (~numbers.0)
+~first_squared is square (~numbers.0)
+~first_is_even is is-even (~numbers.0)
 say "Double of 2: " ~first_doubled " Square of 2: " ~first_squared " 2 is even: " ~first_is_even
 "#;
     let mut parser = Parser::new(program_text);
@@ -405,8 +405,8 @@ fn test_helper_functions_with_filter() {
 
     let program_text = r#"
 ~numbers is [1, 2, 3, 4, 5, 0]
-~evens is *.filter ~numbers .is-even
-~positives is *.filter ~numbers .is-positive
+~evens is filter ~numbers is-even
+~positives is filter ~numbers is-positive
 say "Evens: " ~evens " Positives: " ~positives
 "#;
     let mut parser = Parser::new(program_text);
@@ -424,9 +424,9 @@ fn test_helper_functions_with_reduce() {
 
     let program_text = r#"
 ~numbers is [1, 2, 3, 4, 5]
-~sum is *.reduce ~numbers .add 0
-~product is *.reduce ~numbers .multiply 1
-~maximum is *.reduce ~numbers .max 0
+~sum is reduce ~numbers add 0
+~product is reduce ~numbers multiply 1
+~maximum is reduce ~numbers max 0
 say "Sum: " ~sum " Product: " ~product " Max: " ~maximum
 "#;
     let mut parser = Parser::new(program_text);
@@ -444,8 +444,8 @@ fn test_string_functions_with_map() {
 
     let program_text = r#"
 ~words is ["hello", "WORLD", "TeSt"]
-~upper is *.map ~words .uppercase
-~lower is *.map ~words .lowercase
+~upper is map ~words uppercase
+~lower is map ~words lowercase
 say "Upper: " ~upper " Lower: " ~lower
 "#;
     let mut parser = Parser::new(program_text);
@@ -466,7 +466,7 @@ fn test_helper_function_errors() {
     let mut evaluator = Evaluator::new();
 
     // Test wrong argument count
-    let program_text = "~result is *.double 1 2";
+    let program_text = "~result is double 1 2";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program);
@@ -475,7 +475,7 @@ fn test_helper_function_errors() {
 
     // Test wrong argument type
     let mut evaluator = Evaluator::new();
-    let program_text = "~result is *.is-even \"not a number\"";
+    let program_text = "~result is is-even \"not a number\"";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program);
@@ -484,7 +484,7 @@ fn test_helper_function_errors() {
 
     // Test string function with wrong type
     let mut evaluator = Evaluator::new();
-    let program_text = "~result is *.uppercase 123";
+    let program_text = "~result is uppercase 123";
     let mut parser = Parser::new(program_text);
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program);

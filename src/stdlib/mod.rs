@@ -1,12 +1,51 @@
 pub mod list;
+pub mod list_mutations;
+pub mod list_queries;
+pub mod list_advanced;
+pub mod set_operations;
 pub mod string;
 pub mod math;
 pub mod helpers;
+pub mod object;
+pub mod collection;
 mod utils;
 
 use crate::ast::Expression;
 use crate::evaluator::Evaluator;
 use crate::value::Value;
+
+/// Get all standard library function names
+pub fn get_stdlib_function_names() -> &'static [&'static str] {
+    &[
+        // List functions
+        "map", "filter", "reduce", "sort", "reverse",
+        // Advanced list functions with predicates
+        "find", "find-index", "find-last", "every", "some", "remove-if", "count-if",
+        "take-while", "drop-while", "partition", "group-by", "sort-by",
+        // List mutation functions
+        "remove", "remove-at", "insert", "set-at", "pop", "shift", "unshift",
+        // List query functions
+        "index-of", "contains", "slice", "concat", "take", "drop",
+        // List advanced functions
+        "flatten", "unique", "zip", "chunk", "transpose",
+        // Set operations
+        "union", "difference", "intersection",
+        // String functions
+        "split", "join", "trim", "uppercase", "lowercase",
+        // Math functions
+        "absolute", "square-root", "random",
+        // Object functions
+        "keys", "values", "has",
+        // Collection functions
+        "length", "append",
+        // Common helper functions - predicates
+        "is-even", "is-odd", "is-positive", "is-negative", "is-zero",
+        // Common helper functions - transformations
+        "double", "triple", "quadruple", "half", "square", "increment", "decrement",
+        // Common helper functions - reductions
+        "add", "multiply", "max", "min",
+    ]
+}
 
 /// Register all standard library functions
 pub fn get_stdlib_function(name: &str) -> Option<fn(Vec<Expression>, &mut Evaluator) -> Result<Value, String>> {
@@ -18,6 +57,49 @@ pub fn get_stdlib_function(name: &str) -> Option<fn(Vec<Expression>, &mut Evalua
         "sort" => Some(list::eval_sort),
         "reverse" => Some(list::eval_reverse),
 
+        // Advanced list functions with predicates
+        "find" => Some(list::eval_find),
+        "find-index" => Some(list::eval_find_index),
+        "find-last" => Some(list::eval_find_last),
+        "every" => Some(list::eval_every),
+        "some" => Some(list::eval_some),
+        "remove-if" => Some(list::eval_remove_if),
+        "count-if" => Some(list::eval_count_if),
+        "take-while" => Some(list::eval_take_while),
+        "drop-while" => Some(list::eval_drop_while),
+        "partition" => Some(list::eval_partition),
+        "group-by" => Some(list::eval_group_by),
+        "sort-by" => Some(list::eval_sort_by),
+
+        // List mutation functions
+        "remove" => Some(list_mutations::eval_remove),
+        "remove-at" => Some(list_mutations::eval_remove_at),
+        "insert" => Some(list_mutations::eval_insert),
+        "set-at" => Some(list_mutations::eval_set_at),
+        "pop" => Some(list_mutations::eval_pop),
+        "shift" => Some(list_mutations::eval_shift),
+        "unshift" => Some(list_mutations::eval_unshift),
+
+        // List query functions
+        "index-of" => Some(list_queries::eval_index_of),
+        "contains" => Some(list_queries::eval_contains),
+        "slice" => Some(list_queries::eval_slice),
+        "concat" => Some(list_queries::eval_concat),
+        "take" => Some(list_queries::eval_take),
+        "drop" => Some(list_queries::eval_drop),
+
+        // List advanced functions
+        "flatten" => Some(list_advanced::eval_flatten),
+        "unique" => Some(list_advanced::eval_unique),
+        "zip" => Some(list_advanced::eval_zip),
+        "chunk" => Some(list_advanced::eval_chunk),
+        "transpose" => Some(list_advanced::eval_transpose),
+
+        // Set operations
+        "union" => Some(set_operations::eval_union),
+        "difference" => Some(set_operations::eval_difference),
+        "intersection" => Some(set_operations::eval_intersection),
+
         // String functions
         "split" => Some(string::eval_split),
         "join" => Some(string::eval_join),
@@ -28,6 +110,16 @@ pub fn get_stdlib_function(name: &str) -> Option<fn(Vec<Expression>, &mut Evalua
         // Math functions
         "absolute" => Some(math::eval_absolute),
         "square-root" => Some(math::eval_square_root),
+        "random" => Some(crate::random::eval_random_positional_wrapper),
+
+        // Object functions
+        "keys" => Some(object::eval_keys),
+        "values" => Some(object::eval_values),
+        "has" => Some(object::eval_has),
+
+        // Collection functions
+        "length" => Some(collection::eval_length),
+        "append" => Some(collection::eval_append),
 
         // Common helper functions - predicates
         "is-even" => Some(helpers::eval_is_even),

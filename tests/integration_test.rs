@@ -420,10 +420,10 @@ fn test_property_assignment() {
 fn test_object_functions() {
     let input = "
         ~data is {\"x\": 10 \"y\": 20 \"z\": 30}
-        ~all_keys is keys-of ~data
-        ~all_values is values-of ~data
-        ~has_x is has-key \"x\" ~data
-        ~has_w is has-key \"w\" ~data
+        ~all_keys is keys ~data
+        ~all_values is values ~data
+        ~has_x is has \"x\" ~data
+        ~has_w is has \"w\" ~data
     ";
 
     let mut parser = Parser::new(input);
@@ -608,8 +608,8 @@ fn test_multiline_object_with_mixed_types() {
             }
         }
         
-        ~keys is keys-of ~data
-        ~nested_keys is keys-of ~data.nested
+        ~keys is keys ~data
+        ~nested_keys is keys ~data.nested
     ";
 
     let mut parser = Parser::new(input);

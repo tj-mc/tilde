@@ -336,13 +336,13 @@ mod tests {
 
     #[test]
     fn test_parse_object_functions() {
-        let mut parser = Parser::new("~keys is keys-of(~obj)");
+        let mut parser = Parser::new("~keys is keys(~obj)");
         let program = parser.parse().unwrap();
 
         match &program[0] {
             Statement::Assignment { value, .. } => match value {
                 Expression::FunctionCall { name, args } => {
-                    assert_eq!(name, "keys-of");
+                    assert_eq!(name, "keys");
                     assert_eq!(args.len(), 1);
                     assert_eq!(args[0], Expression::Variable("obj".to_string()));
                 }

@@ -9,7 +9,6 @@ pub enum Token {
     Boolean(bool),
     Variable(String),
     Identifier(String),
-    StdlibCall(String),
 
     // Keywords
     Is,
@@ -24,7 +23,6 @@ pub enum Token {
     Get,
     Run,
     Scrape,
-    Find,
     Wait,
     In,
     Otherwise,
@@ -32,8 +30,6 @@ pub enum Token {
     KeysOf,
     ValuesOf,
     HasKey,
-    Length,
-    Append,
     Action,
     Give,
     And,
@@ -395,14 +391,9 @@ impl Lexer {
             }
             Some('*') => {
                 self.advance();
-                // Check if this is a stdlib call (*.identifier), action call (*identifier), or multiplication
+                // Check if this is an action call (*identifier) or multiplication
                 if let Some(ch) = self.current_char {
-                    if ch == '.' {
-                        // This is a stdlib call (*.function)
-                        self.advance(); // Skip the dot
-                        let name = self.read_identifier();
-                        return Token::StdlibCall(name);
-                    } else if ch.is_alphabetic() {
+                    if ch.is_alphabetic() {
                         // This is an action call
                         let name = self.read_identifier();
                         return Token::Identifier(format!("*{}", name));
@@ -482,7 +473,6 @@ impl Lexer {
                     "get" => Token::Get,
                     "run" => Token::Run,
                     "scrape" => Token::Scrape,
-                    "find" => Token::Find,
                     "wait" => Token::Wait,
                     "in" => Token::In,
                     "otherwise" => Token::Otherwise,
@@ -490,8 +480,6 @@ impl Lexer {
                     "keys-of" => Token::KeysOf,
                     "values-of" => Token::ValuesOf,
                     "has-key" => Token::HasKey,
-                    "length" => Token::Length,
-                    "append" => Token::Append,
                     "action" => Token::Action,
                     "give" => Token::Give,
                     "and" => Token::And,

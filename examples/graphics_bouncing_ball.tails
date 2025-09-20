@@ -31,8 +31,8 @@ loop (
             break-loop
 
         )
-        ~spaces is ~spaces + " "
-        ~i is ~i + 1
+        ~spaces is "`~spaces` "
+        ~i up 1
     )
 
     say "│" ~spaces "🏀" ~other-spaces "│"

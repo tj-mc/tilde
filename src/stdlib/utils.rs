@@ -88,3 +88,12 @@ pub fn extract_list_string_args(args: &[Expression], evaluator: &mut Evaluator, 
     let string = extract_string_arg(&args[1..], evaluator, function_name)?;
     Ok((list, string))
 }
+
+/// Evaluate all arguments and return as a Vec of Values
+pub fn evaluate_args(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Vec<Value>, String> {
+    let mut result = Vec::new();
+    for arg in args {
+        result.push(evaluator.eval_expression(arg)?);
+    }
+    Ok(result)
+}

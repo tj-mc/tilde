@@ -74,9 +74,9 @@ fn test_negative_literals_in_expressions() {
 fn test_negative_literals_with_stdlib_functions() {
     let input = "
         ~numbers is [-1, -2, -3, 4, 5]
-        ~positives is *.filter ~numbers .is-positive
-        ~negatives is *.filter ~numbers .is-negative
-        ~absolute_values is *.map ~numbers .absolute
+        ~positives is filter ~numbers is-positive
+        ~negatives is filter ~numbers is-negative
+        ~absolute_values is map ~numbers absolute
     ";
 
     let mut parser = Parser::new(input);

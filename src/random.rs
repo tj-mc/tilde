@@ -42,6 +42,11 @@ pub fn eval_random_positional(args: Vec<Expression>, evaluator: &mut Evaluator) 
     }
 }
 
+/// Wrapper for stdlib compatibility
+pub fn eval_random_positional_wrapper(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
+    eval_random_positional(args, evaluator)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

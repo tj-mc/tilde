@@ -71,11 +71,6 @@ pub enum Expression {
         args: Vec<Expression>,
     },
 
-    StdlibCall {
-        name: String,
-        args: Vec<Expression>,
-    },
-
     PropertyAccess {
         object: Box<Expression>,
         property: String,

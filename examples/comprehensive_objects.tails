@@ -46,8 +46,8 @@ say "4. Nested property assignment with unquoted keys:"
 say "Updated user:" ~user
 
 say "5. Object functions with unquoted keys:"
-~keys is keys-of ~user.preferences
-~values is values-of ~user.preferences
+~keys is keys ~user.preferences
+~values is values ~user.preferences
 say "Preference keys:" ~keys
 say "Preference values:" ~values
 

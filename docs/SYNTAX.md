@@ -150,7 +150,7 @@ if ~score >= 90 (
 Loops use parentheses for block delimitation:
 ```
 loop (
-    ~counter is (~counter + 1)
+    ~counter up 1 
     say ~counter
     if (~counter >= 100) break-loop
 )
@@ -497,17 +497,6 @@ The `clear` command:
 
 **Terminal Graphics Examples:**
 ```
-# Simple animation loop
-~frame is 0
-loop (
-    if ~frame >= 10 break-loop
-    clear
-    say "Frame: " ~frame
-    say "    🐈‍⬛"  # Moving cat
-    wait 0.2
-    ~frame is ~frame + 1
-)
-
 # Interactive dashboard
 loop (
     clear
@@ -549,9 +538,9 @@ Set or update object properties:
 ### Object Functions
 Built-in functions for working with objects:
 ```
-~keys is keys-of ~person          # Returns list of keys
-~values is values-of ~person      # Returns list of values  
-~exists is has-key "name" ~person # Returns true/false
+~keys is keys ~person          # Returns list of keys
+~values is values ~person      # Returns list of values
+~exists is has "name" ~person # Returns true/false
 ```
 
 ### Objects in Conditionals
@@ -633,88 +622,40 @@ loop (
     if (~counter >= 100) break-loop
 )
 ```
-
-## Parsing Rules
-
-### Tokenization
-1. Input is read line by line
-2. Lines are split on whitespace (whitespace = token boundaries)
-3. No multi-word instructions allowed
-
-### Token Types
-- **Variables**: Tokens starting with `~`
-- **Keywords**: `is`, `if`, `else`, `loop`, `for-each`, `in`, `break-loop`, `up`, `down`, `say`, `ask`, `get`, `run`, `wait`, `random`, `read`, `write`, `clear`, `action`, `give`, `length`, `append`
-- **Literals**: Numbers and double-quoted strings
-- **Operators**: Mathematical and comparison operators
-- **Delimiters**: `(` and `)`
-
-### AST Structure Example
-For the loop example above:
-```
-Program {
-    Assignment { variable: "counter", value: Number(0) }
-    Loop {
-        body: [
-            Assignment { 
-                variable: "counter", 
-                value: BinaryOp { 
-                    left: Variable("counter"), 
-                    op: Add, 
-                    right: Number(1) 
-                }
-            }
-            Effect { function: "say", args: [Variable("counter")] }
-            If {
-                condition: BinaryOp { 
-                    left: Variable("counter"), 
-                    op: GreaterEqual, 
-                    right: Number(100) 
-                }
-                then: BreakLoop
-            }
-        ]
-    }
-}
-```
-
 ## Standard Library
 
-Tails includes a comprehensive standard library for functional programming and common operations. All stdlib functions use the `*.` prefix to avoid conflicts with user-defined actions.
+Tails includes a comprehensive standard library for functional programming and common operations. Stdlib functions are called directly by name and take precedence over user-defined actions when resolving function names.
 
 ### List Operations
 ```tails
-action double ~x (give ~x * 2)
-action is_even ~x (give ~x % 2 == 0)
-action add ~a ~b (give ~a + ~b)
-
 ~numbers is [1, 2, 3, 4, 5]
-~doubled is *.map ~numbers double        # [2, 4, 6, 8, 10]
-~evens is *.filter ~numbers is_even      # [2, 4]
-~sum is *.reduce ~numbers add 0          # 15
-~sorted is *.sort [3, 1, 4, 1, 5]        # [1, 1, 3, 4, 5]
-~reversed is *.reverse ~numbers          # [5, 4, 3, 2, 1]
+~doubled is map ~numbers double        # [2, 4, 6, 8, 10]
+~evens is filter ~numbers is-even      # [2, 4]
+~sum is reduce ~numbers add 0          # 15
+~sorted is sort [3, 1, 4, 1, 5]        # [1, 1, 3, 4, 5]
+~reversed is reverse ~numbers          # [5, 4, 3, 2, 1]
 ```
 
 ### String Operations
 ```tails
-~words is *.split "hello,world,tails" ","    # ["hello", "world", "tails"]
-~sentence is *.join ~words " "               # "hello world tails"
-~clean is *.trim "  hello world  "           # "hello world"
+~words is split "hello,world,tails" ","    # ["hello", "world", "tails"]
+~sentence is join ~words " "               # "hello world tails"
+~clean is trim "  hello world  "           # "hello world"
 ```
 
 ### Math Operations
 ```tails
-~positive is *.absolute -42                  # 42
-~root is *.square-root 16                    # 4
+~positive is absolute -42                  # 42
+~root is square-root 16                    # 4
 ```
 
 ### Functional Programming Patterns
 ```tails
 # Chain operations for data processing
 ~data is [1, -2, 3, -4, 5]
-~positives is *.filter ~data is_positive
-~squares is *.map ~positives square
-~result is *.reduce ~squares add 0
+~positives is filter ~data is_positive
+~squares is map ~positives square
+~result is reduce ~squares add 0
 ```
 
 **📖 See [STDLIB.md](STDLIB.md) for complete standard library documentation with examples and best practices.**

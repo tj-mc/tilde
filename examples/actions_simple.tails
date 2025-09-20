@@ -14,7 +14,7 @@ say "10 + 20 = " ~sum
 ~counter is 0
 
 action increment (
-    ~counter is ~counter + 1
+    ~counter up 1
     give ~counter
 )
 

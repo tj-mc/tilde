@@ -65,7 +65,6 @@ impl Evaluator {
             "get" => self.eval_get_positional(args),
             "run" => self.eval_run_positional(args),
             "wait" => self.eval_wait_positional(args),
-            "random" => crate::random::eval_random_positional(args, self),
             "read" => crate::file_io::eval_read_positional(args, self),
             "write" => crate::file_io::eval_write_positional(args, self),
             "clear" => crate::terminal::eval_clear_positional(args, self),
@@ -531,7 +530,7 @@ impl Evaluator {
 
                         Ok(Value::String(message))
                     }
-                    "get" | "run" | "wait" | "random" | "read" | "write" | "clear" => self.eval_positional_function(&name, args),
+                    "get" | "run" | "wait" | "read" | "write" | "clear" => self.eval_positional_function(&name, args),
                     "ask" => {
                         #[cfg(target_arch = "wasm32")]
                         {
@@ -594,81 +593,13 @@ impl Evaluator {
                             }
                         }
                     }
-                    "keys-of" => {
-                        if args.len() != 1 {
-                            return Err("keys-of requires exactly one argument".to_string());
-                        }
-                        let obj_value = self.eval_expression(args[0].clone())?;
-                        match obj_value {
-                            Value::Object(map) => {
-                                let keys: Vec<Value> =
-                                    map.keys().map(|k| Value::String(k.clone())).collect();
-                                Ok(Value::List(keys))
-                            }
-                            _ => Err("keys-of can only be used on objects".to_string()),
-                        }
-                    }
-                    "values-of" => {
-                        if args.len() != 1 {
-                            return Err("values-of requires exactly one argument".to_string());
-                        }
-                        let obj_value = self.eval_expression(args[0].clone())?;
-                        match obj_value {
-                            Value::Object(map) => {
-                                let values: Vec<Value> = map.values().cloned().collect();
-                                Ok(Value::List(values))
-                            }
-                            _ => Err("values-of can only be used on objects".to_string()),
-                        }
-                    }
-                    "has-key" => {
-                        if args.len() != 2 {
-                            return Err("has-key requires exactly two arguments".to_string());
-                        }
-                        let key_value = self.eval_expression(args[0].clone())?;
-                        let obj_value = self.eval_expression(args[1].clone())?;
-
-                        let key_str = match key_value {
-                            Value::String(s) => s,
-                            _ => return Err("has-key key argument must be a string".to_string()),
-                        };
-
-                        match obj_value {
-                            Value::Object(map) => Ok(Value::Boolean(map.contains_key(&key_str))),
-                            _ => Err("has-key can only be used on objects".to_string()),
-                        }
-                    }
-                    "length" => {
-                        if args.len() != 1 {
-                            return Err("length requires exactly one argument".to_string());
-                        }
-                        let value = self.eval_expression(args[0].clone())?;
-                        match value {
-                            Value::List(list) => Ok(Value::Number(list.len() as f64)),
-                            Value::String(s) => Ok(Value::Number(s.len() as f64)),
-                            _ => Err("length can only be used on lists or strings".to_string()),
-                        }
-                    }
-                    "append" => {
-                        if args.len() != 2 {
-                            return Err("append requires exactly two arguments".to_string());
-                        }
-
-                        let list_value = self.eval_expression(args[0].clone())?;
-                        let item_value = self.eval_expression(args[1].clone())?;
-
-                        match list_value {
-                            Value::List(mut list) => {
-                                list.push(item_value);
-                                Ok(Value::List(list))
-                            }
-                            _ => Err("append can only be used on lists".to_string()),
-                        }
-                    }
                     _ => {
-                        // Check if this is a user-defined action
+                        // Check if this is a user-defined action first
                         if let Some(action) = self.actions.get(&name).cloned() {
                             self.eval_action(action, args)
+                        } else if let Some(func) = crate::stdlib::get_stdlib_function(&name) {
+                            // Check if this is a stdlib function
+                            func(args, self)
                         } else {
                             Err(format!("Unknown function: {}", name))
                         }
@@ -761,14 +692,6 @@ impl Evaluator {
                     map.insert(key, value);
                 }
                 Ok(Value::Object(map))
-            }
-            Expression::StdlibCall { name, args } => {
-                // Handle standard library function calls (*.function syntax)
-                if let Some(func) = crate::stdlib::get_stdlib_function(&name) {
-                    func(args, self)
-                } else {
-                    Err(format!("Unknown standard library function: {}", name))
-                }
             }
         }
     }
@@ -1848,38 +1771,38 @@ mod tests {
 
     #[test]
     fn test_object_key_functions_invalid_args() {
-        let mut parser = Parser::new("~result is keys-of \"not an object\"");
+        let mut parser = Parser::new("~result is keys \"not an object\"");
         let program = parser.parse().unwrap();
 
         let mut evaluator = Evaluator::new();
         let result = evaluator.eval_program(program);
 
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("keys-of can only be used on objects"));
+        assert!(result.unwrap_err().contains("keys can only be used on objects"));
     }
 
     #[test]
     fn test_values_of_invalid_args() {
-        let mut parser = Parser::new("~result is values-of 42");
+        let mut parser = Parser::new("~result is values 42");
         let program = parser.parse().unwrap();
 
         let mut evaluator = Evaluator::new();
         let result = evaluator.eval_program(program);
 
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("values-of can only be used on objects"));
+        assert!(result.unwrap_err().contains("values can only be used on objects"));
     }
 
     #[test]
     fn test_has_key_invalid_args() {
-        let mut parser = Parser::new("~result is has-key \"key\" 42");
+        let mut parser = Parser::new("~result is has \"key\" 42");
         let program = parser.parse().unwrap();
 
         let mut evaluator = Evaluator::new();
         let result = evaluator.eval_program(program);
 
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("has-key can only be used on objects"));
+        assert!(result.unwrap_err().contains("has can only be used on objects"));
     }
 
     #[test]
