@@ -22,8 +22,8 @@ pub fn eval_clear_positional(args: Vec<Expression>, _evaluator: &mut Evaluator) 
 
     #[cfg(not(target_arch = "wasm32"))]
     {
-        // ANSI escape sequence: ESC[2J (clear screen) + ESC[H (move cursor to home)
-        print!("\x1b[2J\x1b[H");
+        // ANSI escape sequence: ESC[c (clear/reset screen) + ESC[H (move cursor to home)
+        print!("\x1bc\x1b[H");
         // Ensure the escape sequence is immediately sent to terminal
         use std::io::{self, Write};
         io::stdout().flush().unwrap();

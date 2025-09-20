@@ -109,10 +109,12 @@ impl Evaluator {
 
                 // Get the object expression (for now, only support variables)
                 if let Expression::Variable(var_name) = object.as_ref() {
-                    if let Some(obj_value) = self.variables.get_mut(var_name) {
-                        match obj_value {
+                    // Use scope-aware variable lookup
+                    if let Ok(mut obj_value) = self.get_variable_value(var_name) {
+                        match &mut obj_value {
                             Value::Object(map) => {
                                 map.insert(property.clone(), val.clone());
+                                self.update_variable(var_name.clone(), obj_value)?;
                                 Ok((val, ControlFlow::Continue))
                             }
                             Value::List(list) => {
@@ -123,6 +125,7 @@ impl Evaluator {
                                         list.push(Value::Null);
                                     }
                                     list[index] = val.clone();
+                                    self.update_variable(var_name.clone(), obj_value)?;
                                     Ok((val, ControlFlow::Continue))
                                 } else {
                                     Err(format!(
@@ -146,13 +149,23 @@ impl Evaluator {
                                 list.push(Value::Null);
                             }
                             list[index] = val.clone();
-                            self.variables.insert(var_name.clone(), Value::List(list));
+                            // Use scope-aware assignment for new variables
+                            if let Some(scope) = self.scope_stack.last_mut() {
+                                scope.insert(var_name.clone(), Value::List(list));
+                            } else {
+                                self.variables.insert(var_name.clone(), Value::List(list));
+                            }
                             Ok((val, ControlFlow::Continue))
                         } else {
                             // Creating a new object
                             let mut map = std::collections::HashMap::new();
                             map.insert(property.clone(), val.clone());
-                            self.variables.insert(var_name.clone(), Value::Object(map));
+                            // Use scope-aware assignment for new variables
+                            if let Some(scope) = self.scope_stack.last_mut() {
+                                scope.insert(var_name.clone(), Value::Object(map));
+                            } else {
+                                self.variables.insert(var_name.clone(), Value::Object(map));
+                            }
                             Ok((val, ControlFlow::Continue))
                         }
                     }
@@ -303,16 +316,14 @@ impl Evaluator {
             Statement::Increment { variable, amount } => {
                 let amount_value = self.eval_expression(amount)?;
 
-                // Get current variable value
-                let current_value = self.variables.get(&variable)
-                    .ok_or_else(|| format!("Variable '{}' not found for increment", variable))?
-                    .clone();
+                // Get current variable value using proper scope lookup
+                let current_value = self.get_variable_value(&variable)?;
 
                 // Ensure both values are numbers
                 match (&current_value, &amount_value) {
                     (Value::Number(current), Value::Number(increment)) => {
                         let new_value = current + increment;
-                        self.variables.insert(variable.clone(), Value::Number(new_value));
+                        self.update_variable(variable.clone(), Value::Number(new_value))?;
                         Ok((Value::Null, ControlFlow::Continue))
                     }
                     _ => Err(format!("Cannot increment '{}': both variable and amount must be numbers", variable))
@@ -321,16 +332,14 @@ impl Evaluator {
             Statement::Decrement { variable, amount } => {
                 let amount_value = self.eval_expression(amount)?;
 
-                // Get current variable value
-                let current_value = self.variables.get(&variable)
-                    .ok_or_else(|| format!("Variable '{}' not found for decrement", variable))?
-                    .clone();
+                // Get current variable value using proper scope lookup
+                let current_value = self.get_variable_value(&variable)?;
 
                 // Ensure both values are numbers
                 match (&current_value, &amount_value) {
                     (Value::Number(current), Value::Number(decrement)) => {
                         let new_value = current - decrement;
-                        self.variables.insert(variable.clone(), Value::Number(new_value));
+                        self.update_variable(variable.clone(), Value::Number(new_value))?;
                         Ok((Value::Null, ControlFlow::Continue))
                     }
                     _ => Err(format!("Cannot decrement '{}': both variable and amount must be numbers", variable))
@@ -367,6 +376,26 @@ impl Evaluator {
                 let value = self.eval_expression(expr)?;
                 Ok((value.clone(), ControlFlow::Give(value)))
             }
+        }
+    }
+
+    fn update_variable(&mut self, name: String, value: Value) -> Result<(), String> {
+        // Search through scope stack to find where the variable exists
+        for scope in self.scope_stack.iter_mut().rev() {
+            if scope.contains_key(&name) {
+                scope.insert(name, value);
+                return Ok(());
+            }
+        }
+
+        // If not found in any scope, check if it exists in global variables
+        if self.variables.contains_key(&name) {
+            self.variables.insert(name, value);
+            Ok(())
+        } else {
+            // Variable doesn't exist anywhere - this should not happen for increment/decrement
+            // since we already validated it exists in get_variable_value
+            Err(format!("Variable '{}' not found for update", name))
         }
     }
 
@@ -706,14 +735,15 @@ impl Evaluator {
         match object_expr {
             Expression::Variable(var_name) => {
                 // Base case: we're at a variable, update its nested property
-                if let Some(obj_value) = self.variables.get_mut(var_name) {
-                    if let Value::Object(map) = obj_value {
+                if let Ok(mut obj_value) = self.get_variable_value(var_name) {
+                    if let Value::Object(map) = &mut obj_value {
                         // Get or create the nested object
                         let nested_obj = map
                             .entry(nested_prop.to_string())
                             .or_insert_with(|| Value::Object(std::collections::HashMap::new()));
                         if let Value::Object(nested_map) = nested_obj {
                             nested_map.insert(final_prop.to_string(), value);
+                            self.update_variable(var_name.clone(), obj_value)?;
                             Ok(())
                         } else {
                             Err(format!(
@@ -755,8 +785,8 @@ impl Evaluator {
     ) -> Result<(), String> {
         match object_expr {
             Expression::Variable(var_name) => {
-                if let Some(obj_value) = self.variables.get_mut(var_name) {
-                    if let Value::Object(map) = obj_value {
+                if let Ok(mut obj_value) = self.get_variable_value(var_name) {
+                    if let Value::Object(map) = &mut obj_value {
                         // Get or create the current property's object
                         let current_obj = map
                             .entry(current_prop.to_string())
@@ -768,6 +798,7 @@ impl Evaluator {
                                 .or_insert_with(|| Value::Object(std::collections::HashMap::new()));
                             if let Value::Object(nested_map) = nested_obj {
                                 nested_map.insert(final_prop.to_string(), value);
+                                self.update_variable(var_name.clone(), obj_value)?;
                                 Ok(())
                             } else {
                                 Err(format!(

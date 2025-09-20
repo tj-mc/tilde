@@ -1,0 +1,46 @@
+action random-character (
+    ~dice is random 0 6
+    if ~dice == 0 give "0"
+    if ~dice == 1  give "1"
+    if ~dice == 2 give "%"
+    if ~dice == 3 give "#"
+    if ~dice == 4 give "0"
+    if ~dice == 5 give " "
+    if ~dice == 6 give "."
+)
+
+action build-row (
+    ~this-row is ""
+    ~row-length is 80
+
+    ~i is 0
+    loop (
+        if ~i == ~row-length break-loop
+        ~character is *random-character
+        ~this-row is "`~this-row``~character`"
+        ~i up 1
+    )
+
+    give ~this-row
+)
+
+clear
+
+~screen is ""
+~columns is 20
+~i is 0
+
+# Main Draw Loop
+loop (
+    if ~i > ~columns (
+        clear
+        say ~screen
+        ~screen is ""
+        ~i is 0
+    ) else (
+        ~row is *build-row
+        ~screen is "`~screen`
+`~row`"
+        ~i up 1
+    )
+)
