@@ -185,6 +185,28 @@ impl Parser {
 
                 Ok(expr)
             }
+            Token::Block(block_name) => {
+                self.advance();
+
+                // Expect a function name after the block
+                if let Token::Identifier(func_name) = self.current_token() {
+                    let full_name = format!(":{}:{}", block_name, func_name);
+                    self.advance();
+
+                    // Parse arguments like any stdlib function
+                    let mut args = Vec::new();
+                    while !self.is_expression_terminator() && !matches!(self.current_token(), Token::LeftParen | Token::Is) && !self.is_binary_operator(self.current_token()) {
+                        args.push(self.parse_action_argument()?);
+                    }
+
+                    Ok(Expression::FunctionCall {
+                        name: full_name,
+                        args,
+                    })
+                } else {
+                    Err(format!("Expected function name after :{}:", block_name))
+                }
+            }
             Token::Identifier(name) => {
                 self.advance();
 
@@ -455,6 +477,23 @@ impl Parser {
                 }
 
                 Ok(expr)
+            }
+            Token::Block(block_name) => {
+                self.advance();
+
+                // Expect a function name after the block
+                if let Token::Identifier(func_name) = self.current_token() {
+                    let full_name = format!(":{}:{}", block_name, func_name);
+                    self.advance();
+
+                    // For action arguments, return a function reference (no arguments)
+                    Ok(Expression::FunctionCall {
+                        name: full_name,
+                        args: Vec::new(),
+                    })
+                } else {
+                    Err(format!("Expected function name after :{}:", block_name))
+                }
             }
             Token::Identifier(name) => {
                 self.advance();

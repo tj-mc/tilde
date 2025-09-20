@@ -623,14 +623,39 @@ impl Evaluator {
                         }
                     }
                     _ => {
-                        // Check if this is a user-defined action first
-                        if let Some(action) = self.actions.get(&name).cloned() {
-                            self.eval_action(action, args)
-                        } else if let Some(func) = crate::stdlib::get_stdlib_function(&name) {
-                            // Check if this is a stdlib function
-                            func(args, self)
+                        // Check for block syntax first (e.g., :core:is-even)
+                        if name.starts_with(':') && name.contains(':') {
+                            // Extract the block name and function name
+                            let parts: Vec<&str> = name[1..].split(':').collect();
+                            if parts.len() == 2 {
+                                let block_name = parts[0];
+                                let func_name = parts[1];
+
+                                // Handle different blocks
+                                match block_name {
+                                    "core" => {
+                                        // Force use of stdlib function, bypassing user definitions
+                                        if let Some(func) = crate::stdlib::get_stdlib_function(func_name) {
+                                            func(args, self)
+                                        } else {
+                                            Err(format!("Unknown core function: {}", func_name))
+                                        }
+                                    }
+                                    _ => Err(format!("Unknown block: {}", block_name))
+                                }
+                            } else {
+                                Err(format!("Invalid block syntax: {}", name))
+                            }
                         } else {
-                            Err(format!("Unknown function: {}", name))
+                            // Check if this is a user-defined action first
+                            if let Some(action) = self.actions.get(&name).cloned() {
+                                self.eval_action(action, args)
+                            } else if let Some(func) = crate::stdlib::get_stdlib_function(&name) {
+                                // Check if this is a stdlib function
+                                func(args, self)
+                            } else {
+                                Err(format!("Unknown function: {}", name))
+                            }
                         }
                     }
                 }
@@ -1868,5 +1893,229 @@ mod tests {
         } else {
             panic!("Expected object");
         }
+    }
+
+    #[test]
+    fn test_block_syntax_core_functions() {
+        use crate::parser::Parser;
+
+        // Test :core:is-even
+        let mut parser = Parser::new("~result is :core:is-even 4");
+        let program = parser.parse().unwrap();
+
+        let mut evaluator = Evaluator::new();
+        evaluator.eval_program(program).unwrap();
+
+        assert_eq!(evaluator.get_variable("result"), Some(&Value::Boolean(true)));
+
+        // Test :core:is-odd
+        let mut parser = Parser::new("~result is :core:is-odd 5");
+        let program = parser.parse().unwrap();
+
+        let mut evaluator = Evaluator::new();
+        evaluator.eval_program(program).unwrap();
+
+        assert_eq!(evaluator.get_variable("result"), Some(&Value::Boolean(true)));
+    }
+
+    #[test]
+    fn test_block_syntax_priority_resolution() {
+        use crate::parser::Parser;
+
+        // Define a user function that conflicts with stdlib
+        let mut parser = Parser::new("action is-even ~x ( give false )\n~user_result is is-even 4\n~core_result is :core:is-even 4");
+        let program = parser.parse().unwrap();
+
+        let mut evaluator = Evaluator::new();
+        evaluator.eval_program(program).unwrap();
+
+        // User function should be called for bare name
+        assert_eq!(evaluator.get_variable("user_result"), Some(&Value::Boolean(false)));
+
+        // Core function should be called for :core: prefix
+        assert_eq!(evaluator.get_variable("core_result"), Some(&Value::Boolean(true)));
+    }
+
+    #[test]
+    fn test_block_syntax_unknown_block() {
+        use crate::parser::Parser;
+
+        let mut parser = Parser::new("~result is :unknown:function 1");
+        let program = parser.parse().unwrap();
+
+        let mut evaluator = Evaluator::new();
+        let result = evaluator.eval_program(program);
+
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Unknown block: unknown"));
+    }
+
+    #[test]
+    fn test_block_syntax_unknown_core_function() {
+        use crate::parser::Parser;
+
+        let mut parser = Parser::new("~result is :core:unknown-function 1");
+        let program = parser.parse().unwrap();
+
+        let mut evaluator = Evaluator::new();
+        let result = evaluator.eval_program(program);
+
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Unknown core function: unknown-function"));
+    }
+
+    #[test]
+    fn test_block_syntax_in_map_function() {
+        use crate::parser::Parser;
+
+        // Test that :core:is-even works as a function reference in map
+        let mut parser = Parser::new("~nums is [1, 2, 3, 4]\n~results is map ~nums :core:is-even");
+        let program = parser.parse().unwrap();
+
+        let mut evaluator = Evaluator::new();
+        evaluator.eval_program(program).unwrap();
+
+        assert_eq!(
+            evaluator.get_variable("results"),
+            Some(&Value::List(vec![
+                Value::Boolean(false), // 1 is odd
+                Value::Boolean(true),  // 2 is even
+                Value::Boolean(false), // 3 is odd
+                Value::Boolean(true),  // 4 is even
+            ]))
+        );
+    }
+
+    #[test]
+    fn test_block_syntax_with_filter() {
+        use crate::parser::Parser;
+
+        // Test that :core: works with filter function
+        let mut parser = Parser::new("~nums is [1, 2, 3, 4, 5]\n~evens is filter ~nums :core:is-even");
+        let program = parser.parse().unwrap();
+
+        let mut evaluator = Evaluator::new();
+        evaluator.eval_program(program).unwrap();
+
+        assert_eq!(
+            evaluator.get_variable("evens"),
+            Some(&Value::List(vec![
+                Value::Number(2.0),
+                Value::Number(4.0),
+            ]))
+        );
+    }
+
+    #[test]
+    fn test_block_syntax_mixed_with_user_functions() {
+        use crate::parser::Parser;
+
+        // Test mixing user functions and core functions in the same script
+        let mut parser = Parser::new(
+            "action custom-double ~x ( give ~x * 2 )\n\
+             ~nums is [1, 2, 3]\n\
+             ~user_doubled is map ~nums custom-double\n\
+             ~core_doubled is map ~nums :core:double"
+        );
+        let program = parser.parse().unwrap();
+
+        let mut evaluator = Evaluator::new();
+        evaluator.eval_program(program).unwrap();
+
+        // Both should produce the same result but through different functions
+        assert_eq!(
+            evaluator.get_variable("user_doubled"),
+            Some(&Value::List(vec![
+                Value::Number(2.0),
+                Value::Number(4.0),
+                Value::Number(6.0),
+            ]))
+        );
+
+        assert_eq!(
+            evaluator.get_variable("core_doubled"),
+            Some(&Value::List(vec![
+                Value::Number(2.0),
+                Value::Number(4.0),
+                Value::Number(6.0),
+            ]))
+        );
+    }
+
+    #[test]
+    fn test_block_syntax_chaining() {
+        use crate::parser::Parser;
+
+        // Test using core functions in sequence
+        let mut parser = Parser::new(
+            "~num is 5\n\
+             ~doubled is :core:double ~num\n\
+             ~squared is :core:square ~doubled"
+        );
+        let program = parser.parse().unwrap();
+
+        let mut evaluator = Evaluator::new();
+        evaluator.eval_program(program).unwrap();
+
+        assert_eq!(evaluator.get_variable("doubled"), Some(&Value::Number(10.0)));
+        assert_eq!(evaluator.get_variable("squared"), Some(&Value::Number(100.0)));
+    }
+
+    #[test]
+    fn test_block_syntax_edge_cases() {
+        use crate::parser::Parser;
+
+        // Test edge cases like zero, negative numbers
+        let mut parser = Parser::new(
+            "~zero_even is :core:is-even 0\n\
+             ~neg_pos is :core:is-positive -5\n\
+             ~zero_zero is :core:is-zero 0"
+        );
+        let program = parser.parse().unwrap();
+
+        let mut evaluator = Evaluator::new();
+        evaluator.eval_program(program).unwrap();
+
+        assert_eq!(evaluator.get_variable("zero_even"), Some(&Value::Boolean(true)));
+        assert_eq!(evaluator.get_variable("neg_pos"), Some(&Value::Boolean(false)));
+        assert_eq!(evaluator.get_variable("zero_zero"), Some(&Value::Boolean(true)));
+    }
+
+    #[test]
+    fn test_block_syntax_library_pattern() {
+        use crate::parser::Parser;
+
+        // Test the library pattern mentioned in docs - using :core: for predictable behavior
+        let mut parser = Parser::new(
+            "action validate-positive ~x (\n\
+                 if :core:is-positive ~x (\n\
+                     give true\n\
+                 ) else (\n\
+                     give false\n\
+                 )\n\
+             )\n\
+             ~result is *validate-positive 5"
+        );
+        let program = parser.parse().unwrap();
+
+        let mut evaluator = Evaluator::new();
+        evaluator.eval_program(program).unwrap();
+
+        assert_eq!(evaluator.get_variable("result"), Some(&Value::Boolean(true)));
+    }
+
+    #[test]
+    fn test_block_syntax_multiple_blocks_parsing() {
+        use crate::parser::Parser;
+
+        // Test that multiple block syntaxes in one line parse correctly
+        let mut parser = Parser::new("~a is :core:double 5\n~b is :core:square 3");
+        let program = parser.parse().unwrap();
+
+        let mut evaluator = Evaluator::new();
+        evaluator.eval_program(program).unwrap();
+
+        assert_eq!(evaluator.get_variable("a"), Some(&Value::Number(10.0)));
+        assert_eq!(evaluator.get_variable("b"), Some(&Value::Number(9.0)));
     }
 }

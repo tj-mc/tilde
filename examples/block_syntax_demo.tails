@@ -1,0 +1,81 @@
+# Block Syntax Demo
+# This example demonstrates Tails' block syntax for namespace resolution
+
+say "=== Block Syntax Demo ==="
+say ""
+
+# Define a custom is-even function that has different behavior
+action is-even ~x (
+    say "Using custom is-even function"
+    # Custom logic: only multiples of 4 are "even"
+    give ~x % 4 == 0
+)
+
+say "1. Testing priority resolution:"
+~test_number is 8
+
+# User function is called when using bare name
+~user_result is is-even ~test_number
+say "User is-even " ~test_number ": " ~user_result
+
+# Core function is called when using :core: prefix
+~core_result is :core:is-even ~test_number
+say "Core is-even " ~test_number ": " ~core_result
+
+say ""
+
+# Demo with different numbers
+say "2. Comparing user vs core for different numbers:"
+~numbers is [2, 4, 6, 8]
+
+for-each ~num in ~numbers (
+    ~user_check is is-even ~num
+    ~core_check is :core:is-even ~num
+    say "Number " ~num ": user=" ~user_check " core=" ~core_check
+)
+
+say ""
+
+# Demo with higher-order functions
+say "3. Using block syntax with map:"
+~test_list is [1, 2, 3, 4, 5, 6]
+
+~user_mapped is map ~test_list is-even
+say "User mapped: " ~user_mapped
+
+~core_mapped is map ~test_list :core:is-even
+say "Core mapped: " ~core_mapped
+
+say ""
+
+# Demo with other core functions
+say "4. Other core functions:"
+~demo_nums is [1, 2, 3, 4, 5]
+
+# Math operations
+~doubled is map ~demo_nums :core:double
+say "Doubled: " ~doubled
+
+~squared is map ~demo_nums :core:square
+say "Squared: " ~squared
+
+# Filter with core predicate
+~positives is filter ~demo_nums :core:is-positive
+say "Positives: " ~positives
+
+say ""
+
+# Demo combining user and core functions
+say "5. Combining user and core functions:"
+
+action custom-transform ~x (
+    ~doubled is :core:double ~x
+    ~squared is :core:square ~doubled
+    give ~squared
+)
+
+~transformed is map [1, 2, 3] custom-transform
+say "Custom transform (double then square): " ~transformed
+
+say ""
+say "=== Demo Complete ==="

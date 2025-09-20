@@ -10,6 +10,38 @@ fn eval_predicate(function_name: &str, item: &Value, evaluator: &mut Evaluator) 
 
 /// Helper function to evaluate any function (transformer or predicate) on an item
 fn eval_function_on_item(function_name: &str, item: &Value, evaluator: &mut Evaluator) -> Result<Value, String> {
+    // Check for block syntax first (e.g., :core:is-even)
+    if function_name.starts_with(':') && function_name.contains(':') {
+        let parts: Vec<&str> = function_name[1..].split(':').collect();
+        if parts.len() == 2 {
+            let block_name = parts[0];
+            let func_name = parts[1];
+
+            // Handle different blocks
+            match block_name {
+                "core" => {
+                    // Force use of stdlib function, bypassing user definitions
+                    if let Some(stdlib_func) = crate::stdlib::get_stdlib_function(func_name) {
+                        // Convert the value to an expression for the stdlib function
+                        let item_expr = match item {
+                            Value::Number(n) => Expression::Number(*n, false),
+                            Value::String(s) => Expression::String(s.clone()),
+                            Value::Boolean(b) => Expression::Boolean(*b),
+                            // For complex types, stdlib functions should handle them appropriately
+                            _ => return Err(format!("Core function {} cannot be used in higher-order functions with complex values", func_name)),
+                        };
+                        return stdlib_func(vec![item_expr], evaluator);
+                    } else {
+                        return Err(format!("Unknown core function: {}", func_name));
+                    }
+                }
+                _ => return Err(format!("Unknown block: {}", block_name))
+            }
+        } else {
+            return Err(format!("Invalid block syntax: {}", function_name));
+        }
+    }
+
     // First try user actions
     if let Some(action) = evaluator.actions.get(function_name) {
         let action = action.clone();
@@ -29,9 +61,8 @@ fn eval_function_on_item(function_name: &str, item: &Value, evaluator: &mut Eval
             Value::Number(n) => Expression::Number(*n, false),
             Value::String(s) => Expression::String(s.clone()),
             Value::Boolean(b) => Expression::Boolean(*b),
-            Value::List(_) => return Err(format!("Stdlib function {} cannot operate on lists directly", function_name)),
-            Value::Object(_) => return Err(format!("Stdlib function {} cannot operate on objects directly", function_name)),
-            Value::Null => return Err(format!("Stdlib function {} cannot operate on null values", function_name)),
+            // For complex types, only allow if the function can handle them
+            _ => return Err(format!("Stdlib function {} cannot be used in higher-order functions with complex values", function_name)),
         };
         return stdlib_func(vec![item_expr], evaluator);
     }
@@ -71,50 +102,12 @@ pub fn eval_map(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Valu
         _ => return Err("map second argument must be a function name".to_string()),
     };
 
-    // Check if it's a stdlib function first
-    if let Some(stdlib_func) = crate::stdlib::get_stdlib_function(&function_name) {
-        let mut result = Vec::new();
-        for item in list {
-            // Create expression for the item
-            let arg_expr = match &item {
-                Value::Number(n) => Expression::Number(*n, false),
-                Value::String(s) => Expression::String(s.clone()),
-                Value::Boolean(b) => Expression::Boolean(*b),
-                _ => return Err("map can only work with numbers, strings, and booleans for now".to_string()),
-            };
-
-            let mapped_value = stdlib_func(vec![arg_expr], evaluator)?;
-            result.push(mapped_value);
-        }
-        return Ok(Value::List(result));
-    }
-
-    // Check if the action exists (user-defined function)
-    if !evaluator.actions.contains_key(&function_name) {
-        return Err(format!("Action '{}' not found", function_name));
-    }
-
-    let action = evaluator.actions.get(&function_name).unwrap().clone();
-
-    // Check that the action takes exactly one parameter
-    if action.params.len() != 1 {
-        return Err(format!("Action '{}' must take exactly one parameter for map", function_name));
-    }
-
+    // Use the helper function to evaluate the function on each item
     let mut result = Vec::new();
     for item in list {
-        // Create a single-element argument list with the current item
-        let arg_expr = match &item {
-            Value::Number(n) => Expression::Number(*n, false),
-            Value::String(s) => Expression::String(s.clone()),
-            Value::Boolean(b) => Expression::Boolean(*b),
-            _ => return Err("map can only work with numbers, strings, and booleans for now".to_string()),
-        };
-
-        let mapped_value = evaluator.eval_action(action.clone(), vec![arg_expr])?;
+        let mapped_value = eval_function_on_item(&function_name, &item, evaluator)?;
         result.push(mapped_value);
     }
-
     Ok(Value::List(result))
 }
 
@@ -148,49 +141,10 @@ pub fn eval_filter(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<V
         _ => return Err("filter second argument must be a function name (like 'is_even' or '.is-even' for stdlib)".to_string()),
     };
 
-    // Check if it's a stdlib function first
-    if let Some(stdlib_func) = crate::stdlib::get_stdlib_function(&function_name) {
-            let mut result = Vec::new();
-            for item in list {
-                // Create expression for the item
-                let arg_expr = match &item {
-                    Value::Number(n) => Expression::Number(*n, false),
-                    Value::String(s) => Expression::String(s.clone()),
-                    Value::Boolean(b) => Expression::Boolean(*b),
-                    _ => return Err("filter can only work with numbers, strings, and booleans for now".to_string()),
-                };
-
-                let predicate_result = stdlib_func(vec![arg_expr], evaluator)?;
-                if let Value::Boolean(true) = predicate_result {
-                    result.push(item);
-                }
-            }
-            return Ok(Value::List(result));
-    }
-
-    // Check if the action exists (user-defined function)
-    if !evaluator.actions.contains_key(&function_name) {
-        return Err(format!("Action '{}' not found", function_name));
-    }
-
-    let action = evaluator.actions.get(&function_name).unwrap().clone();
-
-    // Check that the action takes exactly one parameter
-    if action.params.len() != 1 {
-        return Err(format!("Action '{}' must take exactly one parameter for filter", function_name));
-    }
-
+    // Use the helper function to evaluate the predicate on each item
     let mut result = Vec::new();
     for item in list {
-        // Create a single-element argument list with the current item
-        let arg_expr = match &item {
-            Value::Number(n) => Expression::Number(*n, false),
-            Value::String(s) => Expression::String(s.clone()),
-            Value::Boolean(b) => Expression::Boolean(*b),
-            _ => return Err("filter can only work with numbers, strings, and booleans for now".to_string()),
-        };
-
-        let predicate_result = evaluator.eval_action(action.clone(), vec![arg_expr])?;
+        let predicate_result = eval_predicate(&function_name, &item, evaluator)?;
         if let Value::Boolean(true) = predicate_result {
             result.push(item);
         }

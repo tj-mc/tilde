@@ -9,6 +9,7 @@ pub enum Token {
     Boolean(bool),
     Variable(String),
     Identifier(String),
+    Block(String), // For :block_name: syntax
 
     // Keywords
     Is,
@@ -367,8 +368,23 @@ impl Lexer {
                 Token::RightBracket
             }
             Some(':') => {
-                self.advance();
-                Token::Colon
+                // Check for block syntax :block_name:
+                if self.peek().map_or(false, |c| c.is_alphabetic()) {
+                    self.advance(); // consume first :
+                    let block_name = self.read_identifier();
+                    if self.current_char == Some(':') {
+                        self.advance(); // consume second :
+                        Token::Block(block_name)
+                    } else {
+                        // If no closing :, treat as regular colon followed by identifier
+                        // This is a bit tricky - we need to backtrack
+                        // For now, let's require the closing colon
+                        Token::Colon
+                    }
+                } else {
+                    self.advance();
+                    Token::Colon
+                }
             }
             Some(',') => {
                 self.advance();
@@ -785,5 +801,50 @@ mod tests {
         } else {
             panic!("Expected InterpolatedString token");
         }
+    }
+
+    #[test]
+    fn test_block_syntax_lexing() {
+        let mut lexer = Lexer::new(":core:");
+        let tokens = lexer.tokenize();
+
+        assert_eq!(tokens[0], Token::Block("core".to_string()));
+        assert_eq!(tokens[1], Token::Eof);
+    }
+
+    #[test]
+    fn test_block_syntax_with_function() {
+        let mut lexer = Lexer::new(":core:is-even 4");
+        let tokens = lexer.tokenize();
+
+        assert_eq!(tokens[0], Token::Block("core".to_string()));
+        assert_eq!(tokens[1], Token::Identifier("is-even".to_string()));
+        assert_eq!(tokens[2], Token::Number(4.0, false));
+        assert_eq!(tokens[3], Token::Eof);
+    }
+
+    #[test]
+    fn test_regular_colon_vs_block_syntax() {
+        let mut lexer = Lexer::new("key: value :core:function");
+        let tokens = lexer.tokenize();
+
+        assert_eq!(tokens[0], Token::Identifier("key".to_string()));
+        assert_eq!(tokens[1], Token::Colon);
+        assert_eq!(tokens[2], Token::Identifier("value".to_string()));
+        assert_eq!(tokens[3], Token::Block("core".to_string()));
+        assert_eq!(tokens[4], Token::Identifier("function".to_string()));
+        assert_eq!(tokens[5], Token::Eof);
+    }
+
+    #[test]
+    fn test_multiple_blocks() {
+        let mut lexer = Lexer::new(":core:is-even :math:sqrt");
+        let tokens = lexer.tokenize();
+
+        assert_eq!(tokens[0], Token::Block("core".to_string()));
+        assert_eq!(tokens[1], Token::Identifier("is-even".to_string()));
+        assert_eq!(tokens[2], Token::Block("math".to_string()));
+        assert_eq!(tokens[3], Token::Identifier("sqrt".to_string()));
+        assert_eq!(tokens[4], Token::Eof);
     }
 }
