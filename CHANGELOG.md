@@ -5,19 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-01-20
+
+### Added
+- **Advanced List Operations**: New powerful list processing functions
+  - **Predicate Functions**: `partition`, `group-by`, `sort-by` for complex data organization
+  - **Set Operations**: `union`, `difference`, `intersection` for mathematical set operations
+  - **Collection Functions**: `length`, `append` now available as stdlib functions
+- **Enhanced Predicate Support**: All list functions now support both custom actions and stdlib predicates
+  - Functions like `filter`, `find`, `every`, `some` can use `is-even`, `is-odd`, etc. directly
+  - Improved function resolution system for seamless stdlib integration
+
+### Enhanced
+- **Function Call System**: Refactored how predicates and transformers are evaluated
+  - Unified helper system for consistent function resolution
+  - Better error messages for function parameter mismatches
+  - Support for mixed stdlib and custom action usage
+
+### Technical Improvements
+- **Code Organization**: New modular stdlib structure with dedicated modules
+  - `collection.rs` for basic collection operations
+  - `set_operations.rs` for mathematical set operations
+  - Enhanced `list.rs` with improved predicate handling
+- **Test Coverage**: 55+ new tests for advanced list operations and set functions
+- **Documentation**: Updated STDLIB.md with comprehensive examples and usage patterns
+
+### Changed
+- **Token Cleanup**: Removed hardcoded `Length` and `Append` tokens from lexer
+  - These are now proper stdlib functions with full functionality
+  - Better consistency with other stdlib functions
+
 ## [0.2.0] - 2025-01-20
 
 ### Added
-- **Comprehensive Standard Library**: Complete functional programming toolkit using `*.` syntax
-  - **List Operations**: `*.map`, `*.filter`, `*.reduce`, `*.sort`, `*.reverse`
-  - **Helper Functions**: 20+ functional programming helpers with `.` prefix
-    - **Predicates**: `.is-even`, `.is-odd`, `.is-positive`, `.is-negative`, `.is-zero`
-    - **Transformations**: `.double`, `.triple`, `.quadruple`, `.half`, `.square`, `.increment`, `.decrement`
-    - **Reductions**: `.add`, `.multiply`, `.max`, `.min`
-    - **String Operations**: `.uppercase`, `.lowercase`
-    - **Math Functions**: `.absolute`, `.square-root`
-  - **String Functions**: `*.join`, `*.split`, `*.trim`, `*.length`
-  - **Math Operations**: `*.min`, `*.max`, `*.absolute`, `*.square-root`
+- **Comprehensive Standard Library**: Complete functional programming toolkit
+  - **List Operations**: `map`, `filter`, `reduce`, `sort`, `reverse`
+  - **Helper Functions**: 20+ functional programming helpers
+    - **Predicates**: `is-even`, `is-odd`, `is-positive`, `is-negative`, `is-zero`
+    - **Transformations**: `double`, `triple`, `quadruple`, `half`, `square`, `increment`, `decrement`
+    - **Reductions**: `add`, `multiply`, `max`, `min`
+    - **String Operations**: `uppercase`, `lowercase`
+    - **Math Functions**: `absolute`, `square-root`
+  - **String Functions**: `join`, `split`, `trim`
+  - **Math Operations**: `min`, `max`, `absolute`, `square-root`
 - **Enhanced Variable Operations**:
   - `~var up amount` - Increment variables by specified amount
   - `~var down amount` - Decrement variables by specified amount
@@ -31,8 +61,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Multiple graphics examples (bouncing ball, matrix rain, simple game)
 
 ### Enhanced
-- **Function Reference System**: Functions can be passed by name using `.function-name` syntax
-- **Parser Improvements**: Enhanced handling of dot-prefixed identifiers for stdlib functions
+- **Function Reference System**: Functions can be passed by name directly
+- **Parser Improvements**: Enhanced handling of function references
 - **Error Messages**: More descriptive error messages for stdlib function usage
 - **Code Organization**: Refactored stdlib with utility functions to reduce duplication
 
@@ -41,11 +71,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Documentation**: Complete stdlib documentation with examples
 - **Performance**: Optimized stdlib functions with shared validation utilities
 - **Type Safety**: Enhanced argument validation for all stdlib functions
-
-### Breaking Changes
-- Standard library functions now use `*.` prefix (e.g., `*.map` instead of `map`)
-- Helper functions referenced with `.` prefix when passed to higher-order functions
-- Function calls vs function references now clearly distinguished
 
 ## [0.1.3] - 2025-01-19
 
