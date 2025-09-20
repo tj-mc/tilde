@@ -12,16 +12,7 @@ With simple `~variable` notation, english-like syntax, and powerful built-ins fo
 
 **Experienced developer?** Tails won't get in your way. Write simple automation scripts without fighting the language.
 
-### Key Features
-
-- **🔖 Readable Variables** with `~` prefix notation
-- **🎯 String Interpolation** that just works
-- **🌐 Built-in HTTP Operations** for modern tasks
-- **⚡ Compose Functionality** with actions
-- **📦 Rich Objects** with intuitive property access
-- **🔄 Intuitive Control Flow** that makes sense
-
-## 🚀 See It In Action
+## 🧶 See It In Action
 
 ### HTTP & Data Processing
 ```tails
@@ -29,8 +20,9 @@ With simple `~variable` notation, english-like syntax, and powerful built-ins fo
 say "Found user: `~user.name` with `~user.public_repos` repos"
 ```
 
-### Actions (aka Functions)
+### Actions
 ```tails
+# Compose functionality with actions
 action greet-user ~name ~age (
     if ~age >= 18 (
         say "Welcome `~name`! You can access all features."
@@ -39,6 +31,7 @@ action greet-user ~name ~age (
     )
 )
 
+# Call them with *
 *greet-user "Alice" 25
 ```
 
@@ -58,7 +51,7 @@ loop (
 
 ## Install & Usage
 
-### 🌐 Try in Browser (Recommended)
+### 🌐 Try in Browser
 
 **Web REPL**: https://tj-mc.github.io/tails/
 
@@ -158,7 +151,7 @@ cargo run --bin performance_main your_program.tails
 **[📖 Complete Language Reference → SYNTAX.md](docs/SYNTAX.md)**
 
 Discover all of Tails' features including:
-- **Standard Library** (`*.map`, `*.filter`, `*.reduce`) for functional programming
+- **Standard Library** (`map`, `filter`, `reduce`) for functional programming
 - Advanced object manipulation and property access
 - Comprehensive control flow (`loop`, `if`/`else`, `break-loop`)
 - HTTP operations (`get`, `wait`) and error handling

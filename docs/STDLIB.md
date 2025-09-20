@@ -931,35 +931,6 @@ say ~result  # [[1, 3, 6], [2, 4, null], [null, 5, null]]
 say ~pairs
 ```
 
-### Advanced List Processing with New Functions
-
-```tails
-# Data analysis pipeline using partition, group-by, and sort-by
-~scores is [95, 67, 89, 72, 91, 83, 76, 88, 79, 93]
-
-# Partition into passing/failing (70+ is passing)
-action is-passing ~score (give ~score >= 70)
-~results is partition ~scores is-passing
-say "Passing scores:" ~results.matched    # [95, 89, 72, 91, 83, 76, 88, 79, 93]
-say "Failing scores:" ~results.unmatched  # [67]
-
-# Group by grade ranges
-action get-grade-range ~score (
-  if ~score >= 90 then (give "A")
-  else if ~score >= 80 then (give "B")
-  else if ~score >= 70 then (give "C")
-  else (give "F")
-)
-~by-grade is group-by ~scores get-grade-range
-say "A grades:" ~by-grade.A  # [95, 91, 93]
-say "B grades:" ~by-grade.B  # [89, 83, 88]
-
-# Sort by score (highest first) using a custom comparison
-action negate ~n (give 0 - ~n)
-~highest-first is sort-by ~scores negate
-say "Top scores:" (take ~highest-first 3)  # [95, 93, 91]
-```
-
 ### Set Operations for Data Comparison
 
 ```tails
@@ -1100,71 +1071,6 @@ say ~decimal  # 1.4142135623730951
 
 **Error:** Throws an error if the number is negative.
 
-## Functional Programming Patterns
-
-### Chaining Operations
-
-You can chain stdlib functions together for powerful data processing:
-
-```tails
-~numbers is [1, 2, 3, 4, 5, 6, 7, 8]
-
-# Get even numbers, double them, then sort
-~evens is filter ~numbers is-even        # [2, 4, 6, 8]
-~doubled_evens is map ~evens double       # [4, 8, 12, 16]
-~final is sort ~doubled_evens             # [4, 8, 12, 16]
-
-say ~final
-```
-
-### Data Processing Pipeline
-
-```tails
-~data is [1, -2, 3, -4, 5, 0]
-
-# Process: filter positive → square each → sum all
-~positives is filter ~data is-positive    # [1, 3, 5]
-~squares is map ~positives square         # [1, 9, 25]
-~sum is reduce ~squares add 0             # 35
-
-say "Sum of squares of positive numbers: " ~sum
-```
-
-### Working with Strings and Lists
-
-```tails
-~text is "apple,banana,cherry,date"
-~fruits is split ~text ","               # ["apple", "banana", "cherry", "date"]
-~sorted_fruits is sort ~fruits           # ["apple", "banana", "cherry", "date"]
-~result is join ~sorted_fruits " | "     # "apple | banana | cherry | date"
-
-say ~result
-```
-
-## Error Handling
-
-The stdlib functions provide clear error messages:
-
-```tails
-# Wrong number of arguments
-~result is map [1, 2, 3]  # Error: map requires exactly 2 arguments
-
-# Function doesn't exist
-~result is map [1, 2, 3] nonexistent  # Error: Action 'nonexistent' not found
-~result is map [1, 2, 3] nonexistent  # Error: Unknown stdlib function: nonexistent
-
-# Wrong function signature for custom actions
-action bad-func ~a ~b (give ~a + ~b)
-~result is map [1, 2, 3] bad_func  # Error: Action 'bad-func' must take exactly one parameter for map
-
-# Type errors
-~result is sort "not a list"  # Error: sort first argument must be a list
-~result is is-even "not a number"  # Error: is-even argument must be a number
-~result is uppercase 123  # Error: uppercase argument must be a string
-
-# Math errors
-~result is square-root -4  # Error: square-root argument must be non-negative
-```
 
 ## See Also
 
