@@ -16,18 +16,28 @@ pub fn eval_index_of(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result
         _ => return Err("index-of: invalid arguments".to_string()),
     };
 
-    let list = match list {
-        Value::List(l) => l,
-        _ => return Err("index-of: first argument must be a list".to_string()),
-    };
-
-    for (index, item) in list.iter().enumerate() {
-        if *item == value {
-            return Ok(Value::Number(index as f64));
-        }
+    match list {
+        Value::List(l) => {
+            for (index, item) in l.iter().enumerate() {
+                if *item == value {
+                    return Ok(Value::Number(index as f64));
+                }
+            }
+            Ok(Value::Null)
+        },
+        Value::String(s) => {
+            match value {
+                Value::String(search_str) => {
+                    match s.find(&search_str) {
+                        Some(index) => Ok(Value::Number(index as f64)),
+                        None => Ok(Value::Null),
+                    }
+                },
+                _ => Err("index-of: when searching in a string, the search value must also be a string".to_string()),
+            }
+        },
+        _ => Err("index-of: first argument must be a list or string".to_string()),
     }
-
-    Ok(Value::Null)
 }
 
 /// Check if a list contains a specific value
@@ -43,12 +53,16 @@ pub fn eval_contains(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result
         _ => return Err("contains: invalid arguments".to_string()),
     };
 
-    let list = match list {
-        Value::List(l) => l,
-        _ => return Err("contains: first argument must be a list".to_string()),
-    };
-
-    Ok(Value::Boolean(list.contains(&value)))
+    match list {
+        Value::List(l) => Ok(Value::Boolean(l.contains(&value))),
+        Value::String(s) => {
+            match value {
+                Value::String(search_str) => Ok(Value::Boolean(s.contains(&search_str))),
+                _ => Err("contains: when searching in a string, the search value must also be a string".to_string()),
+            }
+        },
+        _ => Err("contains: first argument must be a list or string".to_string()),
+    }
 }
 
 /// Extract a slice from a list

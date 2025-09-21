@@ -738,6 +738,21 @@ impl Evaluator {
                             )),
                         }
                     }
+                    Value::Error(err) => {
+                        match property.as_str() {
+                            "message" => Ok(Value::String(err.message.clone())),
+                            "code" => match &err.code {
+                                Some(code) => Ok(Value::String(code.clone())),
+                                None => Ok(Value::Null),
+                            },
+                            "source" => match &err.source {
+                                Some(source) => Ok(Value::String(source.clone())),
+                                None => Ok(Value::Null),
+                            },
+                            "context" => Ok(Value::Object(err.context.clone())),
+                            _ => Ok(Value::Null), // Return null for non-existent properties
+                        }
+                    }
                     _ => Err(format!(
                         "Cannot access property '{}' on non-object/non-list value",
                         property

@@ -751,32 +751,51 @@ if (length ~items) > 0 then (
 )
 ```
 
-#### `index-of list value`
+#### `index-of list_or_string value`
 
-Finds the index of the first occurrence of a value in a list. Returns the index as a number or null if not found.
+Finds the index of the first occurrence of a value in a list, or the position of a substring in a string. Returns the index as a number or null if not found.
 
-**Example:**
+**Examples:**
 ```tails
+# With lists
 ~fruits is ["apple", "banana", "cherry", "banana"]
 ~index is index-of ~fruits "banana"
 say ~index  # 1
 
 ~index is index-of ~fruits "grape"
 say ~index  # null
+
+# With strings
+~email is "user@example.com"
+~at_pos is index-of ~email "@"
+say ~at_pos  # 4
+
+~missing is index-of ~email "xyz"
+say ~missing  # null
 ```
 
-#### `contains list value`
+#### `contains list_or_string value`
 
-Checks if a list contains a specific value. Returns true or false.
+Checks if a list contains a specific value, or if a string contains a substring. Returns true or false.
 
-**Example:**
+**Examples:**
 ```tails
+# With lists
 ~numbers is [1, 2, 3, 4, 5]
 ~has-three is contains ~numbers 3
 say ~has-three  # true
 
 ~has-ten is contains ~numbers 10
 say ~has-ten  # false
+
+# With strings
+~email is "user@example.com"
+~has-at is contains ~email "@"
+say ~has-at  # true
+
+~text is "hello world"
+~has-xyz is contains ~text "xyz"
+say ~has-xyz  # false
 ```
 
 #### `slice list start [end]`
