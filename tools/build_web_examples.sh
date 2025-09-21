@@ -48,8 +48,8 @@ get_example_metadata() {
         "objects.tails")
             echo "Objects|Working with object properties"
             ;;
-        "actions.tails")
-            echo "Actions (Functions)|Define and call custom actions with parameters"
+        "functions.tails")
+            echo "Functions |Define and call custom functions with parameters"
             ;;
         "fibonacci.tails")
             echo "Fibonacci Sequence|Functions with return values and loops"
@@ -79,7 +79,7 @@ WEB_EXAMPLES=(
     "variables_math.tails"
     "conditionals.tails"
     "objects.tails"
-    "actions.tails"
+    "functions.tails"
     "fibonacci.tails"
     "nested_function_calls.tails"
     "data_structure_madness.tails"

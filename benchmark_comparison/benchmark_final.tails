@@ -1,4 +1,4 @@
-action fibonacci ~n (
+function fibonacci ~n (
     if ~n <= 1 (
         give ~n
     ) else (
@@ -10,7 +10,7 @@ action fibonacci ~n (
     )
 )
 
-action factorial ~n (
+function factorial ~n (
     if ~n <= 1 (
         give 1
     ) else (
@@ -20,7 +20,7 @@ action factorial ~n (
     )
 )
 
-action complex_benchmark ~iterations (
+function complex_benchmark ~iterations (
     ~total is 0
     ~counter is 0
 

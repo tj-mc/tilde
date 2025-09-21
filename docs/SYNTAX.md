@@ -238,14 +238,14 @@ function greet (
 )
 ```
 
-Action with parameters:
+Function with parameters:
 ```
 function greet-person ~name (
     say "Hello, " ~name "!"
 )
 ```
 
-Action with multiple parameters:
+Function with multiple parameters:
 ```
 function calculate-area ~width ~height (
     ~area is ~width * ~height
@@ -320,7 +320,7 @@ function fibonacci ~n (
 say "The 10th Fibonacci number is " ~fib-10
 ```
 
-### Action Scope
+### Function Scope
 - Parameters are local to the function and don't affect variables in the calling scope
 - Variables defined inside an function are local to that function 
 - Functions can access global variables (variables defined outside any function)

@@ -1,5 +1,6 @@
 use crate::ast::*;
 use crate::value::Value;
+use crate::http::{HttpClient, HttpRequest, parse_http_options};
 use serde_json;
 use std::collections::HashMap;
 
@@ -64,7 +65,12 @@ impl Evaluator {
     // Helper function to call positional evaluation functions
     fn eval_positional_function(&mut self, name: &str, args: Vec<Expression>) -> Result<Value, String> {
         match name {
-            "get" => self.eval_get_positional(args),
+            "get" => self.eval_http_get(args),
+            "post" => self.eval_http_post(args),
+            "put" => self.eval_http_put(args),
+            "delete" => self.eval_http_delete(args),
+            "patch" => self.eval_http_patch(args),
+            "http" => self.eval_http_request(args),
             "run" => self.eval_run_positional(args),
             "wait" => self.eval_wait_positional(args),
             "read" => crate::file_io::eval_read_positional(args, self),
@@ -564,7 +570,7 @@ impl Evaluator {
 
                         Ok(Value::String(message))
                     }
-                    "get" | "run" | "wait" | "read" | "write" | "clear" => self.eval_positional_function(&name, args),
+                    "get" | "post" | "put" | "delete" | "patch" | "http" | "run" | "wait" | "read" | "write" | "clear" => self.eval_positional_function(&name, args),
                     "ask" => {
                         #[cfg(target_arch = "wasm32")]
                         {
@@ -652,7 +658,7 @@ impl Evaluator {
                                 Err(format!("Invalid block syntax: {}", name))
                             }
                         } else {
-                            // Check if this is a user-defined action first
+                            // Check if this is a user-defined function first
                             if let Some(function) = self.functions.get(&name).cloned() {
                                 self.eval_function(function, args)
                             } else if let Some(func) = crate::stdlib::get_stdlib_function(&name) {
@@ -902,7 +908,8 @@ impl Evaluator {
         }
     }
 
-    fn eval_get_positional(&mut self, args: Vec<Expression>) -> Result<Value, String> {
+    // HTTP GET request
+    fn eval_http_get(&mut self, args: Vec<Expression>) -> Result<Value, String> {
         if args.is_empty() {
             return Err("get requires at least a URL argument".to_string());
         }
@@ -913,51 +920,198 @@ impl Evaluator {
             _ => return Err("get URL must be a string".to_string()),
         };
 
-        #[cfg(target_arch = "wasm32")]
-        {
-            // For WASM, call JavaScript fetch function
-            use crate::wasm::fetch_url;
-            let body = fetch_url(&url);
+        // Parse options (headers, timeout, auth, etc.)
+        let options = if args.len() > 1 {
+            Some(self.eval_expression(args[1].clone())?)
+        } else {
+            None
+        };
 
-            // Try to parse as JSON, fall back to string if parsing fails
-            match serde_json::from_str::<serde_json::Value>(&body) {
-                Ok(json) => Ok(Self::json_to_tails_value(json)),
-                Err(_) => Ok(Value::String(body)),
-            }
+        let (headers, _, timeout_ms) = parse_http_options(options)?;
+        let request = HttpRequest::new("GET", &url)
+            .with_headers(headers)
+            .with_timeout(timeout_ms);
+
+        match HttpClient::execute(request) {
+            Ok(response) => Ok(response.to_tails_value()),
+            Err(error_value) => Err(Self::error_value_to_string(&error_value)),
+        }
+    }
+
+    // HTTP POST request
+    fn eval_http_post(&mut self, args: Vec<Expression>) -> Result<Value, String> {
+        if args.is_empty() {
+            return Err("post requires at least a URL argument".to_string());
         }
 
-        #[cfg(not(target_arch = "wasm32"))]
-        {
-            let timeout = if args.len() > 1 {
-                let timeout_value = self.eval_expression(args[1].clone())?;
-                match timeout_value {
-                    Value::Number(n) => n as u64,
-                    _ => return Err("get timeout must be a number".to_string()),
-                }
-            } else {
-                30 // default timeout
-            };
+        let url_value = self.eval_expression(args[0].clone())?;
+        let url = match url_value {
+            Value::String(s) => s,
+            _ => return Err("post URL must be a string".to_string()),
+        };
 
-            let config = ureq::Agent::config_builder()
-                .timeout_global(Some(std::time::Duration::from_secs(timeout)))
-                .build();
-            let agent: ureq::Agent = config.into();
-            let response = agent
-                .get(&url)
-                .call()
-                .map_err(|e| format!("HTTP request failed: {}", e))?;
+        // Parse options (headers, body, timeout, auth, etc.)
+        let options = if args.len() > 1 {
+            Some(self.eval_expression(args[1].clone())?)
+        } else {
+            None
+        };
 
-            let mut response = response;
-            let body = response
-                .body_mut()
-                .read_to_string()
-                .map_err(|e| format!("Failed to read response body: {}", e))?;
+        let (headers, body, timeout_ms) = parse_http_options(options)?;
+        let mut request = HttpRequest::new("POST", &url)
+            .with_headers(headers)
+            .with_timeout(timeout_ms);
 
-            // Try to parse as JSON, fall back to string if parsing fails
-            match serde_json::from_str::<serde_json::Value>(&body) {
-                Ok(json) => Ok(Self::json_to_tails_value(json)),
-                Err(_) => Ok(Value::String(body)),
-            }
+        if let Some(body_str) = body {
+            request = request.with_body(body_str);
+        }
+
+        match HttpClient::execute(request) {
+            Ok(response) => Ok(response.to_tails_value()),
+            Err(error_value) => Err(Self::error_value_to_string(&error_value)),
+        }
+    }
+
+    // HTTP PUT request
+    fn eval_http_put(&mut self, args: Vec<Expression>) -> Result<Value, String> {
+        if args.is_empty() {
+            return Err("put requires at least a URL argument".to_string());
+        }
+
+        let url_value = self.eval_expression(args[0].clone())?;
+        let url = match url_value {
+            Value::String(s) => s,
+            _ => return Err("put URL must be a string".to_string()),
+        };
+
+        let options = if args.len() > 1 {
+            Some(self.eval_expression(args[1].clone())?)
+        } else {
+            None
+        };
+
+        let (headers, body, timeout_ms) = parse_http_options(options)?;
+        let mut request = HttpRequest::new("PUT", &url)
+            .with_headers(headers)
+            .with_timeout(timeout_ms);
+
+        if let Some(body_str) = body {
+            request = request.with_body(body_str);
+        }
+
+        match HttpClient::execute(request) {
+            Ok(response) => Ok(response.to_tails_value()),
+            Err(error_value) => Err(Self::error_value_to_string(&error_value)),
+        }
+    }
+
+    // HTTP DELETE request
+    fn eval_http_delete(&mut self, args: Vec<Expression>) -> Result<Value, String> {
+        if args.is_empty() {
+            return Err("delete requires at least a URL argument".to_string());
+        }
+
+        let url_value = self.eval_expression(args[0].clone())?;
+        let url = match url_value {
+            Value::String(s) => s,
+            _ => return Err("delete URL must be a string".to_string()),
+        };
+
+        let options = if args.len() > 1 {
+            Some(self.eval_expression(args[1].clone())?)
+        } else {
+            None
+        };
+
+        let (headers, _, timeout_ms) = parse_http_options(options)?;
+        let request = HttpRequest::new("DELETE", &url)
+            .with_headers(headers)
+            .with_timeout(timeout_ms);
+
+        match HttpClient::execute(request) {
+            Ok(response) => Ok(response.to_tails_value()),
+            Err(error_value) => Err(Self::error_value_to_string(&error_value)),
+        }
+    }
+
+    // HTTP PATCH request
+    fn eval_http_patch(&mut self, args: Vec<Expression>) -> Result<Value, String> {
+        if args.is_empty() {
+            return Err("patch requires at least a URL argument".to_string());
+        }
+
+        let url_value = self.eval_expression(args[0].clone())?;
+        let url = match url_value {
+            Value::String(s) => s,
+            _ => return Err("patch URL must be a string".to_string()),
+        };
+
+        let options = if args.len() > 1 {
+            Some(self.eval_expression(args[1].clone())?)
+        } else {
+            None
+        };
+
+        let (headers, body, timeout_ms) = parse_http_options(options)?;
+        let mut request = HttpRequest::new("PATCH", &url)
+            .with_headers(headers)
+            .with_timeout(timeout_ms);
+
+        if let Some(body_str) = body {
+            request = request.with_body(body_str);
+        }
+
+        match HttpClient::execute(request) {
+            Ok(response) => Ok(response.to_tails_value()),
+            Err(error_value) => Err(Self::error_value_to_string(&error_value)),
+        }
+    }
+
+    // Generic HTTP request
+    fn eval_http_request(&mut self, args: Vec<Expression>) -> Result<Value, String> {
+        if args.len() < 2 {
+            return Err("http requires method and URL arguments".to_string());
+        }
+
+        let method_value = self.eval_expression(args[0].clone())?;
+        let method = match method_value {
+            Value::String(s) => s,
+            _ => return Err("http method must be a string".to_string()),
+        };
+
+        let url_value = self.eval_expression(args[1].clone())?;
+        let url = match url_value {
+            Value::String(s) => s,
+            _ => return Err("http URL must be a string".to_string()),
+        };
+
+        let options = if args.len() > 2 {
+            Some(self.eval_expression(args[2].clone())?)
+        } else {
+            None
+        };
+
+        let (headers, body, timeout_ms) = parse_http_options(options)?;
+        let mut request = HttpRequest::new(&method, &url)
+            .with_headers(headers)
+            .with_timeout(timeout_ms);
+
+        if let Some(body_str) = body {
+            request = request.with_body(body_str);
+        }
+
+        match HttpClient::execute(request) {
+            Ok(response) => Ok(response.to_tails_value()),
+            Err(error_value) => Err(Self::error_value_to_string(&error_value)),
+        }
+    }
+
+    // Convert error value to string for Rust error propagation
+    fn error_value_to_string(error_value: &Value) -> String {
+        if let Value::Error(err) = error_value {
+            err.message.clone()
+        } else {
+            "Unknown error".to_string()
         }
     }
 
@@ -1025,7 +1179,7 @@ impl Evaluator {
         // Check argument count
         if args.len() != function.params.len() {
             return Err(format!(
-                "Action expects {} arguments, but {} were provided",
+                "Function expects {} arguments, but {} were provided",
                 function.params.len(),
                 args.len()
             ));
@@ -1047,7 +1201,7 @@ impl Evaluator {
         // Push the new scope
         self.scope_stack.push(local_scope);
 
-        // Execute action body
+        // Execute function body
         let mut last_value = Value::Null;
         for stmt in function.body {
             let (value, control) = self.eval_statement_with_control(stmt)?;
@@ -1059,7 +1213,7 @@ impl Evaluator {
                     return Ok(return_value);
                 }
                 ControlFlow::BreakLoop => {
-                    // break-loop in action should only break local loops, not return
+                    // break-loop in function should only break local loops, not return
                     last_value = value;
                 }
                 ControlFlow::Continue => {

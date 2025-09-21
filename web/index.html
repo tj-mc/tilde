@@ -73,18 +73,18 @@
                         <p>Working with object properties</p>
                     </div>
                     <div class="example-item" data-code='action convert-temperature ~temp ~from ~to (\n    if ~from == "C" (\n        if ~to == "F" (\n            ~result is (~temp * 9/5) + 32\n            say ~temp "°C = " ~result "°F"\n        ) else if ~to == "K" (\n            ~result is ~temp + 273.15\n            say ~temp "°C = " ~result "K"\n        )\n    ) else if ~from == "F" (\n        if ~to == "C" (\n            ~result is (~temp - 32) * 5/9\n            say ~temp "°F = " ~result "°C"\n        )\n    )\n)\n\n*convert-temperature 25 "C" "F"\n*convert-temperature 77 "F" "C"\n*convert-temperature 0 "C" "K"'>
-                        <h4>Actions (Functions)</h4>
+                        <h4>Functions</h4>
                         <p>Define and call custom actions with parameters</p>
                     </div>
-                    <div class="example-item" data-code='action fibonacci ~n (\n    if ~n <= 1 (\n        give ~n\n    )\n    ~a is 0\n    ~b is 1\n    ~i is 2\n    loop (\n        if ~i > ~n break-loop\n        ~temp is ~b\n        ~b is ~a + ~b\n        ~a is ~temp\n        ~i is ~i + 1\n    )\n    give ~b\n)\n\nsay "Fibonacci sequence:"\n~i is 0\nloop (\n    if ~i > 10 break-loop\n    ~fib is *fibonacci ~i\n    say "F(" ~i ") = " ~fib\n    ~i is ~i + 1\n)'>
+                    <div class="example-item" data-code='function fibonacci ~n (\n    if ~n <= 1 (\n        give ~n\n    )\n    ~a is 0\n    ~b is 1\n    ~i is 2\n    loop (\n        if ~i > ~n break-loop\n        ~temp is ~b\n        ~b is ~a + ~b\n        ~a is ~temp\n        ~i is ~i + 1\n    )\n    give ~b\n)\n\nsay "Fibonacci sequence:"\n~i is 0\nloop (\n    if ~i > 10 break-loop\n    ~fib is *fibonacci ~i\n    say "F(" ~i ") = " ~fib\n    ~i is ~i + 1\n)'>
                         <h4>Fibonacci Sequence</h4>
                         <p>Functions with return values and loops</p>
                     </div>
-                    <div class="example-item" data-code='action is-prime ~num (\n    if ~num < 2 (\n        give false\n    ) else if ~num == 2 (\n        give true\n    ) else if ~num % 2 == 0 (\n        give false\n    ) else (\n        ~is_prime is true\n        ~i is 3\n        loop (\n            if ~i * ~i > ~num break-loop\n            if ~num % ~i == 0 (\n                ~is_prime is false\n                break-loop\n            )\n            ~i is ~i + 2\n        )\n        give ~is_prime\n    )\n)\n\nsay "Prime numbers from 1 to 30:"\n~num is 2\nloop (\n    if ~num > 30 break-loop\n    ~prime_check is *is-prime ~num\n    if ~prime_check (\n        say ~num " is prime ✓"\n    )\n    ~num is ~num + 1\n)'>
+                    <div class="example-item" data-code='function is-prime ~num (\n    if ~num < 2 (\n        give false\n    ) else if ~num == 2 (\n        give true\n    ) else if ~num % 2 == 0 (\n        give false\n    ) else (\n        ~is_prime is true\n        ~i is 3\n        loop (\n            if ~i * ~i > ~num break-loop\n            if ~num % ~i == 0 (\n                ~is_prime is false\n                break-loop\n            )\n            ~i is ~i + 2\n        )\n        give ~is_prime\n    )\n)\n\nsay "Prime numbers from 1 to 30:"\n~num is 2\nloop (\n    if ~num > 30 break-loop\n    ~prime_check is *is-prime ~num\n    if ~prime_check (\n        say ~num " is prime ✓"\n    )\n    ~num is ~num + 1\n)'>
                         <h4>Prime Number Checker</h4>
                         <p>Advanced functions with mathematical logic</p>
                     </div>
-                    <div class="example-item" data-code='action factorial ~n (\n    if ~n <= 1 (\n        give 1\n    ) else (\n        ~n-minus-one is ~n - 1\n        ~recursive is *factorial ~n-minus-one\n        give ~n * ~recursive\n    )\n)\n\nsay "Calculating factorials:"\n~i is 0\nloop (\n    if ~i > 8 break-loop\n    ~result is *factorial ~i\n    say ~i "! = " ~result\n    ~i is ~i + 1\n)'>
+                    <div class="example-item" data-code='function factorial ~n (\n    if ~n <= 1 (\n        give 1\n    ) else (\n        ~n-minus-one is ~n - 1\n        ~recursive is *factorial ~n-minus-one\n        give ~n * ~recursive\n    )\n)\n\nsay "Calculating factorials:"\n~i is 0\nloop (\n    if ~i > 8 break-loop\n    ~result is *factorial ~i\n    say ~i "! = " ~result\n    ~i is ~i + 1\n)'>
                         <h4>Recursive Factorial</h4>
                         <p>Recursive functions and mathematical computations</p>
                     </div>
@@ -92,7 +92,7 @@
                         <h4>Todo List Manager</h4>
                         <p>Lists and single-line conditionals</p>
                     </div>
-                    <div class="example-item" data-code='action generate-pattern ~size ~char (\n    ~row is 0\n    loop (\n        if ~row >= ~size break-loop\n        ~line is ""\n        ~col is 0\n        loop (\n            if ~col >= ~size break-loop\n            if ~row == 0 or ~row == (~size - 1) or ~col == 0 or ~col == (~size - 1) (\n                ~line is ~line + ~char\n            ) else (\n                ~line is ~line + " "\n            )\n            ~col is ~col + 1\n        )\n        say ~line\n        ~row is ~row + 1\n    )\n)\n\nsay "🎨 Pattern Generator"\nsay "==================="\nsay "Square border (5x5):"\n*generate-pattern 5 "*"\n\nsay ""\nsay "Smaller pattern:"\n*generate-pattern 3 "#"'>
+                    <div class="example-item" data-code='function generate-pattern ~size ~char (\n    ~row is 0\n    loop (\n        if ~row >= ~size break-loop\n        ~line is ""\n        ~col is 0\n        loop (\n            if ~col >= ~size break-loop\n            if ~row == 0 or ~row == (~size - 1) or ~col == 0 or ~col == (~size - 1) (\n                ~line is ~line + ~char\n            ) else (\n                ~line is ~line + " "\n            )\n            ~col is ~col + 1\n        )\n        say ~line\n        ~row is ~row + 1\n    )\n)\n\nsay "🎨 Pattern Generator"\nsay "==================="\nsay "Square border (5x5):"\n*generate-pattern 5 "*"\n\nsay ""\nsay "Smaller pattern:"\n*generate-pattern 3 "#"'>
                         <h4>Pattern Generator</h4>
                         <p>Nested loops and creative ASCII art</p>
                     </div>

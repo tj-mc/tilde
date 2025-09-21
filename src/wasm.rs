@@ -89,7 +89,7 @@ impl WasmTailsRepl {
         self.evaluator.output_buffer.clear();
     }
 
-    /// Reset the REPL state (clear variables and actions)
+    /// Reset the REPL state (clear variables and functions)
     #[wasm_bindgen]
     pub fn reset(&mut self) {
         self.evaluator = Evaluator::new();

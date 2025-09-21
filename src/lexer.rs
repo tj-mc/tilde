@@ -416,10 +416,10 @@ impl Lexer {
             }
             Some('*') => {
                 self.advance();
-                // Check if this is an action call (*identifier) or multiplication
+                // Check if this is an function call (*identifier) or multiplication
                 if let Some(ch) = self.current_char {
                     if ch.is_alphabetic() {
-                        // This is an action call
+                        // This is an function call
                         let name = self.read_identifier();
                         return Token::Identifier(format!("*{}", name));
                     }

@@ -211,7 +211,7 @@ class TailsWebREPL {
         }
         this.clearOutput();
         this.runCount = 0;
-        this.addOutput('🔄 REPL reset. All variables and actions cleared.', 'info');
+        this.addOutput('🔄 REPL reset. All variables and functions cleared.', 'info');
         this.updateStatus('Reset complete');
     }
 

@@ -39,7 +39,7 @@ function factorial ~n (
     )
 )
 
-say "🔥 NESTED FUNCTION CALLS IN ACTION"
+say "🔥 NESTED FUNCTION CALLS IN FUNCTION"
 say "=================================="
 
 say "Simple nesting: sum(43, sum(100, 28)) = " (*sum 43 (*sum 100 28))

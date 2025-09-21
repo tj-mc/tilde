@@ -1,6 +1,6 @@
 # Tails Standard Library
 
-The Tails standard library provides powerful built-in functions for common programming tasks. Stdlib functions are called directly by name and take precedence over user-defined actions when resolving function names.
+The Tails standard library provides powerful built-in functions for common programming tasks. Stdlib functions are called directly by name and take precedence over user-defined functions when resolving function names.
 
 ## Quick Reference
 

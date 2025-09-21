@@ -1,6 +1,7 @@
 pub mod ast;
 pub mod evaluator;
 pub mod file_io;
+pub mod http;
 pub mod intern;
 pub mod lexer;
 pub mod parser;

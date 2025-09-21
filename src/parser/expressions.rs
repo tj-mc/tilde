@@ -210,9 +210,9 @@ impl Parser {
             Token::Identifier(name) => {
                 self.advance();
 
-                // Check if this is an action call (*name)
+                // Check if this is an function call (*name)
                 if name.starts_with('*') {
-                    // Parse action call arguments (space-separated until terminator)
+                    // Parse function call arguments (space-separated until terminator)
                     let mut args = Vec::new();
 
                     // Parse arguments until we hit a terminator
@@ -229,7 +229,7 @@ impl Parser {
                                 break;
                             }
                         } else {
-                            // For action calls, parse arguments one by one without property access
+                            // For function calls, parse arguments one by one without property access
                             args.push(self.parse_function_argument()?);
                         }
                     }
@@ -260,7 +260,7 @@ impl Parser {
                     let is_stdlib = crate::stdlib::get_stdlib_function_names().contains(&name.as_str());
 
                     if is_builtin || is_stdlib {
-                        // Parse arguments like action calls (space-separated until terminator)
+                        // Parse arguments like function calls (space-separated until terminator)
                         let mut args = Vec::new();
 
                         // Parse arguments until we hit a terminator
@@ -428,7 +428,7 @@ impl Parser {
         Ok(args)
     }
 
-    /// Parse a single action argument without property access chains
+    /// Parse a single function argument without property access chains
     /// This prevents ~var .prop from being parsed as property access
     fn parse_function_argument(&mut self) -> Result<Expression, String> {
         match self.current_token().clone() {
@@ -486,7 +486,7 @@ impl Parser {
                     let full_name = format!(":{}:{}", block_name, func_name);
                     self.advance();
 
-                    // For action arguments, return a function reference (no arguments)
+                    // For function arguments, return a function reference (no arguments)
                     Ok(Expression::FunctionCall {
                         name: full_name,
                         args: Vec::new(),
@@ -497,7 +497,7 @@ impl Parser {
             }
             Token::Identifier(name) => {
                 self.advance();
-                // Don't allow function calls in action arguments - just identifiers
+                // Don't allow function calls in function arguments - just identifiers
                 Ok(Expression::FunctionCall {
                     name,
                     args: Vec::new(),
