@@ -1,6 +1,6 @@
 {
   "name": "tilde-web-repl",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Tilde Scripting Language Web REPL",
   "main": "repl.js",
   "type": "module",
