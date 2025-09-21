@@ -1445,6 +1445,259 @@ if ~time_left.days > 30 (
 )
 ```
 
+## HTTP Operations
+
+Tails provides a comprehensive HTTP client for making web requests with full support for all HTTP verbs, authentication, headers, error handling, and more.
+
+### Basic HTTP Requests
+
+#### `get url [options]`
+
+Make an HTTP GET request.
+
+```tails
+# Simple GET request
+~response is get "https://api.example.com/users"
+
+# Access response data
+~status is ~response.status
+~data is ~response.body
+~headers is ~response.headers
+```
+
+#### `post url [options]`
+
+Make an HTTP POST request with optional body data.
+
+```tails
+# POST with JSON data
+~user is {
+    "name": "John Doe",
+    "email": "john@example.com"
+}
+
+~response is post "https://api.example.com/users" {
+    "body": ~user,
+    "headers": {
+        "Content-Type": "application/json"
+    }
+}
+```
+
+#### `put url [options]`
+
+Make an HTTP PUT request for updates.
+
+```tails
+# Update a resource
+~updated_user is {
+    "name": "Jane Doe",
+    "email": "jane@example.com"
+}
+
+~response is put "https://api.example.com/users/123" {
+    "body": ~updated_user,
+    "headers": {
+        "Content-Type": "application/json"
+    }
+}
+```
+
+#### `patch url [options]`
+
+Make an HTTP PATCH request for partial updates.
+
+```tails
+# Partial update
+~changes is {"email": "newemail@example.com"}
+
+~response is patch "https://api.example.com/users/123" {
+    "body": ~changes,
+    "headers": {
+        "Content-Type": "application/json"
+    }
+}
+```
+
+#### `delete url [options]`
+
+Make an HTTP DELETE request.
+
+```tails
+# Delete a resource
+~response is delete "https://api.example.com/users/123"
+
+if ~response.ok (
+    say "User deleted successfully"
+)
+```
+
+#### `http method url [options]`
+
+Generic HTTP function for custom methods.
+
+```tails
+# Custom HTTP method
+~response is http "OPTIONS" "https://api.example.com/users" {
+    "headers": {
+        "Access-Control-Request-Method": "POST"
+    }
+}
+```
+
+### HTTP Options
+
+All HTTP functions accept an optional configuration object with the following fields:
+
+#### Headers
+```tails
+~response is get "https://api.example.com/data" {
+    "headers": {
+        "User-Agent": "MyApp/1.0",
+        "Accept": "application/json",
+        "X-API-Key": "your-api-key"
+    }
+}
+```
+
+#### Request Body
+```tails
+# String body
+~response is post "https://api.example.com/data" {
+    "body": "raw string data",
+    "headers": {
+        "Content-Type": "text/plain"
+    }
+}
+
+# JSON body (automatically serialized)
+~response is post "https://api.example.com/data" {
+    "body": {"key": "value"},
+    "headers": {
+        "Content-Type": "application/json"
+    }
+}
+```
+
+#### Timeout
+```tails
+# Set timeout in milliseconds
+~response is get "https://slow-api.example.com/data" {
+    "timeout": 5000  # 5 seconds
+}
+```
+
+### Authentication
+
+#### Bearer Token Authentication
+```tails
+~response is get "https://api.example.com/protected" {
+    "headers": {
+        "Authorization": "Bearer your-jwt-token-here"
+    }
+}
+
+# Or use the bearer_token shorthand
+~response is get "https://api.example.com/protected" {
+    "bearer_token": "your-jwt-token-here"
+}
+```
+
+#### Basic Authentication
+```tails
+~response is get "https://api.example.com/protected" {
+    "basic_auth": {
+        "username": "your-username",
+        "password": "your-password"
+    }
+}
+```
+
+### Response Object
+
+HTTP responses contain the following fields:
+
+```tails
+~response is get "https://api.example.com/data"
+
+# Status information
+~status_code is ~response.status          # 200
+~status_text is ~response.status_text     # "OK"
+~is_successful is ~response.ok            # true for 2xx
+~is_successful2 is ~response.success      # alias for ok
+
+# Response data
+~body_data is ~response.body              # Parsed JSON or raw string
+~raw_text is ~response.body_text          # Raw response text
+~response_headers is ~response.headers    # Header object
+
+# Timing information
+~request_time is ~response.response_time_ms  # Response time in milliseconds
+~url is ~response.url                     # Final URL (after redirects)
+```
+
+### Error Handling with attempt/rescue
+
+HTTP errors (4xx, 5xx status codes, timeouts, network failures) can be caught and handled:
+
+```tails
+~success is false
+~error_info is null
+
+attempt (
+    ~response is get "https://api.example.com/might-fail"
+    ~success is true
+    ~data is ~response.body
+) rescue ~error (
+    say "Request failed:" ~error.message
+
+    # Access error details
+    if (has "status" ~error.context) (
+        say "HTTP Status:" ~error.context.status
+    )
+
+    # Different error types
+    if (~error.message contains "timeout") (
+        say "Request timed out"
+    ) else if (~error.context.status == 404) (
+        say "Resource not found"
+    ) else if (~error.context.status >= 500) (
+        say "Server error"
+    )
+)
+```
+
+### Error Context
+
+HTTP errors provide rich context information:
+
+```tails
+attempt (
+    ~response is get "https://httpbin.org/status/404"
+) rescue ~error (
+    # Error message
+    say "Error:" ~error.message             # "http status: 404"
+
+    # HTTP status code (for HTTP errors)
+    say "Status:" ~error.context.status    # 404
+
+    # Response timing
+    say "Response time:" ~error.context.response_time_ms
+
+    # Timeout setting
+    say "Timeout was:" ~error.context.timeout_ms
+
+    # Error body (if available)
+    if (has "body" ~error.context) (
+        say "Error body:" ~error.context.body
+    )
+
+    # Response headers (for HTTP errors)
+    if (has "headers" ~error.context) (
+        say "Response headers:" ~error.context.headers
+    )
+)
+
 ## See Also
 
 - [SYNTAX.md](SYNTAX.md) - Complete Tails language reference
