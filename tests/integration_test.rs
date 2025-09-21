@@ -743,7 +743,7 @@ fn test_string_interpolation_basic() {
 fn test_shell_command_with_interpolation() {
     let input = "
         ~filename is \"test.txt\"
-        ~command is \"echo 'Hello from Tails' > `~filename`\"
+        ~command is \"echo 'Hello from Tilde' > `~filename`\"
         ~result is run ~command
         ~readback is run \"cat `~filename` && rm `~filename`\"
     ";
@@ -758,7 +758,7 @@ fn test_shell_command_with_interpolation() {
     if let Some(Value::Object(readback_map)) = evaluator.get_variable("readback") {
         assert_eq!(
             readback_map.get("output"),
-            Some(&Value::String("Hello from Tails\n".to_string()))
+            Some(&Value::String("Hello from Tilde\n".to_string()))
         );
     } else {
         panic!("Expected readback to be an object with output");

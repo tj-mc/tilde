@@ -21,7 +21,7 @@ impl HttpResponse {
         response_map.insert("url".to_string(), Value::String(self.url.clone()));
         response_map.insert("response_time_ms".to_string(), Value::Number(self.response_time_ms as f64));
 
-        // Convert headers to Tails object
+        // Convert headers to Tilde object
         let mut headers_map = HashMap::new();
         for (key, value) in &self.headers {
             headers_map.insert(key.clone(), Value::String(value.clone()));
@@ -375,7 +375,7 @@ impl HttpClient {
     }
 }
 
-/// Parse HTTP options from Tails value
+/// Parse HTTP options from Tilde value
 pub fn parse_http_options(options_value: Option<Value>) -> Result<(HashMap<String, String>, Option<String>, u64), String> {
     let mut headers = HashMap::new();
     let mut body = None;

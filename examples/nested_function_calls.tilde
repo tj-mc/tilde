@@ -1,4 +1,4 @@
-# Nested Function Calls - The New Power of Tails!
+# Nested Function Calls - The New Power of Tilde!
 # This demonstrates the new ability to use parentheses for nested function calls
 
 function sum ~first ~second (

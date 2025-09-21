@@ -8,15 +8,15 @@ unsafe extern "C" {
     fn log(s: &str);
 
     // JavaScript function to handle user input (will be implemented in JS)
-    #[wasm_bindgen(js_namespace = window, js_name = tailsPrompt)]
+    #[wasm_bindgen(js_namespace = window, js_name = tildePrompt)]
     pub fn prompt_user(message: &str) -> String;
 
     // JavaScript function to handle HTTP fetch (will be implemented in JS)
-    #[wasm_bindgen(js_namespace = window, js_name = tailsFetch)]
+    #[wasm_bindgen(js_namespace = window, js_name = tildeFetch)]
     pub fn fetch_url(url: &str) -> String;
 
     // JavaScript function to clear console (will be implemented in JS)
-    #[wasm_bindgen(js_namespace = window, js_name = tailsClearConsole)]
+    #[wasm_bindgen(js_namespace = window, js_name = tildeClearConsole)]
     pub fn clear_console();
 }
 
@@ -26,23 +26,23 @@ macro_rules! console_log {
 }
 
 #[wasm_bindgen]
-pub struct WasmTailsRepl {
+pub struct WasmTildeRepl {
     evaluator: Evaluator,
 }
 
 #[wasm_bindgen]
-impl WasmTailsRepl {
+impl WasmTildeRepl {
     #[wasm_bindgen(constructor)]
-    pub fn new() -> WasmTailsRepl {
+    pub fn new() -> WasmTildeRepl {
         // Set up panic hook for better error reporting in the browser
         console_error_panic_hook::set_once();
 
-        WasmTailsRepl {
+        WasmTildeRepl {
             evaluator: Evaluator::new(),
         }
     }
 
-    /// Execute Tails code and return the result as a JSON string
+    /// Execute Tilde code and return the result as a JSON string
     #[wasm_bindgen]
     pub fn execute(&mut self, code: &str) -> String {
         // Clear output buffer for this execution
@@ -95,13 +95,13 @@ impl WasmTailsRepl {
         self.evaluator = Evaluator::new();
     }
 
-    /// Get the current version of Tails
+    /// Get the current version of Tilde
     #[wasm_bindgen]
     pub fn get_version(&self) -> String {
         env!("CARGO_PKG_VERSION").to_string()
     }
 
-    /// Add output to the buffer (called internally by Tails operations)
+    /// Add output to the buffer (called internally by Tilde operations)
     pub fn add_output(&mut self, output: String) {
         self.evaluator.output_buffer.push(output);
     }
@@ -141,7 +141,7 @@ impl ExecutionResult {
     }
 }
 
-/// Convert Tails Value to JSON Value for JavaScript interop
+/// Convert Tilde Value to JSON Value for JavaScript interop
 fn value_to_js_value(value: &Value) -> serde_json::Value {
     match value {
         Value::Number(n) => serde_json::Value::Number(
@@ -186,20 +186,20 @@ fn value_to_js_value(value: &Value) -> serde_json::Value {
 /// Initialize the WASM module
 #[wasm_bindgen(start)]
 pub fn init() {
-    console_log!("Tails WASM module initialized");
+    console_log!("Tilde WASM module initialized");
 }
 
 // Custom implementations for web environment
-impl WasmTailsRepl {
+impl WasmTildeRepl {
     /// Handle say operations by adding to output buffer
     pub fn handle_say(&mut self, message: &str) {
         self.add_output(message.to_string());
-        console_log!("Tails output: {}", message);
+        console_log!("Tilde output: {}", message);
     }
 
     /// Handle ask operations by prompting the user
     pub fn handle_ask(&mut self, prompt: &str) -> String {
-        console_log!("Tails prompt: {}", prompt);
+        console_log!("Tilde prompt: {}", prompt);
         prompt_user(prompt)
     }
 }

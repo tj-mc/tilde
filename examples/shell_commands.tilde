@@ -1,9 +1,9 @@
 # =============================================================================
-# Tails Shell Command Examples
+# Tilde Shell Command Examples
 # Demonstrating the 'run' command and string interpolation with backticks
 # =============================================================================
 
-say "=== Tails Shell Command Examples ==="
+say "=== Tilde Shell Command Examples ==="
 say "Demonstrating the 'run' command and string interpolation"
 say ""
 
@@ -16,7 +16,7 @@ say "Command output: " ~result.output
 # Example 2: Variable interpolation using backticks
 # Use backticks `~variable` to substitute variables into command strings
 say "2. String interpolation with backticks"
-~name is "Tails"
+~name is "Tilde"
 ~greeting is run "echo Welcome to `~name` scripting!"
 say "Interpolated greeting: " ~greeting.output
 
@@ -24,7 +24,7 @@ say "Interpolated greeting: " ~greeting.output
 # Demonstrate creating, reading, and cleaning up files using shell commands
 say "3. Working with files"
 ~filename is "temp_demo.txt"
-~content is "This is a demo file created by Tails"
+~content is "This is a demo file created by Tilde"
 # Write content to file using echo and redirection
 ~write_result is run "echo '`~content`' > `~filename`"
 # Read the file back to verify it was written

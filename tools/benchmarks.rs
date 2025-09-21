@@ -24,7 +24,7 @@ where
 }
 
 fn main() {
-    println!("🔥 Tails Language Benchmarks (Zero Dependencies)");
+    println!("🔥 Tilde Language Benchmarks (Zero Dependencies)");
     println!("==================================================\n");
 
     // Lexer benchmarks

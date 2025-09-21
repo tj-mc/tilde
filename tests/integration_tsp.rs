@@ -89,11 +89,11 @@ if ~best_path.0 == 0 and ~best_path.1 == 1 and ~best_path.2 == 3 and ~best_path.
     let temp_file = "temp_tsp_test.tilde";
     std::fs::write(temp_file, tsp_program).expect("Failed to write test file");
 
-    // Execute the Tails interpreter
+    // Execute the Tilde interpreter
     let output = Command::new("cargo")
         .args(&["run", "--", temp_file])
         .output()
-        .expect("Failed to execute tails");
+        .expect("Failed to execute tilde");
 
     // Clean up
     std::fs::remove_file(temp_file).ok();
@@ -108,7 +108,7 @@ if ~best_path.0 == 0 and ~best_path.1 == 1 and ~best_path.2 == 3 and ~best_path.
     }
 
     // Verify the program executed successfully
-    assert!(output.status.success(), "Tails program failed to execute");
+    assert!(output.status.success(), "Tilde program failed to execute");
 
     // Verify the output contains expected results
     assert!(stdout.contains("✅ TEST PASSED: Found optimal distance 65"));
@@ -155,7 +155,7 @@ if ~result0 == 10 and ~result1 == 20 and ~result4 == 50 (
     let output = Command::new("cargo")
         .args(&["run", "--", temp_file])
         .output()
-        .expect("Failed to execute tails");
+        .expect("Failed to execute tilde");
 
     std::fs::remove_file(temp_file).ok();
 
@@ -198,7 +198,7 @@ if ~fact_5 == 120 (
     let output = Command::new("cargo")
         .args(&["run", "--", temp_file])
         .output()
-        .expect("Failed to execute tails");
+        .expect("Failed to execute tilde");
 
     std::fs::remove_file(temp_file).ok();
 

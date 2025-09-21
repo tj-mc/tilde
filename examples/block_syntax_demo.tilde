@@ -1,5 +1,5 @@
 # Block Syntax Demo
-# This example demonstrates Tails' block syntax for namespace resolution
+# This example demonstrates Tilde's block syntax for namespace resolution
 
 say "=== Block Syntax Demo ==="
 say ""

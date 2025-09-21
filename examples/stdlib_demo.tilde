@@ -60,7 +60,7 @@ say "   Doubled even positives → " ~doubled_even_positives
 # Working with strings
 say ""
 say "📝 String Operations:"
-~words is ["hello", "world", "from", "tails"]
+~words is ["hello", "world", "from", "tilde"]
 say "Words: " ~words
 
 ~text is join ~words " "
@@ -76,7 +76,7 @@ say "Trimmed: '" ~trimmed "'"
 ~uppercase_words is map ~words uppercase
 say "UPPERCASE: " ~uppercase_words
 
-~mixed_case is ["Hello", "WORLD", "FrOm", "tails"]
+~mixed_case is ["Hello", "WORLD", "FrOm", "tilde"]
 ~lowercase_words is map ~mixed_case lowercase
 say "lowercase: " ~lowercase_words
 

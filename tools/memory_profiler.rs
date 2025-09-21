@@ -132,7 +132,7 @@ where
 }
 
 fn main() {
-    println!("🧠 Tails Language Memory Profiler");
+    println!("🧠 Tilde Language Memory Profiler");
     println!("==================================\n");
 
     let mut results = Vec::new();

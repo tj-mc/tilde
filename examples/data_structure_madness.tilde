@@ -1,5 +1,5 @@
 # Data Structure Manipulation with Nested Calls
-# Showcasing functional programming patterns in Tails
+# Showcasing functional programming patterns in Tilde
 
 function sum_list ~list (
     ~sum is 0

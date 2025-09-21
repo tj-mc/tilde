@@ -2,7 +2,7 @@ use crate::ast::Expression;
 use crate::evaluator::Evaluator;
 use crate::value::Value;
 
-/// Terminal control operations for Tails
+/// Terminal control operations for Tilde
 /// Handles terminal manipulation commands like clear screen
 
 pub fn eval_clear_positional(args: Vec<Expression>, _evaluator: &mut Evaluator) -> Result<Value, String> {

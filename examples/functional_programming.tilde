@@ -30,7 +30,7 @@ say "   Highest sale: $" ~max_sale
 # Example 2: Text processing pipeline
 say ""
 say "2. Text Processing Pipeline:"
-~user_inputs is ["  Hello World  ", "TAILS ROCKS", "  functional programming  "]
+~user_inputs is ["  Hello World  ", "TILDE ROCKS", "  functional programming  "]
 say "   Raw inputs: " ~user_inputs
 
 # Clean and normalize text

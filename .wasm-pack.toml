@@ -1,10 +1,10 @@
 [package]
-name = "tails"
-description = "Tails Scripting Language WebAssembly Module"
+name = "tilde"
+description = "Tilde Scripting Language WebAssembly Module"
 version = "0.5.1"
 authors = ["Tom McIntosh"]
 license = "MIT"
-repository = "https://github.com/tj-mc/tails"
+repository = "https://github.com/tj-mc/tilde"
 
 [package.metadata.wasm-pack.profile.release]
 wee_alloc = false

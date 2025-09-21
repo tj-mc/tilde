@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.5.1] - 2025-09-22
 
 ### Changed
-- **Project Rebrand**: Renamed from "Tails" to "Tilde" across all components
+- **Project Rebrand**: Renamed from "Tilde" to "Tilde" across all components
 - **Web REPL**: Updated and enhanced web interface
 
 ### Added

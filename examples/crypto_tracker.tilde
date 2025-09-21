@@ -1,5 +1,5 @@
 say "=== Real-time Crypto Portfolio Tracker ==="
-say "Building the most interesting program possible with current Tails features!"
+say "Building the most interesting program possible with current Tilde features!"
 say ""
 
 say "1. Setting up portfolio configuration..."
@@ -144,5 +144,5 @@ loop (
 
 say ""
 say "=== Portfolio Tracking Session Complete ==="
-say "Thank you for using the Tails Crypto Portfolio Tracker!"
+say "Thank you for using the Tilde Crypto Portfolio Tracker!"
 say "This demo showcased: HTTP requests, JSON parsing, objects, loops, conditionals, and real-time data processing."

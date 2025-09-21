@@ -5,7 +5,7 @@ use regex::Regex;
 use walkdir::WalkDir;
 
 fn main() {
-    println!("🔧 Starting kebab-case conversion for Tails codebase...");
+    println!("🔧 Starting kebab-case conversion for Tilde codebase...");
 
     let converter = KebabCaseConverter::new();
     converter.run();
@@ -41,11 +41,11 @@ impl KebabCaseConverter {
 
         // Process different types of files
         self.process_directory("docs", &["md"], base_path);
-        self.process_directory("examples", &["tails"], base_path);
+        self.process_directory("examples", &["tilde"], base_path);
         self.process_directory("tests", &["rs"], base_path);
         self.process_directory("src", &["rs"], base_path);
         self.process_directory("web", &["js", "html"], base_path);
-        self.process_directory("benchmark_comparison", &["tails"], base_path);
+        self.process_directory("benchmark_comparison", &["tilde"], base_path);
         self.process_directory("tools", &["rs"], base_path);
 
         // Process individual files
@@ -56,7 +56,7 @@ impl KebabCaseConverter {
         // Process any .tilde files in root
         for entry in WalkDir::new(base_path).max_depth(1) {
             if let Ok(entry) = entry {
-                if entry.path().extension().map_or(false, |ext| ext == "tails") {
+                if entry.path().extension().map_or(false, |ext| ext == "tilde") {
                     self.process_file(entry.path());
                 }
             }
@@ -154,7 +154,7 @@ impl KebabCaseConverter {
     }
 
     fn convert_rust_string_literals(&self, content: &str) -> String {
-        // Pattern to match string literals that might contain Tails code
+        // Pattern to match string literals that might contain Tilde code
         let string_literal_pattern = Regex::new(r#""([^"\\]*(\\.[^"\\]*)*)""#).unwrap();
 
         string_literal_pattern.replace_all(content, |caps: &regex::Captures| {

@@ -489,7 +489,7 @@ The `clear` command:
 # Interactive dashboard
 loop (
     clear
-    say "┌─── TAILS DASHBOARD ───┐"
+    say "┌─── TILDE DASHBOARD ───┐"
     say "│ Status: Running       │"
     say "│ Memory: 42MB          │"
     say "└───────────────────────┘"

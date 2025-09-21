@@ -2,7 +2,7 @@ use std::time::Instant;
 use tilde::{evaluator::Evaluator, parser::Parser};
 
 fn main() {
-    println!("💥 Tails Language Stress Tests");
+    println!("💥 Tilde Language Stress Tests");
     println!("==============================\n");
 
     // Memory stress tests

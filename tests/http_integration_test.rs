@@ -40,7 +40,7 @@ fn test_http_get_with_headers() {
     let input = r#"
     ~response is get "https://httpbin.org/get" {
         "headers": {
-            "User-Agent": "Tails/1.0",
+            "User-Agent": "Tilde/1.0",
             "Accept": "application/json"
         },
         "timeout": 10000
@@ -64,7 +64,7 @@ fn test_http_get_with_headers() {
         if let Some(Value::Object(body)) = resp_map.get("body") {
             if let Some(Value::Object(headers)) = body.get("headers") {
                 if let Some(Value::String(user_agent)) = headers.get("User-Agent") {
-                    assert_eq!(user_agent, "Tails/1.0");
+                    assert_eq!(user_agent, "Tilde/1.0");
                 }
             }
         }
