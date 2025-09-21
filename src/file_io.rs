@@ -69,6 +69,7 @@ pub fn eval_write_positional(args: Vec<Expression>, evaluator: &mut Evaluator) -
         Value::List(_) => content_val.to_string(),
         Value::Object(_) => content_val.to_string(),
         Value::Date(_) => content_val.to_string(),
+        Value::Error(_) => content_val.to_string(),
     };
 
     // Attempt to write the file

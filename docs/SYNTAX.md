@@ -224,37 +224,37 @@ for-each ~dept in ~departments (
 )
 ```
 
-## Actions
+## Functions 
 
-Actions are reusable blocks of code that can be defined once and executed multiple times with different parameters. They provide a way to encapsulate logic and create custom functions in the language.
+Functions are reusable blocks of code that can be defined once and executed multiple times with different parameters. They provide a way to encapsulate logic in the language.
 
-### Action Definition
-Actions are defined using the `action` keyword followed by the action name and optional parameters:
+### Function Definition
+Function are defined using the `function` keyword followed by the function name and optional parameters:
 
-Basic action without parameters:
+Basic function without parameters:
 ```
-action greet (
+function greet (
     say "Hello, world!"
 )
 ```
 
 Action with parameters:
 ```
-action greet-person ~name (
+function greet-person ~name (
     say "Hello, " ~name "!"
 )
 ```
 
 Action with multiple parameters:
 ```
-action calculate-area ~width ~height (
+function calculate-area ~width ~height (
     ~area is ~width * ~height
     say "The area is " ~area
 )
 ```
 
-### Calling Actions
-Actions are invoked using the `*` prefix followed by the action name:
+### Calling a Function 
+Function are invoked using the `*` prefix followed by the function name:
 
 Without arguments:
 ```
@@ -267,10 +267,10 @@ With arguments:
 *calculate-area 10 20
 ```
 
-### Actions with Return Values
-Actions use the `give` keyword to return values:
+### Functions with Return Values
+Functions use the `give` keyword to return values:
 ```
-action add ~a ~b (
+function add ~a ~b (
     ~result is ~a + ~b
     give ~result
 )
@@ -279,14 +279,20 @@ action add ~a ~b (
 say ~sum  # outputs: 8
 ```
 
-### Nested Actions
-Actions can call other actions:
+The last statement in the function body will also be returned, so you can write tiny functions like this:
+```tails
+functions add ~a ~b ( ~a + ~b )
+
 ```
-action double ~n (
+
+### Nested Functions
+Functions can call other functions:
+```
+function double ~n (
     give ~n * 2
 )
 
-action quadruple ~n (
+function quadruple ~n (
     ~doubled is *double ~n
     give *double ~doubled
 )
@@ -295,27 +301,10 @@ action quadruple ~n (
 say ~value  # outputs: 20
 ```
 
-### Actions with Control Flow
-Actions can contain any valid language constructs including conditionals and loops:
-```
-action factorial ~n (
-    if ~n <= 1 (
-        give 1
-    ) else (
-        ~n-minus-one is ~n - 1
-        ~recursive is *factorial ~n-minus-one
-        give ~n * ~recursive
-    )
-)
-
-~fact-5 is *factorial 5
-say ~fact-5  # outputs: 120
-```
-
 ### Fibonacci Example
-A complete example demonstrating recursive actions:
+A complete example demonstrating recursive functions:
 ```
-action fibonacci ~n (
+function fibonacci ~n (
     if ~n <= 1 (
         give ~n
     ) else (
@@ -332,17 +321,17 @@ say "The 10th Fibonacci number is " ~fib-10
 ```
 
 ### Action Scope
-- Parameters are local to the action and don't affect variables in the calling scope
-- Variables defined inside an action are local to that action
-- Actions can access global variables (variables defined outside any action)
-- The `give` keyword is used to return a value from an action
+- Parameters are local to the function and don't affect variables in the calling scope
+- Variables defined inside an function are local to that function 
+- Functions can access global variables (variables defined outside any function)
+- The `give` keyword is used to return a value from a function 
 
 ### Best Practices
-1. Use descriptive action names that indicate what the action does
-2. Keep actions focused on a single task
-3. Use parameters to make actions reusable
-4. Use `give` to return values from actions
-5. Consider breaking complex actions into smaller, composable actions
+1. Use descriptive function names that indicate what the function does
+2. Keep functions focused on a single task
+3. Use parameters to make functions reusable
+4. Use `give` to return values from functions
+5. Consider breaking complex functions into smaller, composable functions
 
 ## Built-in Functions
 
@@ -624,7 +613,7 @@ loop (
 ```
 ## Standard Library
 
-Tails includes a comprehensive standard library for functional programming and common operations. Stdlib functions are called directly by name and take precedence over user-defined actions when resolving function names.
+Tails includes a comprehensive standard library for functional programming and common operations. Stdlib functions are called directly by name and take precedence over user-defined functions when resolving function names.
 
 ### List Operations
 ```tails
@@ -659,6 +648,129 @@ Tails includes a comprehensive standard library for functional programming and c
 ```
 
 **📖 See [STDLIB.md](STDLIB.md) for complete standard library documentation with examples and best practices.**
+
+## Error Handling
+
+Tails provides structured error handling through the `attempt`/`rescue` pattern, allowing you to gracefully handle errors without stopping program execution.
+
+### Basic Error Handling
+
+The `attempt`/`rescue` syntax catches errors and provides an alternative execution path:
+
+```tails
+attempt (
+    ~result is 10 / 0  # This will cause a division by zero error
+) rescue (
+    ~result is "Error occurred"
+)
+say ~result  # outputs: Error occurred
+```
+
+### Capturing Error Information
+
+You can capture the error details by providing a variable name after `rescue`:
+
+```tails
+attempt (
+    ~value is ~undefined_variable + 1
+) rescue ~error (
+    say "Caught error: " ~error
+    say "Error type: " ~error.message
+)
+```
+
+### Error Object Structure
+
+When an error is caught, it becomes an `Error` value with the following properties:
+- `message`: A string describing what went wrong
+- `code`: Optional error code (currently unused, reserved for future use)
+- `source`: Optional source information (currently unused)
+- `context`: Optional additional context (currently unused)
+
+### Nested Error Handling
+
+Error handling blocks can be nested for complex error recovery scenarios:
+
+```tails
+attempt (
+    attempt (
+        ~risky_operation is some_dangerous_function
+    ) rescue (
+        say "Inner error caught, trying fallback"
+        ~risky_operation is fallback_function
+    )
+    ~final_result is ~risky_operation * 2
+) rescue (
+    say "Both attempts failed"
+    ~final_result is 0
+)
+```
+
+### Error Propagation
+
+Errors in rescue blocks are still propagated. Only the attempt block is protected:
+
+```tails
+attempt (
+    ~value is ~undefined_var
+) rescue (
+    ~another_undefined is ~also_missing  # This error will still halt execution
+)
+```
+
+### Common Error Types
+
+Tails automatically creates errors for common failure scenarios:
+
+- **Division by zero**: `Division by zero`
+- **Undefined variables**: `Undefined variable: variable_name`
+- **Unknown functions**: `Unknown function: function_name`
+- **Type mismatches**: `Invalid operation: cannot add string and number`
+- **Property access errors**: `Cannot access property 'prop' on number`
+- **Date parsing errors**: `date-add first argument must be a date`
+
+### Error Values in Conditionals
+
+Error values are falsy in conditional expressions:
+
+```tails
+attempt (
+    ~result is ~undefined_variable
+) rescue ~err (
+    ~error_var is ~err
+)
+
+if ~error_var (
+    say "This won't execute - errors are falsy"
+) else (
+    say "Error occurred but handled gracefully"
+)
+```
+
+### Best Practices
+
+1. **Use for Expected Failures**: Use `attempt`/`rescue` for operations that might legitimately fail
+2. **Don't Hide Real Bugs**: Avoid using error handling to mask programming errors
+3. **Provide Meaningful Fallbacks**: Ensure rescue blocks provide sensible default behavior
+4. **Log Error Details**: Always log or handle the error information appropriately
+
+```tails
+# Good: Handle expected file operations
+attempt (
+    ~config is read "config.json"
+) rescue ~err (
+    say "Config file not found, using defaults"
+    ~config is {"theme": "default", "debug": false}
+)
+
+# Good: Handle user input validation
+attempt (
+    ~number is parse_number ~user_input
+) rescue (
+    say "Invalid number entered, please try again"
+    ~number is 0
+)
+```
 
 ## Design Principles
 - **Simplicity**: Minimal syntax, easy to parse

@@ -52,6 +52,7 @@ impl Evaluator {
             Value::List(l) => !l.is_empty(),
             Value::Object(o) => !o.is_empty(),
             Value::Date(_) => true, // Dates are always truthy
+            Value::Error(_) => false, // Errors are falsy
             Value::Null => false,
         }
     }
@@ -376,6 +377,9 @@ impl Evaluator {
             Statement::Give(expr) => {
                 let value = self.eval_expression(expr)?;
                 Ok((value.clone(), ControlFlow::Give(value)))
+            }
+            Statement::AttemptRescue { attempt_body, rescue_var, rescue_body } => {
+                self.eval_attempt_rescue(attempt_body, rescue_var, rescue_body)
             }
         }
     }
@@ -1054,6 +1058,56 @@ impl Evaluator {
 
         // If no explicit give, return the last value
         Ok(last_value)
+    }
+
+    fn eval_attempt_rescue(&mut self, attempt_body: Vec<Statement>, rescue_var: Option<String>, rescue_body: Vec<Statement>) -> EvalResult {
+        // Try to execute the attempt block
+        let mut last_value = Value::Null;
+        for stmt in attempt_body {
+            match self.eval_statement_with_control(stmt) {
+                Ok((value, control)) => {
+                    last_value = value;
+                    match control {
+                        ControlFlow::Continue => {},
+                        // If we get BreakLoop or Give, propagate it
+                        flow => return Ok((last_value, flow)),
+                    }
+                }
+                Err(error_msg) => {
+                    // An error occurred, create an error value and run rescue block
+                    let error_value = Value::Error(crate::value::ErrorValue::new(error_msg));
+
+                    // If rescue variable is specified, bind the error to it
+                    if let Some(var_name) = rescue_var {
+                        self.set_variable(var_name, error_value);
+                    }
+
+                    // Execute rescue block
+                    let mut rescue_value = Value::Null;
+                    for rescue_stmt in rescue_body {
+                        match self.eval_statement_with_control(rescue_stmt) {
+                            Ok((value, control)) => {
+                                rescue_value = value;
+                                match control {
+                                    ControlFlow::Continue => {},
+                                    // If we get BreakLoop or Give in rescue, propagate it
+                                    flow => return Ok((rescue_value, flow)),
+                                }
+                            }
+                            Err(rescue_error) => {
+                                // Error in rescue block still propagates
+                                return Err(rescue_error);
+                            }
+                        }
+                    }
+
+                    return Ok((rescue_value, ControlFlow::Continue));
+                }
+            }
+        }
+
+        // No error occurred, return the last value from attempt block
+        Ok((last_value, ControlFlow::Continue))
     }
 }
 

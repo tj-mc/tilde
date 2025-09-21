@@ -52,6 +52,8 @@ impl Parser {
                 | Token::Loop
                 | Token::Breakloop
                 | Token::Open
+                | Token::Attempt
+                | Token::Rescue
         )
     }
 

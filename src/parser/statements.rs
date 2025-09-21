@@ -113,6 +113,7 @@ impl Parser {
                 let expr = self.parse_expression()?;
                 Ok(Statement::Give(expr))
             }
+            Token::Attempt => self.parse_attempt_rescue(),
             _ => {
                 let expr = self.parse_expression()?;
                 Ok(Statement::Expression(expr))
@@ -269,6 +270,57 @@ impl Parser {
             name,
             params,
             body,
+        })
+    }
+
+    pub fn parse_attempt_rescue(&mut self) -> Result<Statement, String> {
+        self.expect(Token::Attempt)?;
+        self.expect(Token::LeftParen)?;
+        self.skip_newlines();
+
+        // Parse attempt body
+        let mut attempt_body = Vec::new();
+        while *self.current_token() != Token::RightParen && *self.current_token() != Token::Eof {
+            self.skip_newlines();
+            if *self.current_token() == Token::RightParen {
+                break;
+            }
+            attempt_body.push(self.parse_statement()?);
+            self.skip_newlines();
+        }
+
+        self.expect(Token::RightParen)?;
+        self.expect(Token::Rescue)?;
+
+        // Check for optional rescue variable
+        let rescue_var = if let Token::Variable(var_name) = self.current_token() {
+            let var = var_name.clone();
+            self.advance();
+            Some(var)
+        } else {
+            None
+        };
+
+        self.expect(Token::LeftParen)?;
+        self.skip_newlines();
+
+        // Parse rescue body
+        let mut rescue_body = Vec::new();
+        while *self.current_token() != Token::RightParen && *self.current_token() != Token::Eof {
+            self.skip_newlines();
+            if *self.current_token() == Token::RightParen {
+                break;
+            }
+            rescue_body.push(self.parse_statement()?);
+            self.skip_newlines();
+        }
+
+        self.expect(Token::RightParen)?;
+
+        Ok(Statement::AttemptRescue {
+            attempt_body,
+            rescue_var,
+            rescue_body,
         })
     }
 }

@@ -41,6 +41,8 @@ pub enum Token {
     Clear,
     Up,
     Down,
+    Attempt,
+    Rescue,
 
     // Operators
     Plus,
@@ -517,6 +519,8 @@ impl Lexer {
                         "clear" => Token::Clear,
                         "up" => Token::Up,
                         "down" => Token::Down,
+                        "attempt" => Token::Attempt,
+                        "rescue" => Token::Rescue,
                         "true" => Token::Boolean(true),
                         "false" => Token::Boolean(false),
                         _ => Token::Identifier(ident),

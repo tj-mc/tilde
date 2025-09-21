@@ -41,6 +41,11 @@ pub enum Statement {
         body: Vec<Statement>,
     },
     Give(Expression),
+    AttemptRescue {
+        attempt_body: Vec<Statement>,
+        rescue_var: Option<String>,
+        rescue_body: Vec<Statement>,
+    },
     Expression(Expression),
 }
 

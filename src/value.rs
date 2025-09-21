@@ -10,7 +10,42 @@ pub enum Value {
     List(Vec<Value>),
     Object(HashMap<String, Value>),
     Date(DateTime<Utc>),
+    Error(ErrorValue),
     Null,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ErrorValue {
+    pub message: String,
+    pub code: Option<String>,
+    pub source: Option<String>,
+    pub context: HashMap<String, Value>,
+}
+
+impl ErrorValue {
+    pub fn new(message: impl Into<String>) -> Self {
+        ErrorValue {
+            message: message.into(),
+            code: None,
+            source: None,
+            context: HashMap::new(),
+        }
+    }
+
+    pub fn with_code(mut self, code: impl Into<String>) -> Self {
+        self.code = Some(code.into());
+        self
+    }
+
+    pub fn with_source(mut self, source: impl Into<String>) -> Self {
+        self.source = Some(source.into());
+        self
+    }
+
+    pub fn with_context(mut self, key: impl Into<String>, value: Value) -> Self {
+        self.context.insert(key.into(), value);
+        self
+    }
 }
 
 impl Value {
@@ -23,6 +58,7 @@ impl Value {
             Value::List(l) => !l.is_empty(),
             Value::Object(map) => !map.is_empty(),
             Value::Date(_) => true, // Dates are always truthy
+            Value::Error(_) => false, // Errors are falsy
         }
     }
 }
@@ -48,6 +84,7 @@ impl fmt::Display for Value {
                 write!(f, "{{{}}}", pairs.join(", "))
             }
             Value::Date(dt) => write!(f, "{}", dt.format("%Y-%m-%dT%H:%M:%SZ")),
+            Value::Error(err) => write!(f, "Error: {}", err.message),
             Value::Null => write!(f, "null"),
         }
     }
