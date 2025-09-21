@@ -67,9 +67,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Terminal Control**: `clear` function for screen clearing in animations/games
 - **Negative Number Literals**: Direct support for negative numbers (e.g., `-42`, `-3.14`)
 - **Advanced Examples**:
-  - `stdlib_demo.tails` - Comprehensive standard library showcase
-  - `functional_programming.tails` - Real-world functional programming patterns
-  - `foreach_advanced.tails` - Advanced iteration techniques
+  - `stdlib_demo.tilde` - Comprehensive standard library showcase
+  - `functional_programming.tilde` - Real-world functional programming patterns
+  - `foreach_advanced.tilde` - Advanced iteration techniques
   - Multiple graphics examples (bouncing ball, matrix rain, simple game)
 
 ### Enhanced
@@ -100,7 +100,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2025-01-17
 
 ### Added
-- Initial public release of Tails scripting language
+- Initial public release of Tilde scripting language
 - Core language features:
   - `~` prefix variable notation
   - String interpolation with backticks
@@ -118,20 +118,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Linux x64
   - macOS (Intel & Apple Silicon)
   - Windows x64
-- Web REPL at https://tj-mc.github.io/tails/
+- Web REPL at https://tj-mc.github.io/tilde/
 - WebAssembly support for browser execution
 - Comprehensive documentation and examples
 - Performance testing and benchmarking tools
 - Automated CI/CD with GitHub Actions
 
-### Technical Details
+### Technical Detilde
 - Written in Rust with full type safety
 - WASM-compatible architecture
 - Comprehensive test suite (121+ tests)
 - Memory-efficient interpreter design
 - Cross-platform HTTP client support
 
-[unreleased]: https://github.com/tj-mc/tails/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/tj-mc/tails/compare/v0.1.3...v0.2.0
-[0.1.3]: https://github.com/tj-mc/tails/compare/v0.1.0...v0.1.3
-[0.1.0]: https://github.com/tj-mc/tails/releases/tag/v0.1.0
+[unreleased]: https://github.com/tj-mc/tilde/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/tj-mc/tilde/compare/v0.1.3...v0.2.0
+[0.1.3]: https://github.com/tj-mc/tilde/compare/v0.1.0...v0.1.3
+[0.1.0]: https://github.com/tj-mc/tilde/releases/tag/v0.1.0

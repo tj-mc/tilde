@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Automated Release Script for Tails
+# Automated Release Script for Tilde
 # This script automates the entire release process
 
 set -e
@@ -101,7 +101,7 @@ cargo build --release --quiet
 print_success "Release binary built successfully"
 
 # Verify version in binary
-BINARY_VERSION=$(./target/release/tails --version | grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' | sed 's/v//')
+BINARY_VERSION=$(./target/release/tilde --version | grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' | sed 's/v//')
 if [ "$BINARY_VERSION" != "$NEW_VERSION" ]; then
     print_error "Binary version ($BINARY_VERSION) doesn't match expected version ($NEW_VERSION)"
 fi
@@ -177,8 +177,8 @@ See CHANGELOG.md for complete release notes."
     # Step 8: Wait for and monitor GitHub Actions
     print_step "Monitoring GitHub Actions release"
     print_info "GitHub Actions workflow should start automatically..."
-    print_info "You can monitor the release at: https://github.com/tj-mc/tails/actions"
-    print_info "Release will be available at: https://github.com/tj-mc/tails/releases/tag/v$NEW_VERSION"
+    print_info "You can monitor the release at: https://github.com/tj-mc/tilde/actions"
+    print_info "Release will be available at: https://github.com/tj-mc/tilde/releases/tag/v$NEW_VERSION"
 
 else
     print_warning "DRY RUN: Would commit and push tag v$NEW_VERSION"
@@ -192,9 +192,9 @@ if [ -z "$DRY_RUN" ]; then
     print_success "🎉 Release v$NEW_VERSION initiated successfully!"
     echo
     echo "Next steps:"
-    echo "  📦 Monitor GitHub Actions: https://github.com/tj-mc/tails/actions"
-    echo "  📋 Check release page: https://github.com/tj-mc/tails/releases/tag/v$NEW_VERSION"
-    echo "  🌐 Web REPL will auto-update: https://tj-mc.github.io/tails/"
+    echo "  📦 Monitor GitHub Actions: https://github.com/tj-mc/tilde/actions"
+    echo "  📋 Check release page: https://github.com/tj-mc/tilde/releases/tag/v$NEW_VERSION"
+    echo "  🌐 Web REPL will auto-update: https://tj-mc.github.io/tilde/"
     echo "  📢 Consider announcing the release!"
     echo
     print_info "The GitHub Actions workflow will:"

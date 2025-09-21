@@ -10,12 +10,12 @@ We release patches for security vulnerabilities for the following versions:
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in Tails, please report it responsibly:
+If you discover a security vulnerability in Tilde, please report it responsibly:
 
 ### How to Report
 
 1. **Do NOT** open a public GitHub issue for security vulnerabilities
-2. Send an email to the maintainer with details about the vulnerability
+2. Send an email to the maintainer with detilde about the vulnerability
 3. Include as much information as possible:
    - Description of the vulnerability
    - Steps to reproduce the issue
@@ -31,12 +31,12 @@ If you discover a security vulnerability in Tails, please report it responsibly:
 
 ### Security Considerations
 
-Tails is a scripting language interpreter that can:
+Tilde is a scripting language interpreter that can:
 - Execute system commands through shell integration
 - Make HTTP requests to external services
 - Read and write files through script execution
 
-When using Tails:
+When using Tilde:
 - Only run trusted scripts from known sources
 - Be cautious with scripts that make network requests
 - Review scripts that interact with the file system
@@ -50,4 +50,4 @@ When using Tails:
 4. **File Permissions**: Understand what file operations a script performs
 5. **Environment Isolation**: Use containers or VMs for untrusted code
 
-Thank you for helping keep Tails and its users safe!
+Thank you for helping keep Tilde and its users safe!

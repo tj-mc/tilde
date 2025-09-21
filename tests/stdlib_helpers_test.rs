@@ -1,6 +1,6 @@
-use tails::evaluator::Evaluator;
-use tails::parser::Parser;
-use tails::value::Value;
+use tilde::evaluator::Evaluator;
+use tilde::parser::Parser;
+use tilde::value::Value;
 
 // ============================================================================
 // PREDICATE FUNCTION TESTS

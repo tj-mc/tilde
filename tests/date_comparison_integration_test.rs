@@ -1,4 +1,4 @@
-use tails::{evaluator::Evaluator, parser::Parser};
+use tilde::{evaluator::Evaluator, parser::Parser};
 
 #[test]
 fn test_date_comparison_basic() {

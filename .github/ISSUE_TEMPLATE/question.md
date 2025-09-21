@@ -1,6 +1,6 @@
 ---
 name: Question
-about: Ask a question about using Tails
+about: Ask a question about using Tilde
 title: '[QUESTION] '
 labels: question
 assignees: ''
@@ -18,15 +18,15 @@ If applicable, describe what you've already attempted:
 ## Context
 Help us understand your situation:
 - What are you trying to accomplish?
-- What's your experience level with Tails?
+- What's your experience level with Tilde?
 - Are you migrating from another language?
 
 ## Code Example
 If relevant, provide a code example:
-```tails
+```tilde
 # Your current code or what you're trying to achieve
 ~example is "show us what you're working on"
 ```
 
 ## Additional Information
-Any other details that might help us answer your question.
+Any other detilde that might help us answer your question.

@@ -1,7 +1,7 @@
 # Development
 ## Project Overview
 
-This is a Rust project implementing the Tails scripting language - a simple, readable language. The interpreter provides a full REPL experience with multiline support and file execution.
+This is a Rust project implementing the Tilde scripting language - a simple, readable language. The interpreter provides a full REPL experience with multiline support and file execution.
 
 ## Design Philosophy
 
@@ -31,7 +31,7 @@ Our design priorities (in order):
 ### Performance Analysis (Zero Dependencies)
 - `cargo build --release` - Optimized builds for performance testing
 - `RUSTFLAGS=-g cargo build --release` - Release with debug symbols for profiling
-- `time cargo run large_program.tails` - Basic execution timing
+- `time cargo run large_program.tilde` - Basic execution timing
 - Native OS tools: `time`, `top`, Activity Monitor for system profiling
 
 ### Performance Testing & Benchmarking
@@ -39,13 +39,13 @@ Our design priorities (in order):
 **📊 See [PERFORMANCE_TESTING.md](PERFORMANCE_TESTING.md) for comprehensive performance testing guide**
 
 #### Quick Commands:
-- `./tools/perf_test.sh` - **FASTEST**: Quick Tails vs Bun comparison with auto-build
-- `cargo run --bin performance_main <file.tails>` - **NEW**: Identify bottlenecks (lexing vs parsing vs evaluation)
+- `./tools/perf_test.sh` - **FASTEST**: Quick Tilde vs Bun comparison with auto-build
+- `cargo run --bin performance_main <file.tilde>` - **NEW**: Identify bottlenecks (lexing vs parsing vs evaluation)
 - `./tools/production_benchmarks.sh` - **TRACKING**: CSV benchmarks for tracking over time
 - `cd benchmark_comparison && ./run_benchmarks.sh` - Full automated comparison with detailed analysis
 
 #### Current Performance Status:
-- **Tails**: ~200ms (⬇️ was ~340ms) - **1.6x improvement achieved**
+- **Tilde**: ~200ms (⬇️ was ~340ms) - **1.6x improvement achieved**
 - **Bun**: ~6ms (same benchmark)
 - **Performance Gap**: 33x slower (was 57x slower)
 - **Bottleneck**: 99.4% of time spent in evaluator (not parsing/lexing)
@@ -75,7 +75,7 @@ The interpreter is organized into clean, testable modules:
 - **plan.txt**: Implementation roadmap
 
 ### Procedures (procedures/)
-- **new-feature.md**: Standard procedure for adding new language features to Tails
+- **new-feature.md**: Standard procedure for adding new language features to Tilde
 
 ## Current Implementation Status
 

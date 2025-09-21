@@ -1,5 +1,5 @@
 use std::time::Instant;
-use tails::{evaluator::Evaluator, parser::Parser};
+use tilde::{evaluator::Evaluator, parser::Parser};
 
 fn main() {
     println!("💥 Tails Language Stress Tests");

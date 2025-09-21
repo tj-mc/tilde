@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Tails Language Benchmark Runner
+# Tilde Language Benchmark Runner
 # Runs benchmarks and commits results to performance log
 
-echo "🚀 Running Tails Language Performance Tests"
+echo "🚀 Running Tilde Language Performance Tests"
 echo "============================================="
 echo
 

@@ -1,5 +1,5 @@
 use std::fs;
-use tails::{evaluator::Evaluator, parser::Parser, value::Value};
+use tilde::{evaluator::Evaluator, parser::Parser, value::Value};
 
 fn create_test_file(filename: &str, content: &str) {
     fs::write(filename, content).unwrap();

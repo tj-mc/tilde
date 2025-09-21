@@ -1,5 +1,5 @@
-// Tails Web REPL - JavaScript Interface
-class TailsWebREPL {
+// Tilde Web REPL - JavaScript Interface
+class TildeWebREPL {
     constructor() {
         this.wasm = null;
         this.repl = null;
@@ -102,15 +102,15 @@ class TailsWebREPL {
             this.updateStatus('Loading WebAssembly module...');
 
             // Import the actual WASM module
-            const wasmModule = await import('./pkg/tails.js');
-            const { WasmTailsRepl, init } = wasmModule;
+            const wasmModule = await import('./pkg/tilde.js');
+            const { WasmTildeRepl, init } = wasmModule;
 
             // Initialize the WASM module first with default function, then call init
             await wasmModule.default();
             init();
 
             // Create the REPL instance
-            this.repl = new WasmTailsRepl();
+            this.repl = new WasmTildeRepl();
 
             // Update version display dynamically
             const version = this.repl.get_version();
@@ -120,12 +120,12 @@ class TailsWebREPL {
             this.updateStatus('Ready');
             const isMac = navigator.userAgent.includes('Mac') || /iPad|iPhone|iPod/.test(navigator.userAgent);
             const shortcutKey = isMac ? '⌘' : 'Ctrl';
-            this.addOutput(`Type your Tails code in the editor and click "Run Code" or press ${shortcutKey}+Enter.`, 'info');
+            this.addOutput(`Type your Tilde code in the editor and click "Run Code" or press ${shortcutKey}+Enter.`, 'info');
 
         } catch (error) {
             this.hideLoading();
             this.updateStatus('Error loading WASM');
-            this.addOutput(`Failed to load Tails WASM module: ${error.message}`, 'error');
+            this.addOutput(`Failed to load Tilde WASM module: ${error.message}`, 'error');
             console.error('WASM loading error:', error);
         }
     }
@@ -247,15 +247,15 @@ class TailsWebREPL {
 
 // Initialize the REPL when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-    new TailsWebREPL();
+    new TildeWebREPL();
 });
 
 // Global functions that WASM might call
-window.tailsPrompt = function(message) {
+window.tildePrompt = function(message) {
     return prompt(message) || '';
 };
 
-window.tailsClearConsole = function() {
+window.tildeClearConsole = function() {
     // Clear the output area in the web REPL
     const outputElement = document.getElementById('output');
     if (outputElement) {
@@ -263,7 +263,7 @@ window.tailsClearConsole = function() {
     }
 };
 
-window.tailsFetch = function(url) {
+window.tildeFetch = function(url) {
     // Note: This uses deprecated synchronous XMLHttpRequest for WASM compatibility
     // This will block the main thread but allows HTTP requests to work in WASM
     try {

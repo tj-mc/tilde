@@ -1,6 +1,6 @@
-# Adding a New Language Feature to Tails
+# Adding a New Language Feature to Tilde
 
-This document outlines the standard procedure for adding new features to the Tails programming language.
+This document outlines the standard procedure for adding new features to the Tilde programming language.
 
 ## Overview
 
@@ -213,7 +213,7 @@ Here's how the `ask` command was added following this procedure:
 
 ## Best Practices
 
-1. **Keep It Simple**: Follow Tails' philosophy of simplicity
+1. **Keep It Simple**: Follow Tilde' philosophy of simplicity
 2. **Consistency**: Match existing code patterns and style
 3. **Error Handling**: Provide clear error messages
 4. **Test Coverage**: Write comprehensive tests

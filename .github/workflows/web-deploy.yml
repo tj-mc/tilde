@@ -1,4 +1,4 @@
-name: Deploy Tails Web REPL to GitHub Pages
+name: Deploy Tilde Web REPL to GitHub Pages
 
 on:
   push:

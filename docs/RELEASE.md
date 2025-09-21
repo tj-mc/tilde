@@ -1,10 +1,10 @@
-# 🚀 Tails Release Process
+# 🚀 Tilde Release Process
 
-This document outlines the complete process for creating and publishing Tails releases.
+This document outlines the complete process for creating and publishing Tilde releases.
 
 ## Prerequisites
 
-- Repository must be pushed to GitHub (`tj-mc/tails`)
+- Repository must be pushed to GitHub (`tj-mc/tilde`)
 - GitHub Actions must be enabled
 - All changes committed and pushed to `main` branch
 
@@ -22,7 +22,7 @@ cargo test
 
 # Build locally to verify
 cargo build --release
-./target/release/tails --version
+./target/release/tilde --version
 ```
 
 ### 2. Create and Push Tag
@@ -50,10 +50,10 @@ git push origin v0.1.0
 1. Go to **Releases** tab in GitHub repository
 2. Confirm new release `v0.1.0` was created automatically
 3. Check that all binary archives are attached:
-   - `tails-v0.1.0-linux-x64.tar.gz`
-   - `tails-v0.1.0-windows-x64.zip`
-   - `tails-v0.1.0-macos-intel.tar.gz`
-   - `tails-v0.1.0-macos-arm64.tar.gz`
+   - `tilde-v0.1.0-linux-x64.tar.gz`
+   - `tilde-v0.1.0-windows-x64.zip`
+   - `tilde-v0.1.0-macos-intel.tar.gz`
+   - `tilde-v0.1.0-macos-arm64.tar.gz`
 
 ### 5. Test Installation
 
@@ -61,16 +61,16 @@ Test the install script works:
 
 ```bash
 # Test install script (use a clean environment/container if possible)
-curl -sSL https://raw.githubusercontent.com/tj-mc/tails/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/tj-mc/tilde/main/install.sh | bash
 
 # Verify global installation
-tails --version
-tails --help
+tilde --version
+tilde --help
 
 # Test basic functionality
-echo '~name is "World"' > test.tails
-echo 'say "Hello, " ~name "!"' >> test.tails
-tails test.tails
+echo '~name is "World"' > test.tilde
+echo 'say "Hello, " ~name "!"' >> test.tilde
+tilde test.tilde
 ```
 
 ## Manual Release (Alternative)
@@ -83,7 +83,7 @@ If GitHub Actions fails, you can create releases manually:
 # Build for current platform
 ./tools/build_release.sh
 
-# This creates: releases/v0.1.0/tails-v0.1.0-*.tar.gz
+# This creates: releases/v0.1.0/tilde-v0.1.0-*.tar.gz
 ```
 
 ### 2. Create GitHub Release
@@ -95,8 +95,8 @@ If GitHub Actions fails, you can create releases manually:
 
 # Create release and upload artifacts
 gh release create v0.1.0 \
-  --title "Tails v0.1.0" \
-  --notes "First release of Tails scripting language" \
+  --title "Tilde v0.1.0" \
+  --notes "First release of Tilde scripting language" \
   releases/v0.1.0/*.tar.gz releases/v0.1.0/*.zip
 ```
 
@@ -138,7 +138,7 @@ gh release create v0.1.0 \
 - Verify the release artifacts exist and are publicly downloadable
 - Test download URLs manually:
   ```bash
-  curl -I https://github.com/tj-mc/tails/releases/download/v0.1.0/tails-v0.1.0-linux-x64.tar.gz
+  curl -I https://github.com/tj-mc/tilde/releases/download/v0.1.0/tilde-v0.1.0-linux-x64.tar.gz
   ```
 
 ### Binary Issues
@@ -157,7 +157,7 @@ gh release create v0.1.0 \
 - [ ] GitHub Actions completed successfully
 - [ ] Release created with all binary artifacts
 - [ ] Install script tested
-- [ ] Global `tails` command works
+- [ ] Global `tilde` command works
 - [ ] Basic functionality verified
 
 ## Post-Release

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Tails Binary Distribution Build Script
+# Tilde Binary Distribution Build Script
 # Builds release binaries for multiple platforms
 
 set -e
@@ -8,7 +8,7 @@ set -e
 VERSION=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
 RELEASE_DIR="releases/v$VERSION"
 
-echo "🐈‍⬛ Building Tails v$VERSION for distribution..."
+echo "🐈‍⬛ Building Tilde v$VERSION for distribution..."
 
 # Create release directory
 mkdir -p "$RELEASE_DIR"
@@ -36,9 +36,9 @@ for target in "${TARGETS[@]}"; do
 
     # Determine binary extension
     if [[ "$target" == *"windows"* ]]; then
-        binary_name="tails.exe"
+        binary_name="tilde.exe"
     else
-        binary_name="tails"
+        binary_name="tilde"
     fi
 
     # Build the binary
@@ -63,9 +63,9 @@ for target in "${TARGETS[@]}"; do
         # Create archive
         cd "$RELEASE_DIR"
         if [[ "$target" == *"windows"* ]]; then
-            zip -r "tails-v$VERSION-$target.zip" "$target"
+            zip -r "tilde-v$VERSION-$target.zip" "$target"
         else
-            tar -czf "tails-v$VERSION-$target.tar.gz" "$target"
+            tar -czf "tilde-v$VERSION-$target.tar.gz" "$target"
         fi
         cd - > /dev/null
 

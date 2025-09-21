@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Simple Performance Test - Just the essentials
-echo "🚀 Performance Test: Tails vs Bun"
+echo "🚀 Performance Test: Tilde vs Bun"
 echo "=================================="
 
 # Build release (suppress warnings)
@@ -9,10 +9,10 @@ echo "📦 Building release..."
 cargo build --release > /dev/null 2>&1
 
 echo ""
-echo "🧪 Testing Tails (3 runs):"
+echo "🧪 Testing Tilde (3 runs):"
 for i in {1..3}; do
     echo -n "  Run $i: "
-    time ./target/release/tails benchmark_comparison/benchmark_final.tails > /dev/null
+    time ./target/release/tilde benchmark_comparison/benchmark_final.tilde > /dev/null
 done
 
 echo ""
@@ -28,4 +28,4 @@ fi
 
 echo ""
 echo "✅ Test complete! Focus on the 'user' times above."
-echo "   Typical results: Tails ~200ms, Bun ~5ms"
+echo "   Typical results: Tilde ~200ms, Bun ~5ms"

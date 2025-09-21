@@ -1,12 +1,12 @@
-# Contributing to Tails
+# Contributing to Tilde
 
-Thank you for your interest in contributing to Tails! This document provides guidelines and information for contributors.
+Thank you for your interest in contributing to Tilde! This document provides guidelines and information for contributors.
 
 ## Ways to Contribute
 
 - 🐛 **Report bugs** - Help us identify and fix issues
 - 💡 **Suggest features** - Share ideas for language improvements
-- 📝 **Improve documentation** - Help make Tails more accessible
+- 📝 **Improve documentation** - Help make Tilde more accessible
 - 🧪 **Write tests** - Increase code coverage and reliability
 - 🔧 **Submit code changes** - Fix bugs or implement features
 - 🌐 **Improve examples** - Create helpful sample scripts
@@ -17,8 +17,8 @@ Thank you for your interest in contributing to Tails! This document provides gui
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/tj-mc/tails.git
-   cd tails
+   git clone https://github.com/tj-mc/tilde.git
+   cd tilde
    ```
 
 2. **Install Rust** (if you haven't already)
@@ -44,7 +44,7 @@ Thank you for your interest in contributing to Tails! This document provides gui
 - `src/evaluator.rs` - Executes parsed code
 - `src/ast.rs` - AST data structures
 - `src/value.rs` - Runtime value types
-- `examples/` - Sample Tails scripts
+- `examples/` - Sample Tilde scripts
 - `docs/` - Documentation files
 - `tests/` - Integration tests
 
@@ -119,7 +119,7 @@ cargo test -- --nocapture
 
 ## Language Design Principles
 
-When contributing to Tails, keep these principles in mind:
+When contributing to Tilde, keep these principles in mind:
 
 1. **Readability First** - Code should be self-explanatory
 2. **Simplicity** - Prefer simple solutions over complex ones
@@ -132,7 +132,7 @@ When contributing to Tails, keep these principles in mind:
 ### Bug Reports
 
 Please include:
-- Tails version (`tails --version`)
+- Tilde version (`tilde --version`)
 - Operating system and version
 - Minimal example that reproduces the issue
 - Expected vs actual behavior
@@ -173,8 +173,8 @@ This ensures version consistency across:
 
 ## License
 
-By contributing to Tails, you agree that your contributions will be licensed under the same MIT license that covers the project.
+By contributing to Tilde, you agree that your contributions will be licensed under the same MIT license that covers the project.
 
 ---
 
-Thank you for helping make Tails better! 🐈‍⬛
+Thank you for helping make Tilde better! 🐈‍⬛

@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Tails Web REPL Build Script
+# Tilde Web REPL Build Script
 # This script builds the Rust code to WebAssembly and prepares it for web deployment
 
 set -e
 
-echo "🐈‍⬛ Building Tails Web REPL..."
+echo "🐈‍⬛ Building Tilde Web REPL..."
 
 # Check if wasm-pack is installed
 if ! command -v wasm-pack &> /dev/null; then
@@ -32,16 +32,16 @@ if [ ! -f web/package.json ]; then
     echo "📦 Creating package.json..."
     cat > web/package.json << EOF
 {
-  "name": "tails-web-repl",
+  "name": "tilde-web-repl",
   "version": "0.4.0",
-  "description": "Tails Scripting Language Web REPL",
+  "description": "Tilde Scripting Language Web REPL",
   "main": "repl.js",
   "type": "module",
   "scripts": {
     "build": "../build-web.sh",
     "serve": "python3 -m http.server 8000"
   },
-  "keywords": ["tails", "repl", "wasm", "scripting"],
+  "keywords": ["tilde", "repl", "wasm", "scripting"],
   "author": "Tom McIntosh",
   "license": "MIT"
 }

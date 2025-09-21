@@ -1,14 +1,14 @@
-# Tails Cloud Platform Vision
+# Tilde Cloud Platform Vision
 
 ## Overview
 
-The Tails Cloud Platform will enable users to write simple Tails scripts in a web-based GUI and deploy them instantly as scalable cloud applications. This platform bridges the gap between simple scripting and modern cloud deployment, making backend development accessible to non-technical users while remaining powerful for developers.
+The Tilde Cloud Platform will enable users to write simple Tilde scripts in a web-based GUI and deploy them instantly as scalable cloud applications. This platform bridges the gap between simple scripting and modern cloud deployment, making backend development accessible to non-technical users while remaining powerful for developers.
 
 ## Vision Statement
 
 **"Write a script, deploy an app."**
 
-Users should be able to create data processing APIs, webhook handlers, and simple web services using Tails' intuitive syntax, then deploy them to the cloud with a single click—no Docker knowledge, server management, or complex configuration required.
+Users should be able to create data processing APIs, webhook handlers, and simple web services using Tilde' intuitive syntax, then deploy them to the cloud with a single click—no Docker knowledge, server management, or complex configuration required.
 
 ## Target Use Cases
 
@@ -52,7 +52,7 @@ Users should be able to create data processing APIs, webhook handlers, and simpl
 - ✅ Integration tests covering all major use cases
 
 **Example Working Syntax**:
-```tails
+```tilde
 # GET request with headers
 ~response is get "https://api.example.com/users" {
     "headers": {"Authorization": "Bearer token"},
@@ -95,7 +95,7 @@ attempt (
 - CORS middleware for web integration
 
 **Example Syntax**:
-```tails
+```tilde
 server listen (env "PORT" or 8080)
 
 route GET "/api/users" (
@@ -121,7 +121,7 @@ route POST "/api/users" (
 - Enhanced file I/O with streaming
 
 **Example Syntax**:
-```tails
+```tilde
 ~db is db-connect (env "DATABASE_URL")
 
 route GET "/api/users" (
@@ -181,7 +181,7 @@ route POST "/api/users" (
 
 ### Code Editor
 - **Monaco Editor**: VS Code-like editing experience
-- **Syntax Highlighting**: Custom Tails language support
+- **Syntax Highlighting**: Custom Tilde language support
 - **Auto-completion**: Context-aware suggestions
 - **Error Detection**: Real-time syntax and logic validation
 - **Code Formatting**: Automatic code formatting and style enforcement
@@ -230,7 +230,7 @@ route POST "/api/users" (
 ### Unique Value Proposition
 **"The simplest way to create and deploy backend services."**
 
-Tails Cloud Platform sits between no-code tools (too limiting) and full development platforms (too complex), providing the perfect balance of simplicity and power for common backend tasks.
+Tilde Cloud Platform sits between no-code tools (too limiting) and full development platforms (too complex), providing the perfect balance of simplicity and power for common backend tasks.
 
 ## Success Metrics
 
@@ -249,7 +249,7 @@ Tails Cloud Platform sits between no-code tools (too limiting) and full developm
 ## Implementation Strategy
 
 ### Technology Stack
-- **Runtime**: Rust-based Tails interpreter for performance and safety
+- **Runtime**: Rust-based Tilde interpreter for performance and safety
 - **Web Frontend**: React/TypeScript with Monaco Editor
 - **Infrastructure**: Kubernetes for container orchestration
 - **Database**: PostgreSQL for application data, Redis for caching
@@ -262,4 +262,4 @@ Tails Cloud Platform sits between no-code tools (too limiting) and full developm
 4. **Production Launch** (1 month): Public release with full features
 5. **Growth & Optimization** (Ongoing): Scale and enhance based on usage
 
-This vision represents a significant opportunity to democratize backend development while maintaining the power and flexibility that technical users require. The combination of Tails' simple syntax with modern cloud deployment creates a unique and valuable platform in the current market.
+This vision represents a significant opportunity to democratize backend development while maintaining the power and flexibility that technical users require. The combination of Tilde' simple syntax with modern cloud deployment creates a unique and valuable platform in the current market.

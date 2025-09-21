@@ -1,13 +1,13 @@
 [package]
-name = "tails"
+name = "tilde"
 version = "0.4.0"
 edition = "2024"
-default-run = "tails"
-description = "Tails Scripting Language Interpreter"
+default-run = "tilde"
+description = "Tilde Functional Programming Language"
 authors = ["Tom McIntosh"]
 license = "MIT"
-repository = "https://github.com/tj-mc/tails"
-keywords = ["scripting", "interpreter", "language", "tails", "automation"]
+repository = "https://github.com/tj-mc/tilde"
+keywords = ["scripting", "interpreter", "language", "tilde", "functional"]
 categories = ["development-tools"]
 
 [[bin]]

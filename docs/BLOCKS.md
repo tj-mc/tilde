@@ -1,12 +1,12 @@
-# Block Syntax in Tails
+# Block Syntax in Tilde
 
-Tails supports **block syntax** for organizing and accessing functions from different modules/namespaces. This allows you to explicitly specify which implementation of a function you want to use, and enables future module imports.
+Tilde supports **block syntax** for organizing and accessing functions from different modules/namespaces. This allows you to explicitly specify which implementation of a function you want to use, and enables future module imports.
 
 ## Syntax
 
 Block syntax uses colons on both sides: `:block_name:function_name`
 
-```tails
+```tilde
 :core:is-even 4
 :core:double 5
 :math:sqrt 16
@@ -28,7 +28,7 @@ The `:core:` block provides access to the standard library functions, bypassing 
 
 ## Priority Resolution
 
-Tails follows this priority order when resolving function names:
+Tilde follows this priority order when resolving function names:
 
 1. **Block syntax** (`:core:function`) - Always uses the specified block
 2. **User-defined functions** - Functions you define with `function`
@@ -38,7 +38,7 @@ Tails follows this priority order when resolving function names:
 
 ### Basic Usage
 
-```tails
+```tilde
 # Using core functions directly
 ~result is :core:is-even 4
 say ~result  # true
@@ -50,7 +50,7 @@ say ~doubled  # 10
 
 ### Priority Resolution Example
 
-```tails
+```tilde
 # Define a custom is-even that always returns false
 function is-even ~x (
     give false
@@ -67,7 +67,7 @@ say "Core result: " ~core_result  # Core result: true
 
 Block syntax works seamlessly with higher-order functions like `map`:
 
-```tails
+```tilde
 ~numbers is [1, 2, 3, 4, 5]
 
 # Using core function in map
@@ -81,7 +81,7 @@ say ~doubled  # [2, 4, 6, 8, 10]
 
 ### Mixed Usage
 
-```tails
+```tilde
 # You can mix user functions and core functions
 function custom-transform ~x (
     give ~x * 10
@@ -96,14 +96,14 @@ function custom-transform ~x (
 
 ### Unknown Block
 
-```tails
+```tilde
 ~result is :unknown:function 1
 # Error: Unknown block: unknown
 ```
 
 ### Unknown Function in Block
 
-```tails
+```tilde
 ~result is :core:unknown-function 1
 # Error: Unknown core function: unknown-function
 ```
@@ -112,7 +112,7 @@ function custom-transform ~x (
 
 The block syntax is designed to support future module imports:
 
-```tails
+```tilde
 # Future syntax (not yet implemented)
 import :math: from "math-lib"
 import :string: from "string-utils"
@@ -124,19 +124,19 @@ import :string: from "string-utils"
 ## Best Practices
 
 1. **Use `:core:` when you need guaranteed standard behavior**
-   ```tails
+   ```tilde
    # Ensure standard is-even logic even if user overrides it
    ~filtered is filter ~numbers :core:is-even
    ```
 
 2. **Prefer bare names for user-defined functions**
-   ```tails
+   ```tilde
    function my-custom-logic ~x ( ... )
    ~result is map ~data my-custom-logic
    ```
 
 3. **Use block syntax in libraries to avoid conflicts**
-   ```tails
+   ```tilde
    # In a library, use :core: to ensure predictable behavior
    function validate-positive ~x (
        if :core:is-positive ~x (
@@ -147,4 +147,4 @@ import :string: from "string-utils"
    )
    ```
 
-The block syntax provides a clean way to organize code and avoid naming conflicts while maintaining backward compatibility with existing Tails scripts.
+The block syntax provides a clean way to organize code and avoid naming conflicts while maintaining backward compatibility with existing Tilde scripts.

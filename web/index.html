@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>~tails 🐈‍⬛ Web REPL</title>
-    <meta name="description" content="Interactive Web REPL for the Tails - a scripting language for everyone. Start coding today in 5 seconds, no install required!">
+    <title>~tilde 🐈‍⬛ Web REPL</title>
+    <meta name="description" content="Interactive Web REPL for the Tilde - a scripting language for everyone. Start coding today in 5 seconds, no install required!">
 
-    <meta name="keywords" content="tails, scripting language, repl, webassembly, wasm, programming, interactive">
+    <meta name="keywords" content="tilde, scripting language, repl, webassembly, wasm, programming, interactive">
     <meta name="author" content="Tom McIntosh">
 
     <!-- Open Graph / Social Media -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Tails Scripting Language - Web REPL">
-    <meta property="og:description" content="Try the Tails scripting language directly in your browser! Interactive Web REPL">
-    <meta property="og:url" content="https://tj-mc.github.io/tails/">
+    <meta property="og:title" content="Tilde Scripting Language - Web REPL">
+    <meta property="og:description" content="Try the Tilde scripting language directly in your browser! Interactive Web REPL">
+    <meta property="og:url" content="https://tj-mc.github.io/tilde/">
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Tails Web REPL - Interactive Scripting Language">
-    <meta property="twitter:description" content="Try the Tails scripting language directly in your browser! Interactive Web REPL">
+    <meta name="twitter:title" content="Tilde Web REPL - Interactive Scripting Language">
+    <meta property="twitter:description" content="Try the Tilde scripting language directly in your browser! Interactive Web REPL">
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,11 +33,11 @@
         <!-- Header -->
         <header class="header">
             <div class="header-content">
-                <h1 class="title">~tails 🐈‍⬛ Web REPL</h1>
+                <h1 class="title">~tilde 🐈‍⬛ Web REPL</h1>
                 <p class="subtitle">Interpreted Programming Language</p>
             </div>
             <div class="header-actions">
-                <a href="https://github.com/tj-mc/tails" target="_blank" class="btn btn-tertiary github-link">
+                <a href="https://github.com/tj-mc/tilde" target="_blank" class="btn btn-tertiary github-link">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
                         <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
                     </svg>
@@ -88,7 +88,7 @@
                         <h4>Recursive Factorial</h4>
                         <p>Recursive functions and mathematical computations</p>
                     </div>
-                    <div class="example-item" data-code='~tasks is ["Learn Tails", "Build a project", "Share with friends"]\n~completed is [false, false, false]\n\nsay "📋 Todo List Manager"\nsay "=================="\n\nif ~completed.0 say "1. ✅ " ~tasks.0 else say "1. ⭕ " ~tasks.0\nif ~completed.1 say "2. ✅ " ~tasks.1 else say "2. ⭕ " ~tasks.1  \nif ~completed.2 say "3. ✅ " ~tasks.2 else say "3. ⭕ " ~tasks.2\n\nsay ""\nsay "Marking task 1 as complete..."\n~completed.0 is true\n\nsay ""\nsay "Updated list:"\nif ~completed.0 say "1. ✅ " ~tasks.0 else say "1. ⭕ " ~tasks.0\nif ~completed.1 say "2. ✅ " ~tasks.1 else say "2. ⭕ " ~tasks.1\nif ~completed.2 say "3. ✅ " ~tasks.2 else say "3. ⭕ " ~tasks.2'>
+                    <div class="example-item" data-code='~tasks is ["Learn Tilde", "Build a project", "Share with friends"]\n~completed is [false, false, false]\n\nsay "📋 Todo List Manager"\nsay "=================="\n\nif ~completed.0 say "1. ✅ " ~tasks.0 else say "1. ⭕ " ~tasks.0\nif ~completed.1 say "2. ✅ " ~tasks.1 else say "2. ⭕ " ~tasks.1  \nif ~completed.2 say "3. ✅ " ~tasks.2 else say "3. ⭕ " ~tasks.2\n\nsay ""\nsay "Marking task 1 as complete..."\n~completed.0 is true\n\nsay ""\nsay "Updated list:"\nif ~completed.0 say "1. ✅ " ~tasks.0 else say "1. ⭕ " ~tasks.0\nif ~completed.1 say "2. ✅ " ~tasks.1 else say "2. ⭕ " ~tasks.1\nif ~completed.2 say "3. ✅ " ~tasks.2 else say "3. ⭕ " ~tasks.2'>
                         <h4>Todo List Manager</h4>
                         <p>Lists and single-line conditionals</p>
                     </div>
@@ -114,7 +114,7 @@
                 <div class="input-section">
                     <label for="codeInput" class="input-label">Code Input</label>
                     <div class="editor-container">
-                        <textarea id="codeInput" placeholder="Enter your Tails code here...">~name is ask
+                        <textarea id="codeInput" placeholder="Enter your Tilde code here...">~name is ask
 say "Hello, " ~name</textarea>
                     </div>
                     <div class="input-actions">
@@ -139,7 +139,7 @@ say "Hello, " ~name</textarea>
         <!-- Loading indicator -->
         <div id="loadingIndicator" class="loading-indicator">
             <div class="spinner"></div>
-            <p>Loading Tails WebAssembly module...</p>
+            <p>Loading Tilde WebAssembly module...</p>
         </div>
 
         <!-- Status bar -->

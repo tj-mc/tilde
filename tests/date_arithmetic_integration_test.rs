@@ -1,4 +1,4 @@
-use tails::{evaluator::Evaluator, parser::Parser};
+use tilde::{evaluator::Evaluator, parser::Parser};
 
 #[test]
 fn test_date_arithmetic_basic() {
@@ -25,7 +25,7 @@ fn test_date_arithmetic_basic() {
     assert_eq!(minus_five.to_string(), "2024-03-10T00:00:00Z");
 
     // diff is now an object with multiple time units
-    if let tails::value::Value::Object(diff_obj) = diff {
+    if let tilde::value::Value::Object(diff_obj) = diff {
         let days = diff_obj.get("days").unwrap();
         assert_eq!(days.to_string(), "10");
     } else {
@@ -54,7 +54,7 @@ fn test_date_arithmetic_with_datetime() {
     assert_eq!(next_week.to_string(), "2024-03-22T14:30:00Z");
 
     // days_until is now an object
-    if let tails::value::Value::Object(diff_obj) = days_until {
+    if let tilde::value::Value::Object(diff_obj) = days_until {
         let days = diff_obj.get("days").unwrap();
         assert_eq!(days.to_string(), "7");
     } else {
@@ -82,14 +82,14 @@ fn test_date_arithmetic_negative_diff() {
     let backward_diff = evaluator.get_variable("backward_diff").unwrap();
 
     // Both diffs are now objects
-    if let tails::value::Value::Object(forward_obj) = forward_diff {
+    if let tilde::value::Value::Object(forward_obj) = forward_diff {
         let days = forward_obj.get("days").unwrap();
         assert_eq!(days.to_string(), "10");
     } else {
         panic!("Expected forward_diff to be an object");
     }
 
-    if let tails::value::Value::Object(backward_obj) = backward_diff {
+    if let tilde::value::Value::Object(backward_obj) = backward_diff {
         let days = backward_obj.get("days").unwrap();
         assert_eq!(days.to_string(), "-10");
     } else {

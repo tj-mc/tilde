@@ -3,7 +3,7 @@ use std::fs::OpenOptions;
 use std::io::Write;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Instant;
-use tails::{evaluator::Evaluator, parser::Parser};
+use tilde::{evaluator::Evaluator, parser::Parser};
 
 // Custom allocator to track memory usage (zero dependencies!)
 struct TrackingAllocator {

@@ -1,7 +1,7 @@
 {
-  "name": "tails-web-repl",
+  "name": "tilde-web-repl",
   "version": "0.4.0",
-  "description": "Tails Scripting Language Web REPL",
+  "description": "Tilde Scripting Language Web REPL",
   "main": "repl.js",
   "type": "module",
   "scripts": {
@@ -9,13 +9,13 @@
     "serve": "python3 -m http.server 8000",
     "dev": "../serve-web.sh"
   },
-  "keywords": ["tails", "repl", "wasm", "scripting", "language"],
+  "keywords": ["tilde", "repl", "wasm", "scripting", "language"],
   "author": "Tom McIntosh",
   "license": "MIT",
-  "homepage": "https://tj-mc.github.io/tails/",
+  "homepage": "https://tj-mc.github.io/tilde/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tj-mc/tails.git"
+    "url": "https://github.com/tj-mc/tilde.git"
   },
   "devDependencies": {
     "http-server": "^14.1.1"

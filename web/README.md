@@ -1,12 +1,12 @@
-# Tails Web REPL 🐈‍⬛
+# Tilde Web REPL 🐈‍⬛
 
-The Tails Web REPL is a browser-based interactive environment for the Tails scripting language, powered by WebAssembly.
+The Tilde Web REPL is a browser-based interactive environment for the Tilde scripting language, powered by WebAssembly.
 
 ## 🌐 Access the Published Version
 
 The web REPL is automatically deployed to GitHub Pages and available at:
 
-**https://tj-mc.github.io/tails/**
+**https://tj-mc.github.io/tilde/**
 
 ## 🚀 Local Development
 
@@ -69,14 +69,14 @@ web/
 ├── repl.js            # JavaScript REPL logic
 ├── package.json       # Project metadata
 └── pkg/               # Generated WASM files (after build)
-    ├── tails.js       # WASM JavaScript bindings
-    ├── tails_bg.wasm  # WebAssembly binary
+    ├── tilde.js       # WASM JavaScript bindings
+    ├── tilde_bg.wasm  # WebAssembly binary
     └── *.d.ts         # TypeScript definitions
 ```
 
 ## 🎯 Features
 
-- **Real Tails Interpreter**: Full language support via WebAssembly
+- **Real Tilde Interpreter**: Full language support via WebAssembly
 - **Interactive Code Editor**: Syntax highlighting with CodeMirror
 - **Example Programs**: Built-in examples for learning
 - **Responsive Design**: Works on desktop, tablet, and mobile
@@ -130,6 +130,6 @@ The workflow file is located at `.github/workflows/web-deploy.yml`.
 
 ## 📚 Learn More
 
-- [Tails Language Syntax](../docs/SYNTAX.md)
+- [Tilde Language Syntax](../docs/SYNTAX.md)
 - [Main Project README](../README.md)
 - [Performance Testing](../docs/PERFORMANCE_TESTING.md)

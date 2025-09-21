@@ -1,4 +1,4 @@
-# Tails Language Implementation Plan 
+# Tilde Language Implementation Plan 
 
 ### ✅ **Phase 1: COMPLETE - Core Infrastructure**
 - **Lexer**: Full tokenization with 20+ token types including variables (`~name`), keywords, literals, operators

@@ -1,10 +1,10 @@
 use std::env;
 use std::fs;
 use std::io::{self, Write};
-use tails::{evaluator::Evaluator, parser::Parser};
+use tilde::{evaluator::Evaluator, parser::Parser};
 
 fn version_string() -> String {
-    format!("~tails 🐈‍⬛ v{}", env!("CARGO_PKG_VERSION"))
+    format!("~tilde 🌊 v{}", env!("CARGO_PKG_VERSION"))
 }
 
 fn main() {
@@ -176,14 +176,14 @@ fn print_help() {
     println!("A simple, readable scripting language");
     println!("");
     println!("USAGE:");
-    println!("  tails                  Start interactive REPL");
-    println!("  tails <file>          Run a Tails script file");
-    println!("  tails --version       Show version information");
-    println!("  tails --help          Show this help message");
+    println!("  tilde                  Start interactive REPL");
+    println!("  tilde <file>          Run a Tilde script file");
+    println!("  tilde --version       Show version information");
+    println!("  tilde --help          Show this help message");
     println!("");
     println!("EXAMPLES:");
-    println!("  tails                 # Start REPL");
-    println!("  tails hello.tails     # Run hello.tails");
+    println!("  tilde                 # Start REPL");
+    println!("  tilde hello.tilde     # Run hello.tilde");
     println!("");
     println!("LANGUAGE FEATURES:");
     println!("  Variables:    ~name is \"Hello\"");

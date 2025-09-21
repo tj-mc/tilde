@@ -1,27 +1,27 @@
-# `~tails` 🐈‍⬛
+# `~tilde` 🐈‍⬛
 
 **Interpreted Programming Language**
 
-Tails prioritizes **readability** and **simplicity** above all else. 
+Tilde prioritizes **readability** and **simplicity** above all else. 
 
-With simple `~variable` notation, english-like syntax, and powerful built-ins for modern tasks like HTTP requests and data processing, Tails makes scripts that anyone can understand.
+With simple `~variable` notation, english-like syntax, and powerful built-ins for modern tasks like HTTP requests and data processing, Tilde makes scripts that anyone can understand.
 
 ### Made for Humans
 
-**New to scripting?** Tails is intuitive and readable - anyone can start coding in 30 seconds! 
+**New to scripting?** Tilde is intuitive and readable - anyone can start coding in 30 seconds! 
 
-**Experienced developer?** Tails won't get in your way. Write simple automation scripts without fighting the language.
+**Experienced developer?** Tilde won't get in your way. Write simple automation scripts without fighting the language.
 
 ## 🧶 See It In Action
 
 ### HTTP & Data Processing
-```tails
+```tilde
 ~user is get "https://api.github.com/users/octocat"
 say "Found user: `~user.name` with `~user.public_repos` repos"
 ```
 
 ### Actions
-```tails
+```tilde
 # Compose functionality with actions
 action greet-user ~name ~age (
     if ~age >= 18 (
@@ -36,7 +36,7 @@ action greet-user ~name ~age (
 ```
 
 ### Interactive Automation
-```tails
+```tilde
 loop (
     ~username is ask "GitHub username (or 'quit'): "
     if ~username == "quit" break-loop
@@ -53,26 +53,26 @@ loop (
 
 ### 🌐 Try in Browser
 
-**Web REPL**: https://tj-mc.github.io/tails/
+**Web REPL**: https://tj-mc.github.io/tilde/
 
-The easiest way to try Tails! No installation required - runs directly in your browser.
+The easiest way to try Tilde! No installation required - runs directly in your browser.
 
 ### 💻 Install Locally
 
 **Quick Install:**
 ```bash
-curl -sSL https://raw.githubusercontent.com/tj-mc/tails/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/tj-mc/tilde/main/install.sh | bash
 ```
 
 **Usage:**
 ```bash
-tails                 # Start REPL
-tails script.tails    # Run a file
-tails --help          # Show help
+tilde                 # Start REPL
+tilde script.tilde    # Run a file
+tilde --help          # Show help
 ```
 
 ### Download Binary
-Download pre-built binaries from [Releases](https://github.com/tj-mc/tails/releases) for:
+Download pre-built binaries from [Releases](https://github.com/tj-mc/tilde/releases) for:
 - Linux x64
 - macOS (Intel & Apple Silicon)
 - Windows x64
@@ -80,19 +80,19 @@ Download pre-built binaries from [Releases](https://github.com/tj-mc/tails/relea
 ## Examples & Learning
 
 Explore more examples in the `examples/` folder:
-- **`examples/actions.tails`** - Functions and recursion
-- **`examples/comprehensive_objects.tails`** - Advanced object handling
-- **`examples/http_get.tails`** - Real HTTP requests
-- **`examples/fibonacci.tails`** - Loops and mathematical sequences
+- **`examples/actions.tilde`** - Functions and recursion
+- **`examples/comprehensive_objects.tilde`** - Advanced object handling
+- **`examples/http_get.tilde`** - Real HTTP requests
+- **`examples/fibonacci.tilde`** - Loops and mathematical sequences
 
 ## Development
 
 ### Build from Source
 ```bash
-git clone https://github.com/tj-mc/tails.git
-cd tails
+git clone https://github.com/tj-mc/tilde.git
+cd tilde
 cargo build --release
-./target/release/tails
+./target/release/tilde
 ```
 
 ### Run Tests
@@ -135,11 +135,11 @@ For comprehensive performance testing, benchmarking, and profiling documentation
 
 ### Quick Performance Commands:
 ```bash
-# Compare Tails vs Bun performance
+# Compare Tilde vs Bun performance
 cd benchmark_comparison && ./run_benchmarks.sh
 
 # Identify bottlenecks (lexing vs parsing vs evaluation)
-cargo run --bin performance_main your_program.tails
+cargo run --bin performance_main your_program.tilde
 
 # Track performance over time
 ./tools/production_benchmarks.sh
@@ -150,7 +150,7 @@ cargo run --bin performance_main your_program.tails
 
 **[📖 Complete Language Reference → SYNTAX.md](docs/SYNTAX.md)**
 
-Discover all of Tails' features including:
+Discover all of Tilde' features including:
 - **Standard Library** (`map`, `filter`, `reduce`) for functional programming
 - Advanced object manipulation and property access
 - Comprehensive control flow (`loop`, `if`/`else`, `break-loop`)

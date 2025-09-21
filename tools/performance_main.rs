@@ -1,9 +1,9 @@
 use std::env;
 use std::fs;
 use std::process;
-use tails::evaluator::Evaluator;
-use tails::lexer::Lexer;
-use tails::parser::Parser;
+use tilde::evaluator::Evaluator;
+use tilde::lexer::Lexer;
+use tilde::parser::Parser;
 use std::time::Instant;
 
 mod performance_analysis;
@@ -12,7 +12,7 @@ use performance_analysis::PerformanceAnalyzer;
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
-        eprintln!("Usage: {} <script.tails>", args[0]);
+        eprintln!("Usage: {} <script.tilde>", args[0]);
         process::exit(1);
     }
 

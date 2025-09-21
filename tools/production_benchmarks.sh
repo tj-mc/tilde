@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Production-Grade Tails Language Benchmarks
+# Production-Grade Tilde Language Benchmarks
 # Creates structured data for performance tracking over time
 
-echo "🚀 Production Tails Language Benchmarks"
+echo "🚀 Production Tilde Language Benchmarks"
 echo "========================================"
 echo
 

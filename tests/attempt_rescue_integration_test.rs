@@ -1,4 +1,4 @@
-use tails::{evaluator::Evaluator, parser::Parser, value::Value};
+use tilde::{evaluator::Evaluator, parser::Parser, value::Value};
 
 #[test]
 fn test_attempt_rescue_basic_error_handling() {

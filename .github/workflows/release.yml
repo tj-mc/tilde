@@ -63,9 +63,9 @@ jobs:
 
         # Determine binary name
         if [[ "${{ matrix.target }}" == *"windows"* ]]; then
-          BINARY_NAME="tails.exe"
+          BINARY_NAME="tilde.exe"
         else
-          BINARY_NAME="tails"
+          BINARY_NAME="tilde"
         fi
 
         # Copy binary
@@ -86,15 +86,15 @@ jobs:
       run: |
         cd release
         if [[ "${{ matrix.target }}" == *"windows"* ]]; then
-          7z a ../tails-${{ github.ref_name }}-${{ matrix.name }}.zip .
+          7z a ../tilde-${{ github.ref_name }}-${{ matrix.name }}.zip .
         else
-          tar -czf ../tails-${{ github.ref_name }}-${{ matrix.name }}.tar.gz .
+          tar -czf ../tilde-${{ github.ref_name }}-${{ matrix.name }}.tar.gz .
         fi
 
     - name: Upload release artifact
       uses: actions/upload-artifact@v4
       with:
-        name: tails-${{ matrix.name }}
+        name: tilde-${{ matrix.name }}
         path: |
           *.zip
           *.tar.gz
@@ -115,7 +115,7 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ github.ref_name }}
-        name: Tails ${{ github.ref_name }}
+        name: Tilde ${{ github.ref_name }}
         draft: false
         prerelease: false
         generate_release_notes: true

@@ -1,4 +1,4 @@
-use tails::{parser::Parser, evaluator::Evaluator};
+use tilde::{parser::Parser, evaluator::Evaluator};
 
 #[test]
 fn test_basic_increment() {

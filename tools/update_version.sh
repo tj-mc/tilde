@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Version Update Script for Tails
+# Version Update Script for Tilde
 # Updates version numbers across all project files
 
 set -e

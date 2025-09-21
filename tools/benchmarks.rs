@@ -1,5 +1,5 @@
 use std::time::Instant;
-use tails::{evaluator::Evaluator, lexer::Lexer, parser::Parser};
+use tilde::{evaluator::Evaluator, lexer::Lexer, parser::Parser};
 
 // Simple benchmarking without external dependencies
 fn benchmark<F>(name: &str, iterations: u32, f: F)

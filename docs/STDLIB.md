@@ -1,10 +1,10 @@
-# Tails Standard Library
+# Tilde Standard Library
 
-The Tails standard library provides powerful built-in functions for common programming tasks. Stdlib functions are called directly by name and take precedence over user-defined functions when resolving function names.
+The Tilde standard library provides powerful built-in functions for common programming tasks. Stdlib functions are called directly by name and take precedence over user-defined functions when resolving function names.
 
 ## Quick Reference
 
-```tails
+```tilde
 # List operations with stdlib helpers
 ~doubled is map ~numbers double
 ~evens is filter ~numbers is-even
@@ -60,7 +60,7 @@ The standard library includes common helper functions designed to work seamlessl
 #### `is-even number`
 Returns `true` if the number is even, `false` otherwise.
 
-```tails
+```tilde
 ~numbers is [1, 2, 3, 4, 5]
 ~evens is filter ~numbers is-even
 say ~evens  # [2, 4]
@@ -73,7 +73,7 @@ say ~result  # true
 #### `is-odd number` / `is-odd`
 Returns `true` if the number is odd, `false` otherwise.
 
-```tails
+```tilde
 ~numbers is [1, 2, 3, 4, 5]
 ~odds is filter ~numbers is-odd
 say ~odds  # [1, 3, 5]
@@ -82,7 +82,7 @@ say ~odds  # [1, 3, 5]
 #### `is-positive number` / `is-positive`
 Returns `true` if the number is greater than zero.
 
-```tails
+```tilde
 ~numbers is [-2, -1, 0, 1, 2]
 ~positives is filter ~numbers is-positive
 say ~positives  # [1, 2]
@@ -91,7 +91,7 @@ say ~positives  # [1, 2]
 #### `is-negative number` / `is-negative`
 Returns `true` if the number is less than zero.
 
-```tails
+```tilde
 ~numbers is [-2, -1, 0, 1, 2]
 ~negatives is filter ~numbers is-negative
 say ~negatives  # [-2, -1]
@@ -100,7 +100,7 @@ say ~negatives  # [-2, -1]
 #### `is-zero number` / `is-zero`
 Returns `true` if the number equals zero.
 
-```tails
+```tilde
 ~numbers is [-1, 0, 1, 0, 2]
 ~zeros is filter ~numbers is-zero
 say ~zeros  # [0, 0]
@@ -111,7 +111,7 @@ say ~zeros  # [0, 0]
 #### `double number` / `double`
 Multiplies a number by 2.
 
-```tails
+```tilde
 ~numbers is [1, 2, 3, 4]
 ~doubled is map ~numbers double
 say ~doubled  # [2, 4, 6, 8]
@@ -120,7 +120,7 @@ say ~doubled  # [2, 4, 6, 8]
 #### `triple number` / `triple`
 Multiplies a number by 3.
 
-```tails
+```tilde
 ~numbers is [1, 2, 3]
 ~tripled is map ~numbers triple
 say ~tripled  # [3, 6, 9]
@@ -129,7 +129,7 @@ say ~tripled  # [3, 6, 9]
 #### `quadruple number` / `quadruple`
 Multiplies a number by 4.
 
-```tails
+```tilde
 ~numbers is [1, 2, 3]
 ~quadrupled is map ~numbers quadruple
 say ~quadrupled  # [4, 8, 12]
@@ -138,7 +138,7 @@ say ~quadrupled  # [4, 8, 12]
 #### `half number` / `half`
 Divides a number by 2.
 
-```tails
+```tilde
 ~numbers is [2, 4, 6, 8]
 ~halved is map ~numbers half
 say ~halved  # [1, 2, 3, 4]
@@ -147,7 +147,7 @@ say ~halved  # [1, 2, 3, 4]
 #### `square number` / `square`
 Multiplies a number by itself.
 
-```tails
+```tilde
 ~numbers is [1, 2, 3, 4]
 ~squares is map ~numbers square
 say ~squares  # [1, 4, 9, 16]
@@ -156,7 +156,7 @@ say ~squares  # [1, 4, 9, 16]
 #### `increment number` / `increment`
 Adds 1 to a number.
 
-```tails
+```tilde
 ~numbers is [0, 1, 2]
 ~incremented is map ~numbers increment
 say ~incremented  # [1, 2, 3]
@@ -165,7 +165,7 @@ say ~incremented  # [1, 2, 3]
 #### `decrement number` / `decrement`
 Subtracts 1 from a number.
 
-```tails
+```tilde
 ~numbers is [3, 2, 1]
 ~decremented is map ~numbers decrement
 say ~decremented  # [2, 1, 0]
@@ -174,7 +174,7 @@ say ~decremented  # [2, 1, 0]
 #### `uppercase string` / `uppercase`
 Converts a string to uppercase.
 
-```tails
+```tilde
 ~words is ["hello", "world"]
 ~upper is map ~words uppercase
 say ~upper  # ["HELLO", "WORLD"]
@@ -183,7 +183,7 @@ say ~upper  # ["HELLO", "WORLD"]
 #### `lowercase string` / `lowercase`
 Converts a string to lowercase.
 
-```tails
+```tilde
 ~words is ["HELLO", "WORLD"]
 ~lower is map ~words lowercase
 say ~lower  # ["hello", "world"]
@@ -194,7 +194,7 @@ say ~lower  # ["hello", "world"]
 #### `add number number` / `add`
 Adds two numbers together.
 
-```tails
+```tilde
 ~numbers is [1, 2, 3, 4, 5]
 ~sum is reduce ~numbers add 0
 say ~sum  # 15
@@ -203,7 +203,7 @@ say ~sum  # 15
 #### `multiply number number` / `multiply`
 Multiplies two numbers together.
 
-```tails
+```tilde
 ~numbers is [2, 3, 4]
 ~product is reduce ~numbers multiply 1
 say ~product  # 24
@@ -212,7 +212,7 @@ say ~product  # 24
 #### `max number number` / `max`
 Returns the larger of two numbers.
 
-```tails
+```tilde
 ~numbers is [5, 2, 8, 1, 9]
 ~maximum is reduce ~numbers max 0
 say ~maximum  # 9
@@ -221,7 +221,7 @@ say ~maximum  # 9
 #### `min number number` / `min`
 Returns the smaller of two numbers.
 
-```tails
+```tilde
 ~numbers is [5, 2, 8, 1, 9]
 ~minimum is reduce ~numbers min 999
 say ~minimum  # 1
@@ -235,7 +235,7 @@ say ~minimum  # 1
 
 Creates a list of consecutive numbers from 1 to the specified length.
 
-```tails
+```tilde
 ~numbers is list 10
 say ~numbers  # [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
@@ -258,7 +258,7 @@ say (length ~empty)  # 0
 Transforms each element in a list using the provided function.
 
 **Example:**
-```tails
+```tilde
 # Using stdlib helper functions
 ~numbers is [1, 2, 3]
 ~doubled is map ~numbers double
@@ -283,7 +283,7 @@ say ~greetings  # ["Hello Alice", "Hello Bob"]
 Keeps only elements that match the given predicate function.
 
 **Example:**
-```tails
+```tilde
 # Using stdlib helper functions
 ~numbers is [1, 2, 3, 4, 5, 6]
 ~evens is filter ~numbers is-even
@@ -312,7 +312,7 @@ say ~long_words  # ["elephant", "hippopotamus"]
 Combines all elements in a list into a single value using the provided function.
 
 **Example:**
-```tails
+```tilde
 # Using stdlib helper functions
 ~numbers is [1, 2, 3, 4]
 ~sum is reduce ~numbers add 0
@@ -343,7 +343,7 @@ say ~sentence  # " hello beautiful world"
 Sorts a list in ascending order. Works with numbers, strings, and booleans.
 
 **Example:**
-```tails
+```tilde
 ~numbers is [3, 1, 4, 1, 5]
 ~sorted is sort ~numbers
 say ~sorted  # [1, 1, 3, 4, 5]
@@ -358,7 +358,7 @@ say ~sorted_words  # ["apple", "banana", "zebra"]
 Reverses the order of elements in a list.
 
 **Example:**
-```tails
+```tilde
 ~numbers is [1, 2, 3, 4, 5]
 ~backwards is reverse ~numbers
 say ~backwards  # [5, 4, 3, 2, 1]
@@ -369,7 +369,7 @@ say ~backwards  # [5, 4, 3, 2, 1]
 Adds a new element to the end of a list, returning a new list with the element appended. This operation is functional - it does not modify the original list.
 
 **Example:**
-```tails
+```tilde
 ~numbers is [1, 2, 3]
 ~extended is append ~numbers 4
 say ~extended  # [1, 2, 3, 4]
@@ -390,7 +390,7 @@ The following functions work with custom predicate actions to provide powerful l
 Finds the first item in a list that matches a predicate function. Returns the item or null if no match found.
 
 **Example:**
-```tails
+```tilde
 action is-big ~n (give ~n > 5)
 ~numbers is [1, 3, 7, 2, 9]
 ~first-big is find ~numbers is-big
@@ -402,7 +402,7 @@ say ~first-big  # 7
 Finds the index of the first item that matches a predicate function. Returns the index as a number or null if no match found.
 
 **Example:**
-```tails
+```tilde
 action is-negative ~n (give ~n < 0)
 ~numbers is [5, -2, 3, -1]
 ~neg-index is find-index ~numbers is-negative
@@ -414,7 +414,7 @@ say ~neg-index  # 1
 Finds the last item in a list that matches a predicate function. Returns the item or null if no match found.
 
 **Example:**
-```tails
+```tilde
 action is-even ~n (give ~n % 2 == 0)
 ~numbers is [1, 2, 3, 4, 5, 6]
 ~last-even is find-last ~numbers is-even
@@ -426,7 +426,7 @@ say ~last-even  # 6
 Tests if all items in a list match a predicate function. Returns true if all match, false otherwise.
 
 **Example:**
-```tails
+```tilde
 action is-positive ~n (give ~n > 0)
 ~numbers is [1, 2, 3, 4]
 ~all-positive is every ~numbers is-positive
@@ -442,7 +442,7 @@ say ~all-pos-mixed  # false
 Tests if any item in a list matches a predicate function. Returns true if at least one matches, false otherwise.
 
 **Example:**
-```tails
+```tilde
 action is-zero ~n (give ~n == 0)
 ~numbers is [1, 2, 0, 4]
 ~has-zero is some ~numbers is-zero
@@ -458,7 +458,7 @@ say ~has-zero-2  # false
 Removes items from a list that match a predicate function. Returns a new list with matching items removed.
 
 **Example:**
-```tails
+```tilde
 action is-negative ~n (give ~n < 0)
 ~numbers is [1, -2, 3, -4, 5]
 ~positives is remove-if ~numbers is-negative
@@ -470,7 +470,7 @@ say ~positives  # [1, 3, 5]
 Counts items in a list that match a predicate function. Returns the count as a number.
 
 **Example:**
-```tails
+```tilde
 action is-long ~word (give (length ~word) > 4)
 ~words is ["cat", "elephant", "dog", "hippopotamus"]
 ~long-count is count-if ~words is-long
@@ -482,7 +482,7 @@ say ~long-count  # 2
 Takes items from the beginning of a list while a predicate is true. Stops at the first item that doesn't match.
 
 **Example:**
-```tails
+```tilde
 action is-small ~n (give ~n < 5)
 ~numbers is [1, 2, 3, 7, 4, 1]
 ~small-prefix is take-while ~numbers is-small
@@ -494,7 +494,7 @@ say ~small-prefix  # [1, 2, 3]
 Drops items from the beginning of a list while a predicate is true. Returns the remaining items after the first non-match.
 
 **Example:**
-```tails
+```tilde
 action is-small ~n (give ~n < 5)
 ~numbers is [1, 2, 3, 7, 4, 1]
 ~after-small is drop-while ~numbers is-small
@@ -511,7 +511,7 @@ say ~after-small  # [7, 4, 1]
 Splits a list into two lists based on a predicate function. Returns an object with `matched` and `unmatched` properties containing the elements that did and didn't match the predicate, respectively.
 
 **Example:**
-```tails
+```tilde
 ~numbers is [1, 2, 3, 4, 5, 6]
 ~parts is partition ~numbers is-even
 say ~parts.matched    # [2, 4, 6]
@@ -530,7 +530,7 @@ say ~sorted-emails.unmatched  # ["invalid"]
 Groups list elements by the result of applying a function to each element. Returns an object where keys are the function results (converted to strings) and values are lists of matching elements.
 
 **Example:**
-```tails
+```tilde
 # Group words by length
 ~words is ["cat", "dog", "bird", "cow", "elephant"]
 ~by-length is group-by ~words length
@@ -550,7 +550,7 @@ say ~by-parity.false  # [1, 3, 5] (odd numbers)
 Sorts a list by applying a function to each element and sorting by the results. The original elements are returned in the new order.
 
 **Example:**
-```tails
+```tilde
 # Sort words by length (shortest first)
 ~words is ["elephant", "cat", "dog", "bird"]
 ~by-length is sort-by ~words length
@@ -576,7 +576,7 @@ These functions treat lists as sets, performing mathematical set operations like
 Returns a new list containing all unique elements from both input lists. Elements from the first list appear first, followed by unique elements from the second list.
 
 **Example:**
-```tails
+```tilde
 ~list1 is [1, 2, 3, 4]
 ~list2 is [3, 4, 5, 6]
 ~combined is union ~list1 ~list2
@@ -600,7 +600,7 @@ say ~clean  # [1, 2, 3, 4, 5]
 Returns a new list containing elements that are in the first list but not in the second list.
 
 **Example:**
-```tails
+```tilde
 ~list1 is [1, 2, 3, 4, 5]
 ~list2 is [2, 4, 6]
 ~only-in-first is difference ~list1 ~list2
@@ -618,7 +618,7 @@ say ~allowed-users  # ["admin", "user1"]
 Returns a new list containing elements that appear in both input lists. Duplicates are automatically removed.
 
 **Example:**
-```tails
+```tilde
 ~list1 is [1, 2, 3, 4, 5]
 ~list2 is [2, 4, 6, 8]
 ~common is intersection ~list1 ~list2
@@ -646,7 +646,7 @@ The following functions provide powerful ways to modify lists while maintaining 
 Removes the first occurrence of a value from a list.
 
 **Example:**
-```tails
+```tilde
 ~numbers is [1, 2, 3, 2, 4]
 ~result is remove ~numbers 2
 say ~result  # [1, 3, 2, 4]
@@ -661,7 +661,7 @@ say ~result  # ["banana", "apple"]
 Removes the item at the specified index from a list.
 
 **Example:**
-```tails
+```tilde
 ~words is ["first", "second", "third"]
 ~result is remove-at ~words 1
 say ~result  # ["first", "third"]
@@ -676,7 +676,7 @@ say ~result  # ["second", "third"]
 Inserts a value at the specified index in a list.
 
 **Example:**
-```tails
+```tilde
 ~numbers is [1, 3, 4]
 ~result is insert ~numbers 1 2
 say ~result  # [1, 2, 3, 4]
@@ -695,7 +695,7 @@ say ~result  # [1, 3, 4, 5]
 Replaces the value at the specified index in a list.
 
 **Example:**
-```tails
+```tilde
 ~words is ["hello", "world", "test"]
 ~result is set-at ~words 1 "universe"
 say ~result  # ["hello", "universe", "test"]
@@ -710,7 +710,7 @@ say ~result  # [10, 2, 3]
 Removes and returns the last element from a list. Returns an object with `value` and `list` properties.
 
 **Example:**
-```tails
+```tilde
 ~numbers is [1, 2, 3, 4]
 ~result is pop ~numbers
 say ~result.value  # 4
@@ -727,7 +727,7 @@ say ~popped.list   # [1, 2]
 Removes and returns the first elemet from a list. Returns an object with `value` and `list` properties.
 
 **Example:**
-```tails
+```tilde
 ~numbers is [1, 2, 3, 4]
 ~result is shift ~numbers
 say ~result.value  # 1
@@ -739,7 +739,7 @@ say ~result.list   # [2, 3, 4]
 Adds an element to the beginning of a list.
 
 **Example:**
-```tails
+```tilde
 ~numbers is [2, 3, 4]
 ~result is unshift ~numbers 1
 say ~result  # [1, 2, 3, 4]
@@ -758,7 +758,7 @@ These functions help you search and extract information from lists.
 Returns the number of elements in a list as a number.
 
 **Example:**
-```tails
+```tilde
 ~numbers is [1, 2, 3, 4, 5]
 ~count is length ~numbers
 say ~count  # 5
@@ -780,7 +780,7 @@ if (length ~items) > 0 then (
 Finds the index of the first occurrence of a value in a list, or the position of a substring in a string. Returns the index as a number or null if not found.
 
 **Examples:**
-```tails
+```tilde
 # With lists
 ~fruits is ["apple", "banana", "cherry", "banana"]
 ~index is index-of ~fruits "banana"
@@ -803,7 +803,7 @@ say ~missing  # null
 Checks if a list contains a specific value, or if a string contains a substring. Returns true or false.
 
 **Examples:**
-```tails
+```tilde
 # With lists
 ~numbers is [1, 2, 3, 4, 5]
 ~has-three is contains ~numbers 3
@@ -827,7 +827,7 @@ say ~has-xyz  # false
 Extracts a portion of a list from start index to end index (exclusive). If end is not provided, slices to the end.
 
 **Example:**
-```tails
+```tilde
 ~numbers is [0, 1, 2, 3, 4, 5]
 ~middle is slice ~numbers 2 4
 say ~middle  # [2, 3]
@@ -846,7 +846,7 @@ say ~copy  # [0, 1, 2, 3, 4, 5]
 Concatenates multiple lists into a single list.
 
 **Example:**
-```tails
+```tilde
 ~first is [1, 2]
 ~second is [3, 4]
 ~third is [5, 6]
@@ -863,7 +863,7 @@ say ~result  # [1, 2]
 Takes the first n elements from a list.
 
 **Example:**
-```tails
+```tilde
 ~numbers is [1, 2, 3, 4, 5]
 ~first-three is take ~numbers 3
 say ~first-three  # [1, 2, 3]
@@ -878,7 +878,7 @@ say ~all  # [1, 2, 3, 4, 5]
 Drops the first n elements and returns the rest.
 
 **Example:**
-```tails
+```tilde
 ~numbers is [1, 2, 3, 4, 5]
 ~last-three is drop ~numbers 2
 say ~last-three  # [3, 4, 5]
@@ -897,7 +897,7 @@ These functions provide sophisticated list processing capabilities.
 Flattens nested lists into a single list. Optional depth parameter controls how many levels to flatten.
 
 **Example:**
-```tails
+```tilde
 ~nested is [1, [2, 3], [4, [5, 6]], 7]
 ~flat is flatten ~nested
 say ~flat  # [1, 2, 3, 4, 5, 6, 7]
@@ -912,7 +912,7 @@ say ~partial  # [1, 2, 3, 4, [5, 6], 7]
 Removes duplicate values from a list, preserving order.
 
 **Example:**
-```tails
+```tilde
 ~numbers is [1, 2, 2, 3, 1, 4, 3]
 ~unique-nums is unique ~numbers
 say ~unique-nums  # [1, 2, 3, 4]
@@ -927,7 +927,7 @@ say ~unique-mixed  # [1, "hello", true, false]
 Combines two lists element-wise into pairs. Length is determined by the shorter list.
 
 **Example:**
-```tails
+```tilde
 ~numbers is [1, 2, 3]
 ~letters is ["a", "b", "c", "d"]
 ~pairs is zip ~numbers ~letters
@@ -939,7 +939,7 @@ say ~pairs  # [[1, "a"], [2, "b"], [3, "c"]]
 Partitions a list into chunks of the specified size.
 
 **Example:**
-```tails
+```tilde
 ~numbers is [1, 2, 3, 4, 5, 6, 7]
 ~chunks is chunk ~numbers 3
 say ~chunks  # [[1, 2, 3], [4, 5, 6], [7]]
@@ -953,7 +953,7 @@ say ~pairs  # [[1, 2], [3, 4], [5, 6], [7]]
 Transposes a matrix (list of lists) where rows become columns.
 
 **Example:**
-```tails
+```tilde
 ~matrix is [[1, 2, 3], [4, 5, 6]]
 ~transposed is transpose ~matrix
 say ~transposed  # [[1, 4], [2, 5], [3, 6]]
@@ -971,14 +971,14 @@ say ~result  # [[1, 3, 6], [2, 4, null], [null, 5, null]]
 Splits a string into a list using the given delimiter.
 
 **Example:**
-```tails
+```tilde
 ~csv is "apple,banana,cherry"
 ~fruits is split ~csv ","
 say ~fruits  # ["apple", "banana", "cherry"]
 
-~sentence is "hello world from tails"
+~sentence is "hello world from tilde"
 ~words is split ~sentence " "
-say ~words  # ["hello", "world", "from", "tails"]
+say ~words  # ["hello", "world", "from", "tilde"]
 ```
 
 ### `join list delimiter`
@@ -986,10 +986,10 @@ say ~words  # ["hello", "world", "from", "tails"]
 Joins a list of values into a single string using the given delimiter.
 
 **Example:**
-```tails
-~words is ["hello", "world", "from", "tails"]
+```tilde
+~words is ["hello", "world", "from", "tilde"]
 ~sentence is join ~words " "
-say ~sentence  # "hello world from tails"
+say ~sentence  # "hello world from tilde"
 
 ~numbers is [1, 2, 3, 4]
 ~csv is join ~numbers ","
@@ -1001,7 +1001,7 @@ say ~csv  # "1,2,3,4"
 Removes whitespace from the beginning and end of a string.
 
 **Example:**
-```tails
+```tilde
 ~messy is "  hello world  "
 ~clean is trim ~messy
 say "'" ~clean "'"  # 'hello world'
@@ -1014,7 +1014,7 @@ say "'" ~clean "'"  # 'hello world'
 Returns the absolute value of a number.
 
 **Example:**
-```tails
+```tilde
 ~positive is absolute -42
 say ~positive  # 42
 
@@ -1027,7 +1027,7 @@ say ~already_positive  # 15
 Returns the square root of a number. The number must be non-negative.
 
 **Example:**
-```tails
+```tilde
 ~root is square-root 16
 say ~root  # 4
 
@@ -1039,7 +1039,7 @@ say ~decimal  # 1.4142135623730951
 
 ## Date and Time Operations
 
-Tails provides comprehensive date and time functionality for working with temporal data. All dates are stored internally as UTC timestamps and formatted using the ISO 8601 standard for maximum compatibility and consistency.
+Tilde provides comprehensive date and time functionality for working with temporal data. All dates are stored internally as UTC timestamps and formatted using the ISO 8601 standard for maximum compatibility and consistency.
 
 ### Date Creation
 
@@ -1048,7 +1048,7 @@ Tails provides comprehensive date and time functionality for working with tempor
 Returns the current date and time as a UTC timestamp with millisecond precision.
 
 **Example:**
-```tails
+```tilde
 ~current is now
 say "Current time: " ~current  # "2024-03-15T14:30:00.123Z"
 
@@ -1084,7 +1084,7 @@ Creates a date from a string representation. Supports both date-only and full da
   - All times are converted to UTC internally
 
 **Example:**
-```tails
+```tilde
 # Date only - time defaults to midnight UTC
 ~birthday is date "1990-12-25"
 say ~birthday  # "1990-12-25T00:00:00Z"
@@ -1106,7 +1106,7 @@ say ~event  # "2024-03-15T14:30:00Z" (same as above!)
 **Error Handling:**
 The `date` function validates input and provides clear error messages for invalid formats:
 
-```tails
+```tilde
 # These will all throw "Invalid date format" errors:
 ~bad1 is date "March 15, 2024"     # Wrong format
 ~bad2 is date "15/03/2024"         # Wrong format
@@ -1120,7 +1120,7 @@ The `date` function validates input and provides clear error messages for invali
 
 Dates automatically format to ISO 8601 strings when used in string contexts:
 
-```tails
+```tilde
 ~meeting-time is date "2024-03-15T14:30:00Z"
 ~message is "The meeting is scheduled for `~meeting-time`"
 say ~message  # "The meeting is scheduled for 2024-03-15T14:30:00Z"
@@ -1136,7 +1136,7 @@ say ~schedule  # "Event from 2024-03-15T09:00:00Z to 2024-03-15T17:00:00Z"
 
 Dates can be compared for equality, and the same moment in time represented in different formats will be equal:
 
-```tails
+```tilde
 # Same moment in time with different timezone representations
 ~utc-time is date "2024-03-15T14:30:00Z"
 ~offset-time is date "2024-03-15T16:30:00+02:00"
@@ -1157,13 +1157,13 @@ if ~date-only == ~datetime (
 
 ### Date Comparison Functions
 
-Tails provides three dedicated functions for comparing dates that return boolean values for use in conditionals and logic:
+Tilde provides three dedicated functions for comparing dates that return boolean values for use in conditionals and logic:
 
 #### `date-before date1 date2`
 
 Returns `true` if the first date is before (earlier than) the second date.
 
-```tails
+```tilde
 ~meeting is date "2024-03-15T14:30:00Z"
 ~deadline is date "2024-03-20T17:00:00Z"
 
@@ -1188,7 +1188,7 @@ say ~is_yesterday_before  # true
 
 Returns `true` if the first date is after (later than) the second date.
 
-```tails
+```tilde
 ~current is now
 ~birthday is date "1990-12-25"
 
@@ -1208,7 +1208,7 @@ if date-after ~current ~event (
 
 Returns `true` if two dates represent the exact same moment in time, even if expressed in different timezones.
 
-```tails
+```tilde
 ~utc is date "2024-03-15T14:30:00Z"
 ~paris is date "2024-03-15T15:30:00+01:00"  # Same moment, different timezone
 
@@ -1232,7 +1232,7 @@ Date comparison functions are essential for working with date ranges and time pe
 
 #### Checking if a Date Falls Within a Range
 
-```tails
+```tilde
 ~start is date "2024-03-01"
 ~end is date "2024-03-31"
 ~check_date is date "2024-03-15"
@@ -1251,7 +1251,7 @@ if date-after ~check_date ~start and date-before ~check_date ~end (
 
 #### Business Hours and Scheduling Logic
 
-```tails
+```tilde
 ~business_start is date "2024-03-15T09:00:00Z"
 ~business_end is date "2024-03-15T17:00:00Z"
 ~meeting_time is date "2024-03-15T14:30:00Z"
@@ -1276,7 +1276,7 @@ if date-before ~option2 ~option1 and date-before ~option2 ~option3 (
 
 #### Deadline and Reminder Systems
 
-```tails
+```tilde
 ~deadline is date "2024-12-31T23:59:59Z"
 ~current is now
 ~reminder_period is date-add ~deadline -7  # 7 days before deadline
@@ -1303,7 +1303,7 @@ if ~days_left > 0 (
 
 #### Filtering Lists by Date
 
-```tails
+```tilde
 # Filter events by date range
 ~events is [
     {"name": "Meeting A", "date": date "2024-03-10"},
@@ -1343,13 +1343,13 @@ say "Events in range: " ~filtered_events
 
 ### Date Arithmetic
 
-Tails provides powerful date arithmetic functions for time calculations and duration analysis:
+Tilde provides powerful date arithmetic functions for time calculations and duration analysis:
 
 #### `date-add date days`
 
 Adds a specified number of days to a date, returning a new date.
 
-```tails
+```tilde
 ~birthday is date "1990-12-25"
 ~week_later is date-add ~birthday 7
 say ~week_later  # "1991-01-01T00:00:00Z"
@@ -1368,7 +1368,7 @@ say ~next_month  # "2024-02-01T00:00:00Z"
 
 Subtracts a specified number of days from a date, returning a new date.
 
-```tails
+```tilde
 ~deadline is date "2024-12-31"
 ~reminder is date-subtract ~deadline 7
 say ~reminder  # "2024-12-24T00:00:00Z"
@@ -1390,7 +1390,7 @@ Calculates the time difference between two dates and returns a comprehensive obj
 - `seconds` - Total difference in seconds
 - `milliseconds` - Total difference in milliseconds
 
-```tails
+```tilde
 ~start is date "2024-03-15T10:30:00Z"
 ~end is date "2024-03-17T14:45:30Z"
 
@@ -1419,7 +1419,7 @@ say "Days since New Year: " ~time_since.days
 #### Real-World Usage Examples
 
 **Project Timeline Management:**
-```tails
+```tilde
 ~project_start is date "2024-03-01"
 ~project_end is date "2024-06-30"
 ~today is now
@@ -1438,7 +1438,7 @@ say "Project " ~completion_pct "% complete"
 ```
 
 **Meeting Duration Analysis:**
-```tails
+```tilde
 ~meetings is [
     {"start": date "2024-03-15T09:00:00Z", "end": date "2024-03-15T10:30:00Z"},
     {"start": date "2024-03-15T11:00:00Z", "end": date "2024-03-15T12:00:00Z"},
@@ -1457,7 +1457,7 @@ say "Total meeting time: " (~total_minutes / 60) " hours"
 ```
 
 **Deadline Monitoring:**
-```tails
+```tilde
 ~deadline is date "2024-12-31T23:59:59Z"
 ~current is now
 ~time_left is date-diff ~current ~deadline
@@ -1475,7 +1475,7 @@ if ~time_left.days > 30 (
 
 ## HTTP Operations
 
-Tails provides a comprehensive HTTP client for making web requests with full support for all HTTP verbs, authentication, headers, error handling, and more.
+Tilde provides a comprehensive HTTP client for making web requests with full support for all HTTP verbs, authentication, headers, error handling, and more.
 
 ### Basic HTTP Requests
 
@@ -1483,7 +1483,7 @@ Tails provides a comprehensive HTTP client for making web requests with full sup
 
 Make an HTTP GET request.
 
-```tails
+```tilde
 # Simple GET request
 ~response is get "https://api.example.com/users"
 
@@ -1497,7 +1497,7 @@ Make an HTTP GET request.
 
 Make an HTTP POST request with optional body data.
 
-```tails
+```tilde
 # POST with JSON data
 ~user is {
     "name": "John Doe",
@@ -1516,7 +1516,7 @@ Make an HTTP POST request with optional body data.
 
 Make an HTTP PUT request for updates.
 
-```tails
+```tilde
 # Update a resource
 ~updated_user is {
     "name": "Jane Doe",
@@ -1535,7 +1535,7 @@ Make an HTTP PUT request for updates.
 
 Make an HTTP PATCH request for partial updates.
 
-```tails
+```tilde
 # Partial update
 ~changes is {"email": "newemail@example.com"}
 
@@ -1551,7 +1551,7 @@ Make an HTTP PATCH request for partial updates.
 
 Make an HTTP DELETE request.
 
-```tails
+```tilde
 # Delete a resource
 ~response is delete "https://api.example.com/users/123"
 
@@ -1564,7 +1564,7 @@ if ~response.ok (
 
 Generic HTTP function for custom methods.
 
-```tails
+```tilde
 # Custom HTTP method
 ~response is http "OPTIONS" "https://api.example.com/users" {
     "headers": {
@@ -1578,7 +1578,7 @@ Generic HTTP function for custom methods.
 All HTTP functions accept an optional configuration object with the following fields:
 
 #### Headers
-```tails
+```tilde
 ~response is get "https://api.example.com/data" {
     "headers": {
         "User-Agent": "MyApp/1.0",
@@ -1589,7 +1589,7 @@ All HTTP functions accept an optional configuration object with the following fi
 ```
 
 #### Request Body
-```tails
+```tilde
 # String body
 ~response is post "https://api.example.com/data" {
     "body": "raw string data",
@@ -1608,7 +1608,7 @@ All HTTP functions accept an optional configuration object with the following fi
 ```
 
 #### Timeout
-```tails
+```tilde
 # Set timeout in milliseconds
 ~response is get "https://slow-api.example.com/data" {
     "timeout": 5000  # 5 seconds
@@ -1618,7 +1618,7 @@ All HTTP functions accept an optional configuration object with the following fi
 ### Authentication
 
 #### Bearer Token Authentication
-```tails
+```tilde
 ~response is get "https://api.example.com/protected" {
     "headers": {
         "Authorization": "Bearer your-jwt-token-here"
@@ -1632,7 +1632,7 @@ All HTTP functions accept an optional configuration object with the following fi
 ```
 
 #### Basic Authentication
-```tails
+```tilde
 ~response is get "https://api.example.com/protected" {
     "basic_auth": {
         "username": "your-username",
@@ -1645,7 +1645,7 @@ All HTTP functions accept an optional configuration object with the following fi
 
 HTTP responses contain the following fields:
 
-```tails
+```tilde
 ~response is get "https://api.example.com/data"
 
 # Status information
@@ -1668,7 +1668,7 @@ HTTP responses contain the following fields:
 
 HTTP errors (4xx, 5xx status codes, timeouts, network failures) can be caught and handled:
 
-```tails
+```tilde
 ~success is false
 ~error_info is null
 
@@ -1679,7 +1679,7 @@ attempt (
 ) rescue ~error (
     say "Request failed:" ~error.message
 
-    # Access error details
+    # Access error detilde
     if (has "status" ~error.context) (
         say "HTTP Status:" ~error.context.status
     )
@@ -1699,7 +1699,7 @@ attempt (
 
 HTTP errors provide rich context information:
 
-```tails
+```tilde
 attempt (
     ~response is get "https://httpbin.org/status/404"
 ) rescue ~error (
@@ -1728,6 +1728,6 @@ attempt (
 
 ## See Also
 
-- [SYNTAX.md](SYNTAX.md) - Complete Tails language reference
-- [examples/stdlib_demo.tails](../examples/stdlib_demo.tails) - Working examples
-- [examples/foreach_advanced.tails](../examples/foreach_advanced.tails) - Alternative iteration patterns
+- [SYNTAX.md](SYNTAX.md) - Complete Tilde language reference
+- [examples/stdlib_demo.tilde](../examples/stdlib_demo.tilde) - Working examples
+- [examples/foreach_advanced.tilde](../examples/foreach_advanced.tilde) - Alternative iteration patterns

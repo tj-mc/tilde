@@ -1,17 +1,17 @@
 {
-  "hello_world.tails": {
+  "hello_world.tilde": {
     "title": "Hello World",
     "description": "Basic variable assignment and output"
   },
-  "variables_math.tails": {
+  "variables_math.tilde": {
     "title": "Variables & Math",
     "description": "Simple arithmetic operations"
   },
-  "nested_function_calls.tails": {
+  "nested_function_calls.tilde": {
     "title": "🔥 Nested Function Calls",
     "description": "Mathematical compositions with parentheses"
   },
-  "data_structure_madness.tails": {
+  "data_structure_madness.tilde": {
     "title": "🚀 Data Structure Madness",
     "description": "Functional programming patterns"
   }

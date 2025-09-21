@@ -6,7 +6,7 @@ System: Darwin dabble-GQ5WGRJC34 24.6.0 Darwin Kernel Version 24.6.0: Mon Jul 14
 
 PERFORMANCE BENCHMARKS:
 -----------------------
-🔥 Tails Language Benchmarks (Zero Dependencies)
+🔥 Tilde Language Benchmarks (Zero Dependencies)
 ==================================================
 
 📖 LEXER BENCHMARKS
@@ -66,7 +66,7 @@ Benchmarking String concatenation stress test...
 
 STRESS TESTS:
 -------------
-💥 Tails Language Stress Tests
+💥 Tilde Language Stress Tests
 ==============================
 
 🧠 MEMORY STRESS TESTS

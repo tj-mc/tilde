@@ -131,11 +131,11 @@ impl HttpRequest {
     }
 
     fn value_to_json_string(&self, value: &Value) -> Result<String, String> {
-        let json_value = self.tails_value_to_json(value)?;
+        let json_value = self.tilde_value_to_json(value)?;
         serde_json::to_string(&json_value).map_err(|e| format!("Failed to serialize to JSON: {}", e))
     }
 
-    fn tails_value_to_json(&self, value: &Value) -> Result<serde_json::Value, String> {
+    fn tilde_value_to_json(&self, value: &Value) -> Result<serde_json::Value, String> {
         match value {
             Value::Null => Ok(serde_json::Value::Null),
             Value::Boolean(b) => Ok(serde_json::Value::Bool(*b)),
@@ -146,14 +146,14 @@ impl HttpRequest {
             Value::List(list) => {
                 let mut json_array = Vec::new();
                 for item in list {
-                    json_array.push(self.tails_value_to_json(item)?);
+                    json_array.push(self.tilde_value_to_json(item)?);
                 }
                 Ok(serde_json::Value::Array(json_array))
             }
             Value::Object(map) => {
                 let mut json_obj = serde_json::Map::new();
                 for (key, val) in map {
-                    json_obj.insert(key.clone(), self.tails_value_to_json(val)?);
+                    json_obj.insert(key.clone(), self.tilde_value_to_json(val)?);
                 }
                 Ok(serde_json::Value::Object(json_obj))
             }

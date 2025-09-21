@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea for improving Tails
+about: Suggest an idea for improving Tilde
 title: '[FEATURE] '
 labels: enhancement
 assignees: ''
@@ -12,7 +12,7 @@ A clear and concise description of what you want to happen.
 ## Motivation
 Explain the problem you're trying to solve:
 - What use case would this feature enable?
-- How would it improve the Tails experience?
+- How would it improve the Tilde experience?
 - Is this related to a frustration with current functionality?
 
 ## Proposed Solution
@@ -20,7 +20,7 @@ Describe your ideal solution:
 
 ### Syntax Example
 If this involves language syntax, show how you'd like it to work:
-```tails
+```tilde
 # Example of proposed feature
 ~result is new-feature "example usage"
 say ~result
@@ -32,7 +32,7 @@ What the output should look like
 ```
 
 ## Alternatives Considered
-- Have you tried any workarounds with current Tails features?
+- Have you tried any workarounds with current Tilde features?
 - Are there alternative approaches that might work?
 - How do other languages handle this?
 

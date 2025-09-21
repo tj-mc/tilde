@@ -1,20 +1,20 @@
 #!/bin/bash
 
-echo "=== Performance Benchmark: Tails vs Bun ==="
+echo "=== Performance Benchmark: Tilde vs Bun ==="
 echo ""
 
-# Build Tails in release mode for fair comparison
-echo "Building Tails in release mode..."
+# Build Tilde in release mode for fair comparison
+echo "Building Tilde in release mode..."
 cd ..
 cargo build --release
 cd benchmark_comparison
 
 echo ""
-echo "=== Running Tails Benchmark ==="
+echo "=== Running Tilde Benchmark ==="
 echo "Running 3 iterations..."
 for i in {1..3}; do
     echo "Run $i:"
-    time ../target/release/tails benchmark_final.tails
+    time ../target/release/tilde benchmark_final.tilde
     echo ""
 done
 

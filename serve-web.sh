@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Tails Web REPL Development Server
+# Tilde Web REPL Development Server
 # Serves the web REPL locally for development and testing
 
 PORT=${1:-8000}
 
-echo "🐈‍⬛ Starting Tails Web REPL development server..."
+echo "🐈‍⬛ Starting Tilde Web REPL development server..."
 echo "Server will be available at: http://localhost:$PORT"
 echo "Press Ctrl+C to stop the server"
 echo ""

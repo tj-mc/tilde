@@ -1,16 +1,16 @@
 #!/bin/bash
 
-# Tails Web REPL - One-command development setup
+# Tilde Web REPL - One-command development setup
 # This script installs dependencies, builds WASM, and starts the development server
 
 set -e
 
-echo "🐈‍⬛ Tails Web REPL Development Setup"
+echo "🐈‍⬛ Tilde Web REPL Development Setup"
 echo "=================================="
 
 # Check if we're in the right directory
 if [ ! -f "Cargo.toml" ]; then
-    echo "❌ Error: Please run this script from the root of the Tails project"
+    echo "❌ Error: Please run this script from the root of the Tilde project"
     exit 1
 fi
 

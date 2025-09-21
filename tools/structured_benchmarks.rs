@@ -1,7 +1,7 @@
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::time::Instant;
-use tails::{evaluator::Evaluator, lexer::Lexer, parser::Parser};
+use tilde::{evaluator::Evaluator, lexer::Lexer, parser::Parser};
 
 #[derive(Debug)]
 struct BenchmarkResult {

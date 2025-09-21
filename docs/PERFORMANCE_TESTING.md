@@ -1,10 +1,10 @@
 # Performance Testing & Profiling Guide
 
-This document covers all performance testing, benchmarking, and profiling tools available for the Tails interpreter.
+This document covers all performance testing, benchmarking, and profiling tools available for the Tilde interpreter.
 
 ## Overview
 
-The Tails project has comprehensive performance testing infrastructure to:
+The Tilde project has comprehensive performance testing infrastructure to:
 - Track performance regressions
 - Identify bottlenecks
 - Measure optimization impact
@@ -14,7 +14,7 @@ The Tails project has comprehensive performance testing infrastructure to:
 
 **Benchmark**: Complex recursive computation (Fibonacci 18, Factorial 8, nested loops, 30 iterations)
 
-- **Tails**: ~340ms average
+- **Tilde**: ~340ms average
 - **Bun**: ~9ms average
 - **Performance Gap**: 38x slower
 
@@ -24,7 +24,7 @@ The Tails project has comprehensive performance testing infrastructure to:
 
 ### 1. Quick Comparison Benchmarks
 
-#### Tails vs Bun Comparison
+#### Tilde vs Bun Comparison
 ```bash
 cd benchmark_comparison
 ./run_benchmarks.sh
@@ -32,7 +32,7 @@ cd benchmark_comparison
 
 **Purpose**: Direct performance comparison with industry-standard JavaScript runtime
 **Files**:
-- `benchmark_final.tails` - Tails benchmark
+- `benchmark_final.tilde` - Tilde benchmark
 - `benchmark_final.js` - Equivalent Bun benchmark
 - `run_benchmarks.sh` - Automated runner
 
@@ -40,7 +40,7 @@ cd benchmark_comparison
 
 #### Performance Bottleneck Analysis
 ```bash
-cargo run --bin performance_main benchmark_comparison/profile_benchmark.tails
+cargo run --bin performance_main benchmark_comparison/profile_benchmark.tilde
 ```
 
 **Output Example**:
@@ -127,7 +127,7 @@ cargo run --release --bin stress_test
 
 1. **Identify Bottleneck**:
    ```bash
-   cargo run --bin performance_main your_test_program.tails
+   cargo run --bin performance_main your_test_program.tilde
    ```
 
 2. **Implement Optimization**
@@ -135,10 +135,10 @@ cargo run --release --bin stress_test
 3. **Measure Improvement**:
    ```bash
    # Before optimization
-   time cargo run --release your_test_program.tails
+   time cargo run --release your_test_program.tilde
 
    # After optimization
-   time cargo run --release your_test_program.tails
+   time cargo run --release your_test_program.tilde
    ```
 
 4. **Validate No Regressions**:
@@ -150,10 +150,10 @@ cargo run --release --bin stress_test
 ## Key Performance Files
 
 ### Benchmark Programs
-- `benchmark_comparison/benchmark_final.tails` - Main performance benchmark
-- `benchmark_comparison/profile_benchmark.tails` - Smaller profiling benchmark
-- `examples/fibonacci_action.tails` - Recursive algorithm test
-- `examples/actions.tails` - Action call overhead test
+- `benchmark_comparison/benchmark_final.tilde` - Main performance benchmark
+- `benchmark_comparison/profile_benchmark.tilde` - Smaller profiling benchmark
+- `examples/fibonacci_action.tilde` - Recursive algorithm test
+- `examples/actions.tilde` - Action call overhead test
 
 ### Performance Tools Source
 - `tools/performance_main.rs` - Phase-level profiler (lexing/parsing/evaluation)
@@ -164,7 +164,7 @@ cargo run --release --bin stress_test
 - `tools/stress_test.rs` - Stress testing suite
 
 ### Benchmark Scripts
-- `benchmark_comparison/run_benchmarks.sh` - Tails vs Bun comparison
+- `benchmark_comparison/run_benchmarks.sh` - Tilde vs Bun comparison
 - `tools/production_benchmarks.sh` - Structured CSV benchmarks
 - `tools/benchmark_runner.sh` - Comprehensive text benchmarks
 - `tools/build_release.sh` - Release build script
@@ -197,7 +197,7 @@ Add to `tools/benchmarks.rs` in the `run_benchmarks()` function.
 Add to `tools/structured_benchmarks.rs` for CSV tracking over time.
 
 ### Comparison Benchmark
-Create equivalent `.tails` and `.js` files in `benchmark_comparison/`.
+Create equivalent `.tilde` and `.js` files in `benchmark_comparison/`.
 
 ## Troubleshooting
 
@@ -205,7 +205,7 @@ Create equivalent `.tails` and `.js` files in `benchmark_comparison/`.
 If benchmarks take too long:
 1. Reduce iteration counts in benchmark programs
 2. Use smaller input values (e.g., fibonacci(15) instead of fibonacci(25))
-3. Use `profile_benchmark.tails` instead of `benchmark_final.tails`
+3. Use `profile_benchmark.tilde` instead of `benchmark_final.tilde`
 
 ### Memory Issues
 If running out of memory:

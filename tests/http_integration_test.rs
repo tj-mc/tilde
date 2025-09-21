@@ -1,4 +1,4 @@
-use tails::{evaluator::Evaluator, parser::Parser, value::Value};
+use tilde::{evaluator::Evaluator, parser::Parser, value::Value};
 
 // Note: These tests use httpbin.org which provides testing endpoints
 // In a real environment, you might want to use a local test server

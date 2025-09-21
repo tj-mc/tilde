@@ -53,7 +53,7 @@ impl KebabCaseConverter {
         self.process_file(&base_path.join("CHANGELOG.md"));
         self.process_file(&base_path.join("CONTRIBUTING.md"));
 
-        // Process any .tails files in root
+        // Process any .tilde files in root
         for entry in WalkDir::new(base_path).max_depth(1) {
             if let Ok(entry) = entry {
                 if entry.path().extension().map_or(false, |ext| ext == "tails") {
@@ -227,7 +227,7 @@ mod tests {
         let converter = KebabCaseConverter::new();
         let input = "~user-result is 42\n~long-words-list is empty";
         let expected = "~user-result is 42\n~long-words-list is empty";
-        assert_eq!(converter.convert_content(input, Path::new("test.tails")), expected);
+        assert_eq!(converter.convert_content(input, Path::new("test.tilde")), expected);
     }
 
     #[test]
@@ -235,7 +235,7 @@ mod tests {
         let converter = KebabCaseConverter::new();
         let input = "*sum-list ~numbers\n*filter-even ~data";
         let expected = "*sum-list ~numbers\n*filter-even ~data";
-        assert_eq!(converter.convert_content(input, Path::new("test.tails")), expected);
+        assert_eq!(converter.convert_content(input, Path::new("test.tilde")), expected);
     }
 
     #[test]
@@ -243,7 +243,7 @@ mod tests {
         let converter = KebabCaseConverter::new();
         let input = "function is-not-zero ~x (\n    give ~x > 0\n)";
         let expected = "function is-not-zero ~x (\n    give ~x > 0\n)";
-        assert_eq!(converter.convert_content(input, Path::new("test.tails")), expected);
+        assert_eq!(converter.convert_content(input, Path::new("test.tilde")), expected);
     }
 
     #[test]
@@ -251,7 +251,7 @@ mod tests {
         let converter = KebabCaseConverter::new();
         let input = "~already-kebab is good\n*also-kebab ~data";
         let expected = "~already-kebab is good\n*also-kebab ~data";
-        assert_eq!(converter.convert_content(input, Path::new("test.tails")), expected);
+        assert_eq!(converter.convert_content(input, Path::new("test.tilde")), expected);
     }
 
     #[test]
@@ -259,6 +259,6 @@ mod tests {
         let converter = KebabCaseConverter::new();
         let input = "~counter is 0\n*double ~value";
         let expected = "~counter is 0\n*double ~value";
-        assert_eq!(converter.convert_content(input, Path::new("test.tails")), expected);
+        assert_eq!(converter.convert_content(input, Path::new("test.tilde")), expected);
     }
 }

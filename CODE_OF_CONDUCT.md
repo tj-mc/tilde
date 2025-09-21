@@ -2,7 +2,7 @@
 
 ## Our Commitment
 
-We are committed to providing a friendly, safe and welcoming environment for all contributors and users of Tails, regardless of experience level, gender identity and expression, sexual orientation, disability, personal appearance, body size, race, ethnicity, age, religion, or nationality.
+We are committed to providing a friendly, safe and welcoming environment for all contributors and users of Tilde, regardless of experience level, gender identity and expression, sexual orientation, disability, personal appearance, body size, race, ethnicity, age, religion, or nationality.
 
 ## Standards
 

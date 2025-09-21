@@ -1,4 +1,4 @@
-# Tails Language Syntax Specification
+# Tilde Language Syntax Specification
 
 ### Variables
 Variables are prefixed with `~` and can contain hyphens:
@@ -280,7 +280,7 @@ say ~sum  # outputs: 8
 ```
 
 The last statement in the function body will also be returned, so you can write tiny functions like this:
-```tails
+```tilde
 functions add ~a ~b ( ~a + ~b )
 
 ```
@@ -613,10 +613,10 @@ loop (
 ```
 ## Standard Library
 
-Tails includes a comprehensive standard library for functional programming and common operations. Stdlib functions are called directly by name and take precedence over user-defined functions when resolving function names.
+Tilde includes a comprehensive standard library for functional programming and common operations. Stdlib functions are called directly by name and take precedence over user-defined functions when resolving function names.
 
 ### List Operations
-```tails
+```tilde
 ~numbers is [1, 2, 3, 4, 5]
 ~doubled is map ~numbers double        # [2, 4, 6, 8, 10]
 ~evens is filter ~numbers is-even      # [2, 4]
@@ -626,20 +626,20 @@ Tails includes a comprehensive standard library for functional programming and c
 ```
 
 ### String Operations
-```tails
-~words is split "hello,world,tails" ","    # ["hello", "world", "tails"]
-~sentence is join ~words " "               # "hello world tails"
+```tilde
+~words is split "hello,world,tilde" ","    # ["hello", "world", "tilde"]
+~sentence is join ~words " "               # "hello world tilde"
 ~clean is trim "  hello world  "           # "hello world"
 ```
 
 ### Math Operations
-```tails
+```tilde
 ~positive is absolute -42                  # 42
 ~root is square-root 16                    # 4
 ```
 
 ### Functional Programming Patterns
-```tails
+```tilde
 # Chain operations for data processing
 ~data is [1, -2, 3, -4, 5]
 ~positives is filter ~data is_positive
@@ -651,13 +651,13 @@ Tails includes a comprehensive standard library for functional programming and c
 
 ## Error Handling
 
-Tails provides structured error handling through the `attempt`/`rescue` pattern, allowing you to gracefully handle errors without stopping program execution.
+Tilde provides structured error handling through the `attempt`/`rescue` pattern, allowing you to gracefully handle errors without stopping program execution.
 
 ### Basic Error Handling
 
 The `attempt`/`rescue` syntax catches errors and provides an alternative execution path:
 
-```tails
+```tilde
 attempt (
     ~result is 10 / 0  # This will cause a division by zero error
 ) rescue (
@@ -668,9 +668,9 @@ say ~result  # outputs: Error occurred
 
 ### Capturing Error Information
 
-You can capture the error details by providing a variable name after `rescue`:
+You can capture the error detilde by providing a variable name after `rescue`:
 
-```tails
+```tilde
 attempt (
     ~value is ~undefined_variable + 1
 ) rescue ~error (
@@ -691,7 +691,7 @@ When an error is caught, it becomes an `Error` value with the following properti
 
 Error handling blocks can be nested for complex error recovery scenarios:
 
-```tails
+```tilde
 attempt (
     attempt (
         ~risky_operation is some_dangerous_function
@@ -710,7 +710,7 @@ attempt (
 
 Errors in rescue blocks are still propagated. Only the attempt block is protected:
 
-```tails
+```tilde
 attempt (
     ~value is ~undefined_var
 ) rescue (
@@ -720,7 +720,7 @@ attempt (
 
 ### Common Error Types
 
-Tails automatically creates errors for common failure scenarios:
+Tilde automatically creates errors for common failure scenarios:
 
 - **Division by zero**: `Division by zero`
 - **Undefined variables**: `Undefined variable: variable_name`
@@ -733,7 +733,7 @@ Tails automatically creates errors for common failure scenarios:
 
 Error values are falsy in conditional expressions:
 
-```tails
+```tilde
 attempt (
     ~result is ~undefined_variable
 ) rescue ~err (
@@ -752,9 +752,9 @@ if ~error_var (
 1. **Use for Expected Failures**: Use `attempt`/`rescue` for operations that might legitimately fail
 2. **Don't Hide Real Bugs**: Avoid using error handling to mask programming errors
 3. **Provide Meaningful Fallbacks**: Ensure rescue blocks provide sensible default behavior
-4. **Log Error Details**: Always log or handle the error information appropriately
+4. **Log Error Detilde**: Always log or handle the error information appropriately
 
-```tails
+```tilde
 # Good: Handle expected file operations
 attempt (
     ~config is read "config.json"
