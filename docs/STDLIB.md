@@ -233,33 +233,25 @@ say ~minimum  # 1
 
 #### `list length`
 
-Creates a list of consecutive numbers from 1 to the specified length. Fast O(n) implementation optimized for performance.
+Creates a list of consecutive numbers from 1 to the specified length.
 
 ```tails
-# Create a list of 10 numbers
 ~numbers is list 10
 say ~numbers  # [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-# Create a list for iteration
 ~range is list 100
 ~evens is filter ~range is-even
 say (length ~evens)  # 50
 
-# Empty list
 ~empty is list 0
 say (length ~empty)  # 0
 ```
 
 **Properties:**
-- **Performance**: O(n) time, O(n) space with pre-allocated vector
-- **Limit**: Maximum length of 1,000,000 for performance safety
 - **Range**: Numbers from 1 to length (inclusive)
-- **Type**: Always returns a list of numbers
-
-**Error handling:**
-- Negative length: Error
-- Non-number argument: Error
-- Length > 1,000,000: Error for performance safety
+- **Performance**: O(n) time and space, pre-allocated for efficiency
+- **Limit**: Maximum 1,000,000 elements for safety
+- **Errors**: Negative length, non-number argument, or length > 1,000,000
 
 ### `map list function_name`
 

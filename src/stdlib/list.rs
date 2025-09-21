@@ -670,21 +670,24 @@ pub fn eval_sort_by(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<
 /// Fast O(n) implementation with pre-allocated vector
 pub fn eval_list(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
     if args.len() != 1 {
-        return Err("list requires exactly 1 argument (length)".to_string());
+        return Err("list requires exactly 1 argument (length)".into());
     }
 
-    let length_val = evaluator.eval_expression(args[0].clone())?;
+    let length_val = match &args[0] {
+        Expression::Number(n, _) => Value::Number(*n),  // Fast path for literals
+        expr => evaluator.eval_expression(expr.clone())?,  // Fallback for complex expressions
+    };
     let length = match length_val {
         Value::Number(n) => {
             if n < 0.0 {
-                return Err("list length cannot be negative".to_string());
+                return Err("list length cannot be negative".into());
             }
             if n > 1_000_000.0 {
-                return Err("list length cannot exceed 1,000,000 for performance".to_string());
+                return Err("list length cannot exceed 1,000,000 for performance".into());
             }
             n as usize
         }
-        _ => return Err("list length must be a number".to_string()),
+        _ => return Err("list length must be a number".into()),
     };
 
     // Fast pre-allocated vector - O(n) time, O(n) space
