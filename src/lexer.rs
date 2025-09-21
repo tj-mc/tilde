@@ -515,7 +515,6 @@ impl Lexer {
                         "wait" => Token::Wait,
                         "in" => Token::In,
                         "otherwise" => Token::Otherwise,
-                        "list" => Token::List,
                         "keys-of" => Token::KeysOf,
                         "values-of" => Token::ValuesOf,
                         "has-key" => Token::HasKey,

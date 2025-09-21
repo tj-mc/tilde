@@ -1,7 +1,6 @@
 use crate::ast::*;
 use crate::value::Value;
 use crate::http::{HttpClient, HttpRequest, parse_http_options};
-use serde_json;
 use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
@@ -881,33 +880,6 @@ impl Evaluator {
 
     pub fn get_variable(&self, name: &str) -> Option<&Value> {
         self.variables.get(name)
-    }
-
-    fn json_to_tails_value(json: serde_json::Value) -> Value {
-        match json {
-            serde_json::Value::Null => Value::Null,
-            serde_json::Value::Bool(b) => Value::Boolean(b),
-            serde_json::Value::Number(n) => {
-                if let Some(f) = n.as_f64() {
-                    Value::Number(f)
-                } else {
-                    Value::Number(0.0)
-                }
-            }
-            serde_json::Value::String(s) => Value::String(s),
-            serde_json::Value::Array(arr) => {
-                let tails_list: Vec<Value> =
-                    arr.into_iter().map(Self::json_to_tails_value).collect();
-                Value::List(tails_list)
-            }
-            serde_json::Value::Object(obj) => {
-                let mut tails_map = HashMap::new();
-                for (key, value) in obj {
-                    tails_map.insert(key, Self::json_to_tails_value(value));
-                }
-                Value::Object(tails_map)
-            }
-        }
     }
 
     // HTTP GET request

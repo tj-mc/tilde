@@ -663,3 +663,135 @@ pub fn eval_sort_by(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<
     let sorted_items: Vec<Value> = keyed_items.into_iter().map(|(_, item)| item).collect();
     Ok(Value::List(sorted_items))
 }
+
+/// Creates a list of consecutive numbers from 1 to the specified length
+/// Usage: list length
+/// Returns: [1, 2, 3, ..., length]
+/// Fast O(n) implementation with pre-allocated vector
+pub fn eval_list(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
+    if args.len() != 1 {
+        return Err("list requires exactly 1 argument (length)".to_string());
+    }
+
+    let length_val = evaluator.eval_expression(args[0].clone())?;
+    let length = match length_val {
+        Value::Number(n) => {
+            if n < 0.0 {
+                return Err("list length cannot be negative".to_string());
+            }
+            if n > 1_000_000.0 {
+                return Err("list length cannot exceed 1,000,000 for performance".to_string());
+            }
+            n as usize
+        }
+        _ => return Err("list length must be a number".to_string()),
+    };
+
+    // Fast pre-allocated vector - O(n) time, O(n) space
+    let mut result = Vec::with_capacity(length);
+    for i in 1..=length {
+        result.push(Value::Number(i as f64));
+    }
+
+    Ok(Value::List(result))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::ast::Expression;
+    use crate::evaluator::Evaluator;
+    use crate::value::Value;
+
+    #[test]
+    fn test_list_basic() {
+        let mut evaluator = Evaluator::new();
+        let args = vec![Expression::Number(5.0, false)];
+
+        let result = eval_list(args, &mut evaluator).unwrap();
+
+        match result {
+            Value::List(list) => {
+                assert_eq!(list.len(), 5);
+                assert_eq!(list[0], Value::Number(1.0));
+                assert_eq!(list[1], Value::Number(2.0));
+                assert_eq!(list[2], Value::Number(3.0));
+                assert_eq!(list[3], Value::Number(4.0));
+                assert_eq!(list[4], Value::Number(5.0));
+            }
+            _ => panic!("Expected list"),
+        }
+    }
+
+    #[test]
+    fn test_list_zero() {
+        let mut evaluator = Evaluator::new();
+        let args = vec![Expression::Number(0.0, false)];
+
+        let result = eval_list(args, &mut evaluator).unwrap();
+
+        match result {
+            Value::List(list) => {
+                assert_eq!(list.len(), 0);
+            }
+            _ => panic!("Expected empty list"),
+        }
+    }
+
+    #[test]
+    fn test_list_large() {
+        let mut evaluator = Evaluator::new();
+        let args = vec![Expression::Number(1000.0, false)];
+
+        let result = eval_list(args, &mut evaluator).unwrap();
+
+        match result {
+            Value::List(list) => {
+                assert_eq!(list.len(), 1000);
+                assert_eq!(list[0], Value::Number(1.0));
+                assert_eq!(list[999], Value::Number(1000.0));
+            }
+            _ => panic!("Expected list"),
+        }
+    }
+
+    #[test]
+    fn test_list_negative_error() {
+        let mut evaluator = Evaluator::new();
+        let args = vec![Expression::Number(-5.0, false)];
+
+        let result = eval_list(args, &mut evaluator);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("cannot be negative"));
+    }
+
+    #[test]
+    fn test_list_too_large_error() {
+        let mut evaluator = Evaluator::new();
+        let args = vec![Expression::Number(2_000_000.0, false)];
+
+        let result = eval_list(args, &mut evaluator);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("cannot exceed 1,000,000"));
+    }
+
+    #[test]
+    fn test_list_wrong_type_error() {
+        let mut evaluator = Evaluator::new();
+        let args = vec![Expression::String("hello".to_string())];
+
+        let result = eval_list(args, &mut evaluator);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("must be a number"));
+    }
+
+    #[test]
+    fn test_list_wrong_args_error() {
+        let mut evaluator = Evaluator::new();
+        let args = vec![Expression::Number(5.0, false), Expression::Number(10.0, false)];
+
+        let result = eval_list(args, &mut evaluator);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("exactly 1 argument"));
+    }
+}

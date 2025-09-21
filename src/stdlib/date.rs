@@ -95,7 +95,7 @@ pub fn eval_date_subtract(args: Vec<Expression>, evaluator: &mut Evaluator) -> R
 
 /// Calculates the difference between two dates and returns an object with all units
 /// Usage: date-diff date1 date2
-/// Returns: {"days": N, "hours": N, "minutes": N, "seconds": N, "total_seconds": N}
+/// Returns: {"days": N, "hours": N, "minutes": N, "seconds": N, "milliseconds": N}
 pub fn eval_date_diff(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
     let (date1, date2) = extract_two_dates(args, evaluator, "date-diff")?;
     let diff = date2.signed_duration_since(date1);
@@ -105,7 +105,7 @@ pub fn eval_date_diff(args: Vec<Expression>, evaluator: &mut Evaluator) -> Resul
     result.insert("hours".to_string(), Value::Number(diff.num_hours() as f64));
     result.insert("minutes".to_string(), Value::Number(diff.num_minutes() as f64));
     result.insert("seconds".to_string(), Value::Number(diff.num_seconds() as f64));
-    result.insert("total_seconds".to_string(), Value::Number(diff.num_seconds() as f64));
+    result.insert("milliseconds".to_string(), Value::Number(diff.num_milliseconds() as f64));
 
     Ok(Value::Object(result))
 }

@@ -229,6 +229,38 @@ say ~minimum  # 1
 
 ## List Operations
 
+### List Creation
+
+#### `list length`
+
+Creates a list of consecutive numbers from 1 to the specified length. Fast O(n) implementation optimized for performance.
+
+```tails
+# Create a list of 10 numbers
+~numbers is list 10
+say ~numbers  # [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+# Create a list for iteration
+~range is list 100
+~evens is filter ~range is-even
+say (length ~evens)  # 50
+
+# Empty list
+~empty is list 0
+say (length ~empty)  # 0
+```
+
+**Properties:**
+- **Performance**: O(n) time, O(n) space with pre-allocated vector
+- **Limit**: Maximum length of 1,000,000 for performance safety
+- **Range**: Numbers from 1 to length (inclusive)
+- **Type**: Always returns a list of numbers
+
+**Error handling:**
+- Negative length: Error
+- Non-number argument: Error
+- Length > 1,000,000: Error for performance safety
+
 ### `map list function_name`
 
 Transforms each element in a list using the provided function.
@@ -1021,29 +1053,32 @@ Tails provides comprehensive date and time functionality for working with tempor
 
 #### `now`
 
-Returns the current date and time as a UTC timestamp.
+Returns the current date and time as a UTC timestamp with millisecond precision.
 
 **Example:**
 ```tails
 ~current is now
-say "Current time: " ~current
+say "Current time: " ~current  # "2024-03-15T14:30:00.123Z"
 
 # Use in conditionals - dates are always truthy
 if ~current (
     say "Time exists!"
 )
 
-# Store for later use
+# Store for later use for precise timing
 ~start-time is now
 # ... do some work ...
 ~end-time is now
+~duration is date-diff ~start-time ~end-time
+say "Operation took: " ~duration.milliseconds "ms"
 ```
 
 **Properties:**
 - Takes no arguments
-- Always returns the current moment in UTC
+- Always returns the current moment in UTC with millisecond precision
 - Each call returns a fresh timestamp
-- Useful for timestamping events and measuring time differences
+- Output format: ISO 8601 with milliseconds (e.g., `"2024-03-15T14:30:00.123Z"`)
+- Useful for timestamping events and measuring precise time differences
 
 #### `date string`
 
@@ -1361,17 +1396,18 @@ Calculates the time difference between two dates and returns a comprehensive obj
 - `hours` - Total difference in hours
 - `minutes` - Total difference in minutes
 - `seconds` - Total difference in seconds
-- `total_seconds` - Same as seconds (for clarity)
+- `milliseconds` - Total difference in milliseconds
 
 ```tails
 ~start is date "2024-03-15T10:30:00Z"
 ~end is date "2024-03-17T14:45:30Z"
 
 ~duration is date-diff ~start ~end
-say "Days: " ~duration.days        # 2
-say "Hours: " ~duration.hours      # 52
-say "Minutes: " ~duration.minutes  # 3135
-say "Seconds: " ~duration.seconds  # 188130
+say "Days: " ~duration.days             # 2
+say "Hours: " ~duration.hours           # 52
+say "Minutes: " ~duration.minutes       # 3135
+say "Seconds: " ~duration.seconds       # 188130
+say "Milliseconds: " ~duration.milliseconds  # 188130000
 
 # Use specific units as needed
 ~meeting_start is date "2024-03-15T14:00:00Z"
@@ -1632,7 +1668,7 @@ HTTP responses contain the following fields:
 ~response_headers is ~response.headers    # Header object
 
 # Timing information
-~request_time is ~response.response_time_ms  # Response time in milliseconds
+~request-time is ~response.response-time-ms  # Response time in milliseconds
 ~url is ~response.url                     # Final URL (after redirects)
 ```
 
@@ -1682,7 +1718,7 @@ attempt (
     say "Status:" ~error.context.status    # 404
 
     # Response timing
-    say "Response time:" ~error.context.response_time_ms
+    say "Response time:" ~error.context.response-time-ms
 
     # Timeout setting
     say "Timeout was:" ~error.context.timeout_ms

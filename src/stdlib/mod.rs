@@ -19,7 +19,7 @@ use crate::value::Value;
 pub fn get_stdlib_function_names() -> &'static [&'static str] {
     &[
         // List functions
-        "map", "filter", "reduce", "sort", "reverse",
+        "map", "filter", "reduce", "sort", "reverse", "list",
         // Advanced list functions with predicates
         "find", "find-index", "find-last", "every", "some", "remove-if", "count-if",
         "take-while", "drop-while", "partition", "group-by", "sort-by",
@@ -61,6 +61,7 @@ pub fn get_stdlib_function(name: &str) -> Option<fn(Vec<Expression>, &mut Evalua
         "reduce" => Some(list::eval_reduce),
         "sort" => Some(list::eval_sort),
         "reverse" => Some(list::eval_reverse),
+        "list" => Some(list::eval_list),
 
         // Advanced list functions with predicates
         "find" => Some(list::eval_find),
