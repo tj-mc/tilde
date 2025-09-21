@@ -36,7 +36,13 @@ action is-big ~n (give ~n > 10)
 ~text is join ~parts " "
 ~clean is trim "  hello  "
 ~upper is map ~words uppercase
-~lower is map ~words lowercase
+~lower is map ~words lowercas
+
+# Date and time operations
+~current is now
+~birthday is date "1990-12-25"
+~meeting is date "2024-03-15T14:30:00Z"
+~event is date "2024-03-15T16:30:00+02:00"
 
 # Math operations and helpers
 ~positive is absolute -42
@@ -915,89 +921,6 @@ say ~transposed  # [[1, 4], [2, 5], [3, 6]]
 say ~result  # [[1, 3, 6], [2, 4, null], [null, 5, null]]
 ```
 
-## Functional Programming Patterns with New Operations
-
-### Complex Data Processing Pipelines
-
-```tails
-~data is [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-
-# Pipeline: get evens → square them → take first 3 → chunk into pairs
-~evens is filter ~data is-even       # [2, 4, 6, 8, 10]
-~squared is map ~evens square        # [4, 16, 36, 64, 100]
-~first-three is take ~squared 3      # [4, 16, 36]
-~pairs is chunk ~first-three 2       # [[4, 16], [36]]
-
-say ~pairs
-```
-
-### Set Operations for Data Comparison
-
-```tails
-# Compare different datasets
-~last-week-users is ["alice", "bob", "charlie", "david"]
-~this-week-users is ["bob", "charlie", "eve", "frank"]
-
-# Find all users across both weeks
-~all-users is union ~last-week-users ~this-week-users
-say "All users:" ~all-users  # ["alice", "bob", "charlie", "david", "eve", "frank"]
-
-# Find returning users
-~returning is intersection ~last-week-users ~this-week-users
-say "Returning users:" ~returning  # ["bob", "charlie"]
-
-# Find users who stopped using the service
-~churned is difference ~last-week-users ~this-week-users
-say "Churned users:" ~churned  # ["alice", "david"]
-
-# Find new users
-~new-users is difference ~this-week-users ~last-week-users
-say "New users:" ~new-users  # ["eve", "frank"]
-```
-
-### Working with Nested Data
-
-```tails
-~nested-data is [[1, 2], [3, [4, 5]], [6, 7, 8]]
-
-# Flatten and process
-~flat is flatten ~nested-data        # [1, 2, 3, 4, 5, 6, 7, 8]
-~unique is unique ~flat              # [1, 2, 3, 4, 5, 6, 7, 8]
-~chunks is chunk ~unique 3           # [[1, 2, 3], [4, 5, 6], [7, 8]]
-
-say ~chunks
-```
-
-### Matrix Operations
-
-```tails
-~matrix-a is [[1, 2], [3, 4], [5, 6]]
-~matrix-b is [[7, 8], [9, 10], [11, 12]]
-
-# Zip matrices row-wise
-~combined is zip ~matrix-a ~matrix-b
-say ~combined  # [[[1, 2], [7, 8]], [[3, 4], [9, 10]], [[5, 6], [11, 12]]]
-
-# Transpose for column operations
-~cols-a is transpose ~matrix-a
-~cols-b is transpose ~matrix-b
-say ~cols-a  # [[1, 3, 5], [2, 4, 6]]
-```
-
-### List Building and Mutation Chains
-
-```tails
-~base is [1, 2, 3]
-
-# Build complex list through chaining
-~step1 is insert ~base 1 99         # [1, 99, 2, 3]
-~step2 is unshift ~step1 0          # [0, 1, 99, 2, 3]
-~step3 is remove ~step2 99          # [0, 1, 2, 3]
-~step4 is set-at ~step3 0 10        # [10, 1, 2, 3]
-
-say ~step4
-```
-
 ## String Operations
 
 ### `split string delimiter`
@@ -1071,6 +994,437 @@ say ~decimal  # 1.4142135623730951
 
 **Error:** Throws an error if the number is negative.
 
+## Date and Time Operations
+
+Tails provides comprehensive date and time functionality for working with temporal data. All dates are stored internally as UTC timestamps and formatted using the ISO 8601 standard for maximum compatibility and consistency.
+
+### Date Creation
+
+#### `now`
+
+Returns the current date and time as a UTC timestamp.
+
+**Example:**
+```tails
+~current is now
+say "Current time: " ~current
+
+# Use in conditionals - dates are always truthy
+if ~current (
+    say "Time exists!"
+)
+
+# Store for later use
+~start-time is now
+# ... do some work ...
+~end-time is now
+```
+
+**Properties:**
+- Takes no arguments
+- Always returns the current moment in UTC
+- Each call returns a fresh timestamp
+- Useful for timestamping events and measuring time differences
+
+#### `date string`
+
+Creates a date from a string representation. Supports both date-only and full datetime formats with automatic timezone conversion to UTC.
+
+**Supported Formats:**
+- **Date only:** `YYYY-MM-DD` (e.g., `"2024-03-15"`)
+  - Time is set to `00:00:00` UTC
+- **Full datetime:** ISO 8601 format (e.g., `"2024-03-15T14:30:00Z"`)
+  - Supports timezone offsets (e.g., `"2024-03-15T16:30:00+02:00"`)
+  - All times are converted to UTC internally
+
+**Example:**
+```tails
+# Date only - time defaults to midnight UTC
+~birthday is date "1990-12-25"
+say ~birthday  # "1990-12-25T00:00:00Z"
+
+# Full datetime in UTC
+~meeting is date "2024-03-15T14:30:00Z"
+say ~meeting  # "2024-03-15T14:30:00Z"
+
+# Datetime with timezone - converted to UTC
+~event is date "2024-03-15T16:30:00+02:00"
+say ~event  # "2024-03-15T14:30:00Z" (same as above!)
+
+# Edge cases
+~new-years is date "2000-01-01"
+~leap-day is date "2024-02-29"
+~unix-epoch is date "1970-01-01T00:00:00Z"
+```
+
+**Error Handling:**
+The `date` function validates input and provides clear error messages for invalid formats:
+
+```tails
+# These will all throw "Invalid date format" errors:
+~bad1 is date "March 15, 2024"     # Wrong format
+~bad2 is date "15/03/2024"         # Wrong format
+~bad3 is date "2024-13-01"         # Invalid month
+~bad4 is date "2024-02-30"         # Invalid day
+~bad5 is date "2023-02-29"         # Invalid leap year
+~bad6 is date "not-a-date"         # Not a date
+```
+
+#### String Interpolation
+
+Dates automatically format to ISO 8601 strings when used in string contexts:
+
+```tails
+~meeting-time is date "2024-03-15T14:30:00Z"
+~message is "The meeting is scheduled for `~meeting-time`"
+say ~message  # "The meeting is scheduled for 2024-03-15T14:30:00Z"
+
+# Multiple dates in strings
+~start is date "2024-03-15T09:00:00Z"
+~end is date "2024-03-15T17:00:00Z"
+~schedule is "Event from `~start` to `~end`"
+say ~schedule  # "Event from 2024-03-15T09:00:00Z to 2024-03-15T17:00:00Z"
+```
+
+### Date Comparison and Equality
+
+Dates can be compared for equality, and the same moment in time represented in different formats will be equal:
+
+```tails
+# Same moment in time with different timezone representations
+~utc-time is date "2024-03-15T14:30:00Z"
+~offset-time is date "2024-03-15T16:30:00+02:00"
+
+# These are equal because they represent the same UTC moment
+if ~utc-time == ~offset-time (
+    say "Times are equal!"  # This will execute
+)
+
+# Date-only vs datetime comparison
+~date-only is date "2024-03-15"
+~datetime is date "2024-03-15T00:00:00Z"
+# These are equal because date-only defaults to midnight UTC
+if ~date-only == ~datetime (
+    say "Midnight matches!"  # This will execute
+)
+```
+
+### Date Comparison Functions
+
+Tails provides three dedicated functions for comparing dates that return boolean values for use in conditionals and logic:
+
+#### `date-before date1 date2`
+
+Returns `true` if the first date is before (earlier than) the second date.
+
+```tails
+~meeting is date "2024-03-15T14:30:00Z"
+~deadline is date "2024-03-20T17:00:00Z"
+
+~is_before_deadline is date-before ~meeting ~deadline
+say ~is_before_deadline  # true
+
+# Use in conditionals
+if date-before ~meeting ~deadline (
+    say "Meeting is scheduled before the deadline"
+) else (
+    say "Meeting is after the deadline!"
+)
+
+# Works with date-only formats too
+~yesterday is date "2024-03-14"
+~today is date "2024-03-15"
+~is_yesterday_before is date-before ~yesterday ~today
+say ~is_yesterday_before  # true
+```
+
+#### `date-after date1 date2`
+
+Returns `true` if the first date is after (later than) the second date.
+
+```tails
+~current is now
+~birthday is date "1990-12-25"
+
+~is_after_birthday is date-after ~current ~birthday
+say ~is_after_birthday  # true (assuming current time is after 1990)
+
+# Check if event has passed
+~event is date "2024-01-01T00:00:00Z"
+if date-after ~current ~event (
+    say "The event already happened"
+) else (
+    say "The event is still coming up"
+)
+```
+
+#### `date-equal date1 date2`
+
+Returns `true` if two dates represent the exact same moment in time, even if expressed in different timezones.
+
+```tails
+~utc is date "2024-03-15T14:30:00Z"
+~paris is date "2024-03-15T15:30:00+01:00"  # Same moment, different timezone
+
+~same_time is date-equal ~utc ~paris
+say ~same_time  # true
+
+# Useful for exact time matching
+~scheduled is date "2024-03-15T14:30:00Z"
+~actual is date "2024-03-15T14:30:00Z"
+
+if date-equal ~scheduled ~actual (
+    say "Right on time!"
+) else (
+    say "Time difference detected"
+)
+```
+
+### Working with Date Ranges
+
+Date comparison functions are essential for working with date ranges and time periods:
+
+#### Checking if a Date Falls Within a Range
+
+```tails
+~start is date "2024-03-01"
+~end is date "2024-03-31"
+~check_date is date "2024-03-15"
+
+# Check if date is within range (inclusive)
+~in_range is (date-after ~check_date ~start) and (date-before ~check_date ~end)
+say ~in_range  # true
+
+# More explicit range checking
+if date-after ~check_date ~start and date-before ~check_date ~end (
+    say "Date is within March 2024"
+) else (
+    say "Date is outside the range"
+)
+```
+
+#### Business Hours and Scheduling Logic
+
+```tails
+~business_start is date "2024-03-15T09:00:00Z"
+~business_end is date "2024-03-15T17:00:00Z"
+~meeting_time is date "2024-03-15T14:30:00Z"
+
+# Check if meeting is during business hours
+if date-after ~meeting_time ~business_start and date-before ~meeting_time ~business_end (
+    say "Meeting is during business hours"
+) else (
+    say "Meeting is outside business hours"
+)
+
+# Find the earliest of multiple dates
+~option1 is date "2024-03-20T10:00:00Z"
+~option2 is date "2024-03-18T14:00:00Z"
+~option3 is date "2024-03-22T09:00:00Z"
+
+if date-before ~option2 ~option1 and date-before ~option2 ~option3 (
+    ~earliest is ~option2
+    say "Option 2 is the earliest"
+)
+```
+
+#### Deadline and Reminder Systems
+
+```tails
+~deadline is date "2024-12-31T23:59:59Z"
+~current is now
+~reminder_period is date-add ~deadline -7  # 7 days before deadline
+
+# Check deadline status
+if date-after ~current ~deadline (
+    ~status is "overdue"
+) else if date-after ~current ~reminder_period (
+    ~status is "reminder-period"
+) else (
+    ~status is "plenty-of-time"
+)
+
+say "Project status: " ~status
+
+# Days until deadline
+~days_left is date-diff ~current ~deadline
+if ~days_left > 0 (
+    say "Days remaining: " ~days_left
+) else (
+    say "Days overdue: " (0 - ~days_left)
+)
+```
+
+#### Filtering Lists by Date
+
+```tails
+# Filter events by date range
+~events is [
+    {"name": "Meeting A", "date": date "2024-03-10"},
+    {"name": "Meeting B", "date": date "2024-03-15"},
+    {"name": "Meeting C", "date": date "2024-03-20"},
+    {"name": "Meeting D", "date": date "2024-03-25"}
+]
+
+~start_filter is date "2024-03-12"
+~end_filter is date "2024-03-22"
+
+# Filter events within date range
+action in-range ~event (
+    give (date-after ~event.date ~start_filter) and (date-before ~event.date ~end_filter)
+)
+
+~filtered_events is filter ~events in-range
+say "Events in range: " ~filtered_events
+# Result: [{"name": "Meeting B", ...}, {"name": "Meeting C", ...}]
+```
+
+**Important Notes:**
+- All comparison functions return boolean values (`true` or `false`)
+- Comparisons work with any combination of date-only and full datetime values
+- Timezone differences are automatically handled (everything converted to UTC)
+- Use with `and`, `or`, and `not` operators for complex date logic
+- Perfect for building scheduling, filtering, and validation systems
+### Best Practices
+
+1. **Always use ISO 8601 format:** When creating dates, prefer the full datetime format with timezone information for clarity.
+
+2. **UTC by default:** All dates are stored in UTC internally, eliminating timezone confusion.
+
+3.**String formatting:** Dates automatically format to ISO 8601 strings when displayed or interpolated.
+
+4.**Immutability:** Dates are immutable values that can be safely passed around and stored.
+
+### Date Arithmetic
+
+Tails provides powerful date arithmetic functions for time calculations and duration analysis:
+
+#### `date-add date days`
+
+Adds a specified number of days to a date, returning a new date.
+
+```tails
+~birthday is date "1990-12-25"
+~week_later is date-add ~birthday 7
+say ~week_later  # "1991-01-01T00:00:00Z"
+
+# Works with negative numbers (subtract days)
+~week_earlier is date-add ~birthday -7
+say ~week_earlier  # "1990-12-18T00:00:00Z"
+
+# Handles month/year boundaries automatically
+~end_of_month is date "2024-01-31"
+~next_month is date-add ~end_of_month 1
+say ~next_month  # "2024-02-01T00:00:00Z"
+```
+
+#### `date-subtract date days`
+
+Subtracts a specified number of days from a date, returning a new date.
+
+```tails
+~deadline is date "2024-12-31"
+~reminder is date-subtract ~deadline 7
+say ~reminder  # "2024-12-24T00:00:00Z"
+
+# Calculate past dates
+~today is date "2024-03-15"
+~last_week is date-subtract ~today 7
+say ~last_week  # "2024-03-08T00:00:00Z"
+```
+
+#### `date-diff date1 date2`
+
+Calculates the time difference between two dates and returns a comprehensive object with multiple time units. This is the most powerful function for duration analysis.
+
+**Returns an object with:**
+- `days` - Difference in days
+- `hours` - Total difference in hours
+- `minutes` - Total difference in minutes
+- `seconds` - Total difference in seconds
+- `total_seconds` - Same as seconds (for clarity)
+
+```tails
+~start is date "2024-03-15T10:30:00Z"
+~end is date "2024-03-17T14:45:30Z"
+
+~duration is date-diff ~start ~end
+say "Days: " ~duration.days        # 2
+say "Hours: " ~duration.hours      # 52
+say "Minutes: " ~duration.minutes  # 3135
+say "Seconds: " ~duration.seconds  # 188130
+
+# Use specific units as needed
+~meeting_start is date "2024-03-15T14:00:00Z"
+~meeting_end is date "2024-03-15T16:30:00Z"
+~meeting_duration is date-diff ~meeting_start ~meeting_end
+
+say "Meeting duration: " ~meeting_duration.hours " hours"     # 2 hours
+say "Meeting duration: " ~meeting_duration.minutes " minutes" # 150 minutes
+
+# Negative differences work too
+~past_event is date "2024-01-01"
+~current is now
+~time_since is date-diff ~past_event ~current
+say "Days since New Year: " ~time_since.days
+```
+
+#### Real-World Usage Examples
+
+**Project Timeline Management:**
+```tails
+~project_start is date "2024-03-01"
+~project_end is date "2024-06-30"
+~today is now
+
+~total_duration is date-diff ~project_start ~project_end
+~elapsed is date-diff ~project_start ~today
+~remaining is date-diff ~today ~project_end
+
+say "Project length: " ~total_duration.days " days"
+say "Days completed: " ~elapsed.days
+say "Days remaining: " ~remaining.days
+
+# Calculate completion percentage
+~completion_pct is (~elapsed.days / ~total_duration.days) * 100
+say "Project " ~completion_pct "% complete"
+```
+
+**Meeting Duration Analysis:**
+```tails
+~meetings is [
+    {"start": date "2024-03-15T09:00:00Z", "end": date "2024-03-15T10:30:00Z"},
+    {"start": date "2024-03-15T11:00:00Z", "end": date "2024-03-15T12:00:00Z"},
+    {"start": date "2024-03-15T14:00:00Z", "end": date "2024-03-15T15:30:00Z"}
+]
+
+action calc-duration ~meeting (
+    ~duration is date-diff ~meeting.start ~meeting.end
+    give ~duration.minutes
+)
+
+~durations is map ~meetings calc-duration
+~total_minutes is reduce ~durations add 0
+say "Total meeting time: " ~total_minutes " minutes"
+say "Total meeting time: " (~total_minutes / 60) " hours"
+```
+
+**Deadline Monitoring:**
+```tails
+~deadline is date "2024-12-31T23:59:59Z"
+~current is now
+~time_left is date-diff ~current ~deadline
+
+if ~time_left.days > 30 (
+    say "Plenty of time: " ~time_left.days " days left"
+) else if ~time_left.days > 7 (
+    say "Getting close: " ~time_left.days " days left"
+) else if ~time_left.days > 0 (
+    say "URGENT: Only " ~time_left.days " days left!"
+) else (
+    say "OVERDUE by " (0 - ~time_left.days) " days"
+)
+```
 
 ## See Also
 

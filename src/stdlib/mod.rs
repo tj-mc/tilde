@@ -8,6 +8,7 @@ pub mod math;
 pub mod helpers;
 pub mod object;
 pub mod collection;
+pub mod date;
 mod utils;
 
 use crate::ast::Expression;
@@ -34,6 +35,10 @@ pub fn get_stdlib_function_names() -> &'static [&'static str] {
         "split", "join", "trim", "uppercase", "lowercase",
         // Math functions
         "absolute", "square-root", "random",
+        // Date functions
+        "now", "date", "date-add", "date-subtract", "date-diff", "date-format", "date-parse",
+        "date-year", "date-month", "date-day", "date-hour", "date-minute", "date-second", "date-weekday",
+        "date-before", "date-after", "date-equal",
         // Object functions
         "keys", "values", "has",
         // Collection functions
@@ -111,6 +116,25 @@ pub fn get_stdlib_function(name: &str) -> Option<fn(Vec<Expression>, &mut Evalua
         "absolute" => Some(math::eval_absolute),
         "square-root" => Some(math::eval_square_root),
         "random" => Some(crate::random::eval_random_positional_wrapper),
+
+        // Date functions
+        "now" => Some(date::eval_now),
+        "date" => Some(date::eval_date),
+        "date-add" => Some(date::eval_date_add),
+        "date-subtract" => Some(date::eval_date_subtract),
+        "date-diff" => Some(date::eval_date_diff),
+        "date-format" => Some(date::eval_date_format),
+        "date-parse" => Some(date::eval_date_parse),
+        "date-year" => Some(date::eval_date_year),
+        "date-month" => Some(date::eval_date_month),
+        "date-day" => Some(date::eval_date_day),
+        "date-hour" => Some(date::eval_date_hour),
+        "date-minute" => Some(date::eval_date_minute),
+        "date-second" => Some(date::eval_date_second),
+        "date-weekday" => Some(date::eval_date_weekday),
+        "date-before" => Some(date::eval_date_before),
+        "date-after" => Some(date::eval_date_after),
+        "date-equal" => Some(date::eval_date_equal),
 
         // Object functions
         "keys" => Some(object::eval_keys),

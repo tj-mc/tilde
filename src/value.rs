@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::fmt;
+use chrono::{DateTime, Utc};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
@@ -8,6 +9,7 @@ pub enum Value {
     Boolean(bool),
     List(Vec<Value>),
     Object(HashMap<String, Value>),
+    Date(DateTime<Utc>),
     Null,
 }
 
@@ -20,6 +22,7 @@ impl Value {
             Value::String(s) => !s.is_empty(),
             Value::List(l) => !l.is_empty(),
             Value::Object(map) => !map.is_empty(),
+            Value::Date(_) => true, // Dates are always truthy
         }
     }
 }
@@ -44,6 +47,7 @@ impl fmt::Display for Value {
                 let pairs: Vec<String> = map.iter().map(|(k, v)| format!("{}: {}", k, v)).collect();
                 write!(f, "{{{}}}", pairs.join(", "))
             }
+            Value::Date(dt) => write!(f, "{}", dt.format("%Y-%m-%dT%H:%M:%SZ")),
             Value::Null => write!(f, "null"),
         }
     }

@@ -51,6 +51,7 @@ impl Evaluator {
             Value::String(s) => !s.is_empty(),
             Value::List(l) => !l.is_empty(),
             Value::Object(o) => !o.is_empty(),
+            Value::Date(_) => true, // Dates are always truthy
             Value::Null => false,
         }
     }

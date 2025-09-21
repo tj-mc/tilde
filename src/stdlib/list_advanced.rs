@@ -95,6 +95,7 @@ pub fn eval_unique(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<V
                 // For objects, we'll use the debug representation as a simple hash
                 format!("o:{:?}", item)
             }
+            Value::Date(dt) => format!("d:{}", dt.format("%Y-%m-%dT%H:%M:%SZ")),
         };
 
         if seen.insert(key) {

@@ -135,6 +135,7 @@ fn value_to_hash_key(value: &Value) -> Result<String, String> {
         Value::String(s) => Ok(format!("s:{}", s)),
         Value::Boolean(b) => Ok(format!("b:{}", b)),
         Value::Null => Ok("null".to_string()),
+        Value::Date(dt) => Ok(format!("d:{}", dt.format("%Y-%m-%dT%H:%M:%SZ"))),
         Value::List(_) => Err("Set operations cannot be performed on lists containing other lists".to_string()),
         Value::Object(_) => Err("Set operations cannot be performed on lists containing objects".to_string()),
     }
