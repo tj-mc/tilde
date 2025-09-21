@@ -1146,7 +1146,7 @@ fn test_logical_operators_short_circuit() {
     // Test that the right operand is not evaluated when short-circuiting
     let input = "
         ~counter is 0
-        action increment (
+        function increment (
             ~counter is ~counter + 1
             give true
         )
@@ -1172,11 +1172,11 @@ fn test_logical_operators_short_circuit() {
 #[test]
 fn test_nested_function_calls_with_parentheses() {
     let input = "
-        action sum ~first ~second (
+        function sum ~first ~second (
             ~first + ~second
         )
 
-        action multiply ~a ~b (
+        function multiply ~a ~b (
             ~a * ~b
         )
 
@@ -1204,7 +1204,7 @@ fn test_nested_function_calls_with_parentheses() {
 #[test]
 fn test_prime_number_checker() {
     let input = "
-        action is-prime ~num (
+        function is-prime ~num (
             if ~num < 2 (
                 give false
             ) else if ~num == 2 (
@@ -1252,10 +1252,10 @@ fn test_prime_number_checker() {
 }
 
 #[test]
-fn test_action_call_in_if_condition_workaround() {
-    // This test ensures the workaround for action calls in if conditions works
+fn test_function_call_in_if_condition_workaround() {
+    // This test ensures the workaround for function calls in if conditions works
     let input = "
-        action is-even ~num (
+        function is-even ~num (
             give ~num % 2 == 0
         )
 

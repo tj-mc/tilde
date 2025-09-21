@@ -197,7 +197,7 @@ fn test_clear_chained_with_assignments() {
 #[test]
 fn test_clear_with_action_definition() {
     let input = r#"
-        action animate ~frame_count (
+        function animate ~frame_count (
             ~i is 0
             loop (
                 if ~i >= ~frame_count break-loop

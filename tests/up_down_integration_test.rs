@@ -180,7 +180,7 @@ fn test_increment_undefined_variable() {
 
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("Variable 'undefined_var' not found"));
+    assert!(result.unwrap_err().contains("Undefined variable: undefined_var"));
 }
 
 #[test]
@@ -227,7 +227,7 @@ fn test_decrement_undefined_variable() {
 
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("Variable 'undefined_var' not found"));
+    assert!(result.unwrap_err().contains("Undefined variable: undefined_var"));
 }
 
 #[test]

@@ -315,7 +315,7 @@ fn test_read_with_object_access() {
     let input = format!(r#"
         ~file is read "{}"
 
-        action get-file-info ~file_obj (
+        function get-file-info ~file_obj (
             give {{
                 "has_content": ~file_obj.size > 0,
                 "content_length": ~file_obj.size,

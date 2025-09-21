@@ -76,6 +76,7 @@ pub struct Lexer {
     input: Vec<char>,
     position: usize,
     current_char: Option<char>,
+    after_block: bool,
 }
 
 impl Lexer {
@@ -91,6 +92,7 @@ impl Lexer {
             input: chars,
             position: 0,
             current_char,
+            after_block: false,
         }
     }
 
@@ -297,6 +299,10 @@ impl Lexer {
     pub fn next_token(&mut self) -> Token {
         self.skip_whitespace();
 
+        // Reset after_block flag for most tokens (set to true only when we produce a Block token)
+        let was_after_block = self.after_block;
+        self.after_block = false;
+
         match self.current_char {
             None => Token::Eof,
             Some('\n') => {
@@ -374,6 +380,7 @@ impl Lexer {
                     let block_name = self.read_identifier();
                     if self.current_char == Some(':') {
                         self.advance(); // consume second :
+                        self.after_block = true;
                         Token::Block(block_name)
                     } else {
                         // If no closing :, treat as regular colon followed by identifier
@@ -476,39 +483,44 @@ impl Lexer {
             Some(ch) if ch.is_alphabetic() => {
                 let ident = self.read_identifier();
 
-                match ident.as_str() {
-                    "is" => Token::Is,
-                    "if" => Token::If,
-                    "else" => Token::Else,
-                    "loop" => Token::Loop,
-                    "for-each" => Token::ForEach,
-                    "break-loop" => Token::Breakloop,
-                    "say" => Token::Say,
-                    "ask" => Token::Ask,
-                    "open" => Token::Open,
-                    "get" => Token::Get,
-                    "run" => Token::Run,
-                    "scrape" => Token::Scrape,
-                    "wait" => Token::Wait,
-                    "in" => Token::In,
-                    "otherwise" => Token::Otherwise,
-                    "list" => Token::List,
-                    "keys-of" => Token::KeysOf,
-                    "values-of" => Token::ValuesOf,
-                    "has-key" => Token::HasKey,
-                    "function" => Token::Function,
-                    "give" => Token::Give,
-                    "and" => Token::And,
-                    "or" => Token::Or,
-                    "random" => Token::Random,
-                    "read" => Token::Read,
-                    "write" => Token::Write,
-                    "clear" => Token::Clear,
-                    "up" => Token::Up,
-                    "down" => Token::Down,
-                    "true" => Token::Boolean(true),
-                    "false" => Token::Boolean(false),
-                    _ => Token::Identifier(ident),
+                // If we're after a block, treat everything as an identifier
+                if was_after_block {
+                    Token::Identifier(ident)
+                } else {
+                    match ident.as_str() {
+                        "is" => Token::Is,
+                        "if" => Token::If,
+                        "else" => Token::Else,
+                        "loop" => Token::Loop,
+                        "for-each" => Token::ForEach,
+                        "break-loop" => Token::Breakloop,
+                        "say" => Token::Say,
+                        "ask" => Token::Ask,
+                        "open" => Token::Open,
+                        "get" => Token::Get,
+                        "run" => Token::Run,
+                        "scrape" => Token::Scrape,
+                        "wait" => Token::Wait,
+                        "in" => Token::In,
+                        "otherwise" => Token::Otherwise,
+                        "list" => Token::List,
+                        "keys-of" => Token::KeysOf,
+                        "values-of" => Token::ValuesOf,
+                        "has-key" => Token::HasKey,
+                        "function" => Token::Function,
+                        "give" => Token::Give,
+                        "and" => Token::And,
+                        "or" => Token::Or,
+                        "random" => Token::Random,
+                        "read" => Token::Read,
+                        "write" => Token::Write,
+                        "clear" => Token::Clear,
+                        "up" => Token::Up,
+                        "down" => Token::Down,
+                        "true" => Token::Boolean(true),
+                        "false" => Token::Boolean(false),
+                        _ => Token::Identifier(ident),
+                    }
                 }
             }
             Some(_) => {

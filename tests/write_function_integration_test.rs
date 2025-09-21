@@ -374,12 +374,12 @@ fn test_write_with_object_content() {
 }
 
 #[test]
-fn test_write_with_action() {
-    let filename = "test_write_action.txt";
+fn test_write_with_function() {
+    let filename = "test_write_function.txt";
     cleanup_test_file(filename);
 
     let input = format!(r#"
-        action write-data ~file ~content (
+        function write-data ~file ~content (
             ~result is write ~file ~content
             give ~result
         )

@@ -29,10 +29,10 @@ fn test_stdlib_sort() {
 }
 
 #[test]
-fn test_stdlib_map_with_action() {
+fn test_stdlib_map_with_function() {
     let mut evaluator = Evaluator::new();
     let program_text = r#"
-action double ~x (
+function double ~x (
     give ~x * 2
 )
 
@@ -53,10 +53,10 @@ say ~doubled
 }
 
 #[test]
-fn test_stdlib_filter_with_action() {
+fn test_stdlib_filter_with_function() {
     let mut evaluator = Evaluator::new();
     let program_text = r#"
-action is_even ~x (
+function is_even ~x (
     give ~x % 2 == 0
 )
 
@@ -79,10 +79,10 @@ say ~evens
 }
 
 #[test]
-fn test_stdlib_reduce_with_action() {
+fn test_stdlib_reduce_with_function() {
     let mut evaluator = Evaluator::new();
     let program_text = r#"
-action add ~a ~b (
+function add ~a ~b (
     give ~a + ~b
 )
 
@@ -130,12 +130,12 @@ fn test_map_errors() {
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("Action 'nonexistent' not found"));
+    assert!(result.unwrap_err().contains("Unknown function: nonexistent"));
 
     // Test: Function has wrong number of parameters
     let mut evaluator = Evaluator::new();
     let program_text = r#"
-action bad_func ~a ~b (give ~a + ~b)
+function bad_func ~a ~b (give ~a + ~b)
 ~result is map [1, 2, 3] bad_func
 "#;
     let mut parser = Parser::new(program_text);
@@ -181,7 +181,7 @@ fn test_reduce_errors() {
     // Test: Function needs two parameters
     let mut evaluator = Evaluator::new();
     let program_text = r#"
-action bad_func ~x (give ~x)
+function bad_func ~x (give ~x)
 ~result is reduce [1, 2, 3] bad_func 0
 "#;
     let mut parser = Parser::new(program_text);
@@ -222,7 +222,7 @@ fn test_empty_list_operations() {
 
     // Test: Map with empty list
     let program_text = r#"
-action double ~x (give ~x * 2)
+function double ~x (give ~x * 2)
 ~result is map [] double
 say ~result
 "#;
@@ -236,7 +236,7 @@ say ~result
     // Test: Filter with empty list
     let mut evaluator = Evaluator::new();
     let program_text = r#"
-action is_even ~x (give ~x % 2 == 0)
+function is_even ~x (give ~x % 2 == 0)
 ~result is filter [] is_even
 say ~result
 "#;
@@ -264,7 +264,7 @@ fn test_single_element_lists() {
 
     // Test: Map with single element
     let program_text = r#"
-action double ~x (give ~x * 2)
+function double ~x (give ~x * 2)
 ~result is map [5] double
 say ~result
 "#;
@@ -278,7 +278,7 @@ say ~result
     // Test: Reduce with single element
     let mut evaluator = Evaluator::new();
     let program_text = r#"
-action add ~a ~b (give ~a + ~b)
+function add ~a ~b (give ~a + ~b)
 ~result is reduce [5] add 0
 say ~result
 "#;
@@ -364,7 +364,7 @@ fn test_math_operations_edge_cases() {
 fn test_find_function() {
     let mut evaluator = Evaluator::new();
     let program_text = r#"
-action is-even ~n (give ~n % 2 == 0)
+function is-even ~n (give ~n % 2 == 0)
 ~numbers is [1, 3, 4, 7, 8]
 ~first-even is find ~numbers is-even
 say ~first-even
@@ -382,7 +382,7 @@ say ~first-even
 fn test_find_no_match() {
     let mut evaluator = Evaluator::new();
     let program_text = r#"
-action is-negative ~n (give ~n < 0)
+function is-negative ~n (give ~n < 0)
 ~numbers is [1, 2, 3]
 ~result is find ~numbers is-negative
 say ~result
@@ -400,7 +400,7 @@ say ~result
 fn test_find_index_function() {
     let mut evaluator = Evaluator::new();
     let program_text = r#"
-action is-big ~n (give ~n > 5)
+function is-big ~n (give ~n > 5)
 ~numbers is [1, 2, 8, 3]
 ~index is find-index ~numbers is-big
 say ~index
@@ -418,7 +418,7 @@ say ~index
 fn test_find_last_function() {
     let mut evaluator = Evaluator::new();
     let program_text = r#"
-action is-even ~n (give ~n % 2 == 0)
+function is-even ~n (give ~n % 2 == 0)
 ~numbers is [2, 1, 3, 6, 5]
 ~last-even is find-last ~numbers is-even
 say ~last-even
@@ -436,7 +436,7 @@ say ~last-even
 fn test_every_function_true() {
     let mut evaluator = Evaluator::new();
     let program_text = r#"
-action is-positive ~n (give ~n > 0)
+function is-positive ~n (give ~n > 0)
 ~numbers is [1, 2, 3, 4]
 ~all-positive is every ~numbers is-positive
 say ~all-positive
@@ -454,7 +454,7 @@ say ~all-positive
 fn test_every_function_false() {
     let mut evaluator = Evaluator::new();
     let program_text = r#"
-action is-positive ~n (give ~n > 0)
+function is-positive ~n (give ~n > 0)
 ~numbers is [1, -2, 3]
 ~all-positive is every ~numbers is-positive
 say ~all-positive
@@ -472,7 +472,7 @@ say ~all-positive
 fn test_some_function_true() {
     let mut evaluator = Evaluator::new();
     let program_text = r#"
-action is-zero ~n (give ~n == 0)
+function is-zero ~n (give ~n == 0)
 ~numbers is [1, 2, 0, 4]
 ~has-zero is some ~numbers is-zero
 say ~has-zero
@@ -490,7 +490,7 @@ say ~has-zero
 fn test_some_function_false() {
     let mut evaluator = Evaluator::new();
     let program_text = r#"
-action is-negative ~n (give ~n < 0)
+function is-negative ~n (give ~n < 0)
 ~numbers is [1, 2, 3]
 ~has-negative is some ~numbers is-negative
 say ~has-negative
@@ -508,7 +508,7 @@ say ~has-negative
 fn test_remove_if_function() {
     let mut evaluator = Evaluator::new();
     let program_text = r#"
-action is-negative ~n (give ~n < 0)
+function is-negative ~n (give ~n < 0)
 ~numbers is [1, -2, 3, -4, 5]
 ~positives is remove-if ~numbers is-negative
 say ~positives
@@ -530,7 +530,7 @@ say ~positives
 fn test_count_if_function() {
     let mut evaluator = Evaluator::new();
     let program_text = r#"
-action is-even ~n (give ~n % 2 == 0)
+function is-even ~n (give ~n % 2 == 0)
 ~numbers is [1, 2, 3, 4, 5, 6]
 ~even-count is count-if ~numbers is-even
 say ~even-count
@@ -548,7 +548,7 @@ say ~even-count
 fn test_take_while_function() {
     let mut evaluator = Evaluator::new();
     let program_text = r#"
-action is-small ~n (give ~n < 5)
+function is-small ~n (give ~n < 5)
 ~numbers is [1, 2, 3, 7, 4, 1]
 ~small-prefix is take-while ~numbers is-small
 say ~small-prefix
@@ -570,7 +570,7 @@ say ~small-prefix
 fn test_drop_while_function() {
     let mut evaluator = Evaluator::new();
     let program_text = r#"
-action is-small ~n (give ~n < 5)
+function is-small ~n (give ~n < 5)
 ~numbers is [1, 2, 3, 7, 4, 1]
 ~after-small is drop-while ~numbers is-small
 say ~after-small
@@ -603,7 +603,7 @@ fn test_find_errors() {
     // Test: Non-list first argument
     let mut evaluator2 = Evaluator::new();
     let program_text2 = r#"
-action dummy ~x (give true)
+function dummy ~x (give true)
 ~result is find "not a list" dummy
 "#;
     let mut parser2 = Parser::new(program_text2);
@@ -617,7 +617,7 @@ action dummy ~x (give true)
 fn test_every_empty_list() {
     let mut evaluator = Evaluator::new();
     let program_text = r#"
-action is-positive ~n (give ~n > 0)
+function is-positive ~n (give ~n > 0)
 ~empty is []
 ~result is every ~empty is-positive
 say ~result
@@ -635,7 +635,7 @@ say ~result
 fn test_some_empty_list() {
     let mut evaluator = Evaluator::new();
     let program_text = r#"
-action is-positive ~n (give ~n > 0)
+function is-positive ~n (give ~n > 0)
 ~empty is []
 ~result is some ~empty is-positive
 say ~result
@@ -653,7 +653,7 @@ say ~result
 fn test_count_if_empty_list() {
     let mut evaluator = Evaluator::new();
     let program_text = r#"
-action always-true ~n (give true)
+function always-true ~n (give true)
 ~empty is []
 ~result is count-if ~empty always-true
 say ~result
@@ -671,7 +671,7 @@ say ~result
 fn test_take_while_empty_list() {
     let mut evaluator = Evaluator::new();
     let program_text = r#"
-action always-true ~n (give true)
+function always-true ~n (give true)
 ~empty is []
 ~result is take-while ~empty always-true
 say ~result

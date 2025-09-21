@@ -13,7 +13,7 @@ say "=============================================="
     [20, 25, 30, 0]
 ]
 
-action calculate-distance ~path ~distances (
+function calculate-distance ~path ~distances (
     ~total is 0
     ~i is 0
     ~path_len is length ~path
@@ -129,7 +129,7 @@ fn test_dynamic_property_access() {
 say "🔧 Dynamic Property Access Test"
 say "==============================="
 
-action test-dynamic ~path ~index (
+function test-dynamic ~path ~index (
     say "Testing dynamic access: path[" ~index "] = " ~path.~index
     give ~path.~index
 )
@@ -172,7 +172,7 @@ fn test_recursive_functions() {
 say "🔄 Recursive Function Test"
 say "=========================="
 
-action factorial ~n (
+function factorial ~n (
     if ~n <= 1 (
         give 1
     ) else (
