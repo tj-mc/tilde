@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://tj-mc.github.io/tilde/sitemap.xml
+
+# Allow search engines to crawl the web REPL
+Allow: /index.html
+Allow: /style.css
+Allow: /repl.js
+Allow: /pkg/
+
+# Prevent crawling of source maps and development files
+Disallow: /*.map
+Disallow: /target/
+Disallow: /src/

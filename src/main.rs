@@ -4,7 +4,7 @@ use std::io::{self, Write};
 use tilde::{evaluator::Evaluator, parser::Parser};
 
 fn version_string() -> String {
-    format!("~tilde 🌊 v{}", env!("CARGO_PKG_VERSION"))
+    format!("~tilde v{}", env!("CARGO_PKG_VERSION"))
 }
 
 fn main() {

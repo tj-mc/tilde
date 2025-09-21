@@ -160,6 +160,25 @@ fn value_to_js_value(value: &Value) -> serde_json::Value {
             }
             serde_json::Value::Object(json_map)
         }
+        Value::Date(dt) => serde_json::Value::String(dt.to_rfc3339()),
+        Value::Error(err) => {
+            let mut error_map = serde_json::Map::new();
+            error_map.insert("error".to_string(), serde_json::Value::String(err.message.clone()));
+            if let Some(code) = &err.code {
+                error_map.insert("code".to_string(), serde_json::Value::String(code.clone()));
+            }
+            if let Some(source) = &err.source {
+                error_map.insert("source".to_string(), serde_json::Value::String(source.clone()));
+            }
+            if !err.context.is_empty() {
+                let mut context_map = serde_json::Map::new();
+                for (k, v) in &err.context {
+                    context_map.insert(k.clone(), value_to_js_value(v));
+                }
+                error_map.insert("context".to_string(), serde_json::Value::Object(context_map));
+            }
+            serde_json::Value::Object(error_map)
+        }
         Value::Null => serde_json::Value::Null,
     }
 }
