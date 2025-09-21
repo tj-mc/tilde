@@ -26,6 +26,7 @@ pub struct Evaluator {
     scope_stack: Vec<HashMap<String, Value>>,
     max_call_depth: usize,
     pub output_buffer: Vec<String>,
+    last_error: Option<Value>,
 }
 
 impl Default for Evaluator {
@@ -42,6 +43,7 @@ impl Evaluator {
             scope_stack: Vec::new(),
             max_call_depth: 1000,
             output_buffer: Vec::new(),
+            last_error: None,
         }
     }
 
@@ -934,7 +936,10 @@ impl Evaluator {
 
         match HttpClient::execute(request) {
             Ok(response) => Ok(response.to_tails_value()),
-            Err(error_value) => Err(Self::error_value_to_string(&error_value)),
+            Err(error_value) => {
+                self.last_error = Some(error_value.clone());
+                Err(Self::error_value_to_string(&error_value))
+            },
         }
     }
 
@@ -968,7 +973,10 @@ impl Evaluator {
 
         match HttpClient::execute(request) {
             Ok(response) => Ok(response.to_tails_value()),
-            Err(error_value) => Err(Self::error_value_to_string(&error_value)),
+            Err(error_value) => {
+                self.last_error = Some(error_value.clone());
+                Err(Self::error_value_to_string(&error_value))
+            },
         }
     }
 
@@ -1001,7 +1009,10 @@ impl Evaluator {
 
         match HttpClient::execute(request) {
             Ok(response) => Ok(response.to_tails_value()),
-            Err(error_value) => Err(Self::error_value_to_string(&error_value)),
+            Err(error_value) => {
+                self.last_error = Some(error_value.clone());
+                Err(Self::error_value_to_string(&error_value))
+            },
         }
     }
 
@@ -1030,7 +1041,10 @@ impl Evaluator {
 
         match HttpClient::execute(request) {
             Ok(response) => Ok(response.to_tails_value()),
-            Err(error_value) => Err(Self::error_value_to_string(&error_value)),
+            Err(error_value) => {
+                self.last_error = Some(error_value.clone());
+                Err(Self::error_value_to_string(&error_value))
+            },
         }
     }
 
@@ -1063,7 +1077,10 @@ impl Evaluator {
 
         match HttpClient::execute(request) {
             Ok(response) => Ok(response.to_tails_value()),
-            Err(error_value) => Err(Self::error_value_to_string(&error_value)),
+            Err(error_value) => {
+                self.last_error = Some(error_value.clone());
+                Err(Self::error_value_to_string(&error_value))
+            },
         }
     }
 
@@ -1102,7 +1119,10 @@ impl Evaluator {
 
         match HttpClient::execute(request) {
             Ok(response) => Ok(response.to_tails_value()),
-            Err(error_value) => Err(Self::error_value_to_string(&error_value)),
+            Err(error_value) => {
+                self.last_error = Some(error_value.clone());
+                Err(Self::error_value_to_string(&error_value))
+            },
         }
     }
 
@@ -1243,8 +1263,12 @@ impl Evaluator {
                     }
                 }
                 Err(error_msg) => {
-                    // An error occurred, create an error value and run rescue block
-                    let error_value = Value::Error(crate::value::ErrorValue::new(error_msg));
+                    // Check if we have a structured error from HTTP or use simple error
+                    let error_value = if let Some(structured_error) = self.last_error.take() {
+                        structured_error
+                    } else {
+                        Value::Error(crate::value::ErrorValue::new(error_msg))
+                    };
 
                     // If rescue variable is specified, bind the error to it
                     if let Some(var_name) = rescue_var {

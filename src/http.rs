@@ -1,8 +1,5 @@
-use crate::evaluator::Evaluator;
 use crate::value::{Value, ErrorValue};
-use crate::ast::Expression;
 use std::collections::HashMap;
-use std::io::Read;
 
 /// HTTP response object containing status, headers, and body
 #[derive(Debug, Clone)]
@@ -193,15 +190,62 @@ impl HttpClient {
             .build();
         let agent: ureq::Agent = config.into();
 
-        // Create request builder
-        let mut req_builder = match request.method.as_str() {
-            "GET" => agent.get(&request.url),
-            "POST" => agent.post(&request.url),
-            "PUT" => agent.put(&request.url),
-            "DELETE" => agent.delete(&request.url),
-            "PATCH" => agent.request("PATCH", &request.url),
-            "HEAD" => agent.head(&request.url),
-            "OPTIONS" => agent.request("OPTIONS", &request.url),
+        // Execute request based on method
+        let response_result = match request.method.as_str() {
+            "GET" => {
+                let mut req = agent.get(&request.url);
+                for (key, value) in &request.headers {
+                    req = req.header(key.as_str(), value.as_str());
+                }
+                req.call()
+            }
+            "POST" => {
+                let mut req = agent.post(&request.url);
+                for (key, value) in &request.headers {
+                    req = req.header(key.as_str(), value.as_str());
+                }
+                if let Some(body) = &request.body {
+                    req.send(body.as_bytes())
+                } else {
+                    req.send_empty()
+                }
+            }
+            "PUT" => {
+                let mut req = agent.put(&request.url);
+                for (key, value) in &request.headers {
+                    req = req.header(key.as_str(), value.as_str());
+                }
+                if let Some(body) = &request.body {
+                    req.send(body.as_bytes())
+                } else {
+                    req.send_empty()
+                }
+            }
+            "DELETE" => {
+                let mut req = agent.delete(&request.url);
+                for (key, value) in &request.headers {
+                    req = req.header(key.as_str(), value.as_str());
+                }
+                req.call()
+            }
+            "PATCH" => {
+                let mut req = agent.patch(&request.url);
+                for (key, value) in &request.headers {
+                    req = req.header(key.as_str(), value.as_str());
+                }
+                if let Some(body) = &request.body {
+                    req.send(body.as_bytes())
+                } else {
+                    req.send_empty()
+                }
+            }
+            "HEAD" => {
+                let mut req = agent.head(&request.url);
+                for (key, value) in &request.headers {
+                    req = req.header(key.as_str(), value.as_str());
+                }
+                req.call()
+            }
             _ => return Err(Self::create_error(
                 format!("Unsupported HTTP method: {}", request.method),
                 Some("unsupported_method".to_string()),
@@ -210,51 +254,66 @@ impl HttpClient {
             )),
         };
 
-        // Add headers
-        for (key, value) in &request.headers {
-            req_builder = req_builder.set(&key, &value);
-        }
-
-        // Execute request
-        let response_result = if let Some(body) = &request.body {
-            req_builder.send_string(body)
-        } else {
-            req_builder.call()
-        };
-
         let response_time_ms = start_time.elapsed().as_millis() as u64;
 
         match response_result {
             Ok(mut response) => {
-                // Read response body
-                let mut body = String::new();
-                if let Err(e) = response.body_mut().read_to_string(&mut body) {
-                    return Err(Self::create_error(
-                        format!("Failed to read response body: {}", e),
-                        Some("body_read_error".to_string()),
-                        Some(request.url),
-                        [("response_time_ms".to_string(), Value::Number(response_time_ms as f64))].into(),
-                    ));
-                }
+                // Extract metadata first
+                let status = response.status().as_u16();
+                let status_text = response.status().canonical_reason().unwrap_or("Unknown").to_string();
 
                 // Extract headers
                 let mut headers = HashMap::new();
-                for name in response.headers_names() {
-                    if let Some(value) = response.header(&name) {
-                        headers.insert(name.to_lowercase(), value.to_string());
-                    }
+                for (name, value) in response.headers() {
+                    headers.insert(name.to_string().to_lowercase(), value.to_str().unwrap_or("").to_string());
                 }
 
+                // Read response body
+                let body = match response.body_mut().read_to_string() {
+                    Ok(body_str) => body_str,
+                    Err(e) => {
+                        return Err(Self::create_error(
+                            format!("Failed to read response body: {}", e),
+                            Some("body_read_error".to_string()),
+                            Some(request.url),
+                            [("response_time_ms".to_string(), Value::Number(response_time_ms as f64))].into(),
+                        ));
+                    }
+                };
+
                 let http_response = HttpResponse {
-                    status: response.status(),
-                    status_text: response.status_text().to_string(),
-                    headers,
-                    body,
-                    url: request.url,
+                    status,
+                    status_text: status_text.clone(),
+                    headers: headers.clone(),
+                    body: body.clone(),
+                    url: request.url.clone(),
                     response_time_ms,
                 };
 
-                Ok(http_response)
+                // Check if this is a client or server error (4xx or 5xx)
+                if status >= 400 {
+                    let mut error_context = HashMap::new();
+                    error_context.insert("status".to_string(), Value::Number(status as f64));
+                    error_context.insert("status_text".to_string(), Value::String(status_text));
+                    error_context.insert("response_time_ms".to_string(), Value::Number(response_time_ms as f64));
+                    error_context.insert("body".to_string(), Value::String(http_response.body.clone()));
+
+                    // Include headers in error context
+                    let mut headers_map = HashMap::new();
+                    for (key, value) in &http_response.headers {
+                        headers_map.insert(key.clone(), Value::String(value.clone()));
+                    }
+                    error_context.insert("headers".to_string(), Value::Object(headers_map));
+
+                    Err(Self::create_error(
+                        format!("http status: {}", status),
+                        Some("http_error".to_string()),
+                        Some(request.url),
+                        error_context,
+                    ))
+                } else {
+                    Ok(http_response)
+                }
             }
             Err(error) => {
                 // Handle ureq errors
@@ -262,50 +321,35 @@ impl HttpClient {
                 error_context.insert("response_time_ms".to_string(), Value::Number(response_time_ms as f64));
                 error_context.insert("timeout_ms".to_string(), Value::Number(request.timeout_ms as f64));
 
-                // Try to extract response information if available
-                if let Some(response) = error.response() {
-                    let status = response.status();
-                    let status_text = response.status_text();
+                // Handle different types of ureq errors
+                let (error_message, error_code) = match error {
+                    ureq::Error::StatusCode(status) => {
+                        // This is an HTTP status code error (4xx, 5xx)
+                        error_context.insert("status".to_string(), Value::Number(status as f64));
+                        (format!("http status: {}", status), "http_error")
+                    },
+                    ureq::Error::Timeout(_) => {
+                        (error.to_string(), "timeout")
+                    },
+                    ureq::Error::HostNotFound => {
+                        (error.to_string(), "dns_error")
+                    },
+                    ureq::Error::ConnectionFailed => {
+                        (error.to_string(), "connection_failed")
+                    },
+                    _ => {
+                        (error.to_string(), "network_error")
+                    }
+                };
 
-                    // Read response body if possible
-                    let body = if let Ok(body_str) = response.into_string() {
-                        body_str
-                    } else {
-                        "Failed to read response body".to_string()
-                    };
+                error_context.insert("error_details".to_string(), Value::String(error_message.clone()));
 
-                    error_context.insert("status".to_string(), Value::Number(status as f64));
-                    error_context.insert("status_text".to_string(), Value::String(status_text.to_string()));
-                    error_context.insert("response_body".to_string(), Value::String(body));
-
-                    Err(Self::create_error(
-                        format!("HTTP {} {}", status, status_text),
-                        Some(status.to_string()),
-                        Some(request.url),
-                        error_context,
-                    ))
-                } else {
-                    // Network/transport error
-                    let error_message = error.to_string();
-                    let error_code = if error_message.contains("timeout") {
-                        "timeout"
-                    } else if error_message.contains("DNS") || error_message.contains("dns") {
-                        "dns_error"
-                    } else if error_message.contains("connection") || error_message.contains("Connection") {
-                        "connection_failed"
-                    } else {
-                        "network_error"
-                    };
-
-                    error_context.insert("error_details".to_string(), Value::String(error_message.clone()));
-
-                    Err(Self::create_error(
-                        error_message,
-                        Some(error_code.to_string()),
-                        Some(request.url),
-                        error_context,
-                    ))
-                }
+                Err(Self::create_error(
+                    error_message,
+                    Some(error_code.to_string()),
+                    Some(request.url),
+                    error_context,
+                ))
             }
         }
     }
