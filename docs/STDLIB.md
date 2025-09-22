@@ -49,6 +49,11 @@ action is-big ~n (give ~n > 10)
 ~root is square-root 16
 ~squares is map ~numbers square
 ~halved is map ~numbers half
+
+# System operations
+~port is env "PORT" or 8080
+~db_url is env "DATABASE_URL" or "localhost"
+~debug is env "DEBUG" or false
 ```
 
 ## Helper Functions
@@ -1725,6 +1730,46 @@ attempt (
         say "Response headers:" ~error.context.headers
     )
 )
+
+## System Functions
+
+### Environment Variables
+
+Access environment variables with automatic fallback support:
+
+```tilde
+# Basic usage
+~port is env "PORT"                    # Returns string value or null
+~debug is env "DEBUG"                  # Returns "true"/"false" or null
+
+# With fallback values (recommended pattern)
+~port is env "PORT" or 8080            # Returns env value or 8080
+~db_url is env "DATABASE_URL" or "localhost"
+~timeout is env "TIMEOUT" or 30000
+
+# AWS configuration example
+~access_key is env "AWS_ACCESS_KEY_ID" or "not-configured"
+~secret_key is env "AWS_SECRET_ACCESS_KEY" or "not-configured"
+~region is env "AWS_REGION" or "us-east-1"
+
+# Using in server configuration
+server listen (env "PORT" or 8080)
+```
+
+**Function Signature:**
+- `env variable_name` → string | null
+
+**Parameters:**
+- `variable_name` (string): Name of the environment variable to retrieve
+
+**Returns:**
+- String value if environment variable exists
+- `null` if environment variable is not set
+
+**Error Handling:**
+- Function argument must be a string
+- Missing environment variables return `null` (not an error)
+- Use with `or` operator for graceful fallbacks
 
 ## See Also
 

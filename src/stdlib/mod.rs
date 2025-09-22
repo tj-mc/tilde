@@ -9,6 +9,7 @@ pub mod helpers;
 pub mod object;
 pub mod collection;
 pub mod date;
+pub mod system;
 mod utils;
 
 use crate::ast::Expression;
@@ -49,6 +50,8 @@ pub fn get_stdlib_function_names() -> &'static [&'static str] {
         "double", "triple", "quadruple", "half", "square", "increment", "decrement",
         // Common helper functions - reductions
         "add", "multiply", "max", "min",
+        // System functions
+        "env",
     ]
 }
 
@@ -167,6 +170,9 @@ pub fn get_stdlib_function(name: &str) -> Option<fn(Vec<Expression>, &mut Evalua
         "multiply" => Some(helpers::eval_multiply),
         "max" => Some(helpers::eval_max),
         "min" => Some(helpers::eval_min),
+
+        // System functions
+        "env" => Some(system::eval_env),
 
         _ => None,
     }

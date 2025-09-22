@@ -73,7 +73,13 @@ fn run_repl() {
         io::stdout().flush().unwrap();
 
         let mut line = String::new();
-        io::stdin().read_line(&mut line).unwrap();
+        match io::stdin().read_line(&mut line) {
+            Ok(_) => {},
+            Err(e) => {
+                eprintln!("Error reading input: {}", e);
+                continue;
+            }
+        }
 
         let line = line.trim();
 
