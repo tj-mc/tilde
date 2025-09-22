@@ -208,7 +208,7 @@ throttle(action_name, interval) -> function
 ### Error Handling Strategy
 - All new functions return result objects with `{success, value, error}` pattern
 - Backward compatibility: existing functions unchanged
-- New `try` built-in wraps any action call with error catching
+- New `try` built-in wraps any function call with error catching
 
 ### Memory & Performance
 - All list operations remain immutable

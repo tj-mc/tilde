@@ -1,2 +1,0 @@
-~port is env "PORT" or 8080
-say "Server will run on port: " ~port

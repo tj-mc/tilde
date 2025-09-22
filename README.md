@@ -23,7 +23,7 @@ say "Found user: `~user.name` with `~user.public_repos` repos"
 ### Actions
 ```tilde
 # Compose functionality with actions
-action greet-user ~name ~age (
+function greet-user ~name ~age (
     if ~age >= 18 (
         say "Welcome `~name`! You can access all features."
     ) else (

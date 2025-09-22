@@ -25,7 +25,7 @@ The Tilde standard library provides powerful built-in functions for common progr
 ~common is intersection ~list1 ~list2
 
 # Advanced list operations with predicates
-action is-big ~n (give ~n > 10)
+function is-big ~n (give ~n > 10)
 ~first-big is find ~numbers is-big
 ~all-positive is every ~numbers is-positive
 ~has-negative is some ~numbers is-negative
@@ -270,7 +270,7 @@ Transforms each element in a list using the provided function.
 say ~doubled  # [2, 4, 6]
 
 # Using custom actions (when you need complex logic)
-action greet ~name (give "Hello " + ~name)
+function greet ~name (give "Hello " + ~name)
 ~names is ["Alice", "Bob"]
 ~greetings is map ~names greet
 say ~greetings  # ["Hello Alice", "Hello Bob"]
@@ -280,8 +280,8 @@ say ~greetings  # ["Hello Alice", "Hello Bob"]
 - First argument must be a list
 - Second argument must be either:
   - The name of a stdlib helper function (e.g., `double`, `uppercase`)
-  - The name of a custom action that takes exactly one parameter
-- The function/action must return a value
+  - The name of a custom function that takes exactly one parameter
+- The function must return a value
 
 ### `filter list function_name`
 
@@ -299,7 +299,7 @@ say ~evens  # [2, 4, 6]
 say ~positives  # [1, 2]
 
 # Using custom actions (when you need complex logic)
-action is_long ~word (give (length ~word) > 4)
+function is_long ~word (give (length ~word) > 4)
 ~words is ["cat", "elephant", "dog", "hippopotamus"]
 ~long_words is filter ~words is_long
 say ~long_words  # ["elephant", "hippopotamus"]
@@ -309,8 +309,8 @@ say ~long_words  # ["elephant", "hippopotamus"]
 - First argument must be a list
 - Second argument must be either:
   - The name of a stdlib predicate function (e.g., `is-even`, `is-positive`)
-  - The name of a custom action that takes exactly one parameter
-- The function/action must return a boolean value
+  - The name of a custom function that takes exactly one parameter
+- The function must return a boolean value
 
 ### `reduce list function_name initial_value`
 
@@ -330,7 +330,7 @@ say ~product  # 24
 say ~maximum  # 4
 
 # Using custom actions (when you need complex logic)
-action concatenate ~a ~b (give ~a + " " + ~b)
+function concatenate ~a ~b (give ~a + " " + ~b)
 ~words is ["hello", "beautiful", "world"]
 ~sentence is reduce ~words concatenate ""
 say ~sentence  # " hello beautiful world"
@@ -340,7 +340,7 @@ say ~sentence  # " hello beautiful world"
 - First argument must be a list
 - Second argument must be either:
   - The name of a stdlib reduction function (e.g., `add`, `multiply`, `max`)
-  - The name of a custom action that takes exactly two parameters
+  - The name of a custom function that takes exactly two parameters
 - Third argument is the initial/starting value
 
 ### `sort list`
@@ -396,7 +396,7 @@ Finds the first item in a list that matches a predicate function. Returns the it
 
 **Example:**
 ```tilde
-action is-big ~n (give ~n > 5)
+function is-big ~n (give ~n > 5)
 ~numbers is [1, 3, 7, 2, 9]
 ~first-big is find ~numbers is-big
 say ~first-big  # 7
@@ -408,7 +408,7 @@ Finds the index of the first item that matches a predicate function. Returns the
 
 **Example:**
 ```tilde
-action is-negative ~n (give ~n < 0)
+function is-negative ~n (give ~n < 0)
 ~numbers is [5, -2, 3, -1]
 ~neg-index is find-index ~numbers is-negative
 say ~neg-index  # 1
@@ -420,7 +420,7 @@ Finds the last item in a list that matches a predicate function. Returns the ite
 
 **Example:**
 ```tilde
-action is-even ~n (give ~n % 2 == 0)
+function is-even ~n (give ~n % 2 == 0)
 ~numbers is [1, 2, 3, 4, 5, 6]
 ~last-even is find-last ~numbers is-even
 say ~last-even  # 6
@@ -432,7 +432,7 @@ Tests if all items in a list match a predicate function. Returns true if all mat
 
 **Example:**
 ```tilde
-action is-positive ~n (give ~n > 0)
+function is-positive ~n (give ~n > 0)
 ~numbers is [1, 2, 3, 4]
 ~all-positive is every ~numbers is-positive
 say ~all-positive  # true
@@ -448,7 +448,7 @@ Tests if any item in a list matches a predicate function. Returns true if at lea
 
 **Example:**
 ```tilde
-action is-zero ~n (give ~n == 0)
+function is-zero ~n (give ~n == 0)
 ~numbers is [1, 2, 0, 4]
 ~has-zero is some ~numbers is-zero
 say ~has-zero  # true
@@ -464,7 +464,7 @@ Removes items from a list that match a predicate function. Returns a new list wi
 
 **Example:**
 ```tilde
-action is-negative ~n (give ~n < 0)
+function is-negative ~n (give ~n < 0)
 ~numbers is [1, -2, 3, -4, 5]
 ~positives is remove-if ~numbers is-negative
 say ~positives  # [1, 3, 5]
@@ -476,7 +476,7 @@ Counts items in a list that match a predicate function. Returns the count as a n
 
 **Example:**
 ```tilde
-action is-long ~word (give (length ~word) > 4)
+function is-long ~word (give (length ~word) > 4)
 ~words is ["cat", "elephant", "dog", "hippopotamus"]
 ~long-count is count-if ~words is-long
 say ~long-count  # 2
@@ -488,7 +488,7 @@ Takes items from the beginning of a list while a predicate is true. Stops at the
 
 **Example:**
 ```tilde
-action is-small ~n (give ~n < 5)
+function is-small ~n (give ~n < 5)
 ~numbers is [1, 2, 3, 7, 4, 1]
 ~small-prefix is take-while ~numbers is-small
 say ~small-prefix  # [1, 2, 3]
@@ -500,7 +500,7 @@ Drops items from the beginning of a list while a predicate is true. Returns the 
 
 **Example:**
 ```tilde
-action is-small ~n (give ~n < 5)
+function is-small ~n (give ~n < 5)
 ~numbers is [1, 2, 3, 7, 4, 1]
 ~after-small is drop-while ~numbers is-small
 say ~after-small  # [7, 4, 1]
@@ -508,8 +508,8 @@ say ~after-small  # [7, 4, 1]
 
 **Requirements for all predicate functions:**
 - First argument must be a list
-- Second argument must be the name of a custom action that takes exactly one parameter
-- The predicate action must return a value that can be evaluated for truthiness
+- Second argument must be the name of a custom function that takes exactly one parameter
+- The predicate function must return a value that can be evaluated for truthiness
 
 #### `partition list function_name`
 
@@ -523,7 +523,7 @@ say ~parts.matched    # [2, 4, 6]
 say ~parts.unmatched  # [1, 3, 5]
 
 # Useful for separating valid from invalid data
-action is-valid-email ~email (give (contains ~email "@"))
+function is-valid-email ~email (give (contains ~email "@"))
 ~emails is ["user@domain.com", "invalid", "test@site.org"]
 ~sorted-emails is partition ~emails is-valid-email
 say ~sorted-emails.matched    # ["user@domain.com", "test@site.org"]
@@ -1321,7 +1321,7 @@ if ~days_left > 0 (
 ~end_filter is date "2024-03-22"
 
 # Filter events within date range
-action in-range ~event (
+function in-range ~event (
     give (date-after ~event.date ~start_filter) and (date-before ~event.date ~end_filter)
 )
 
@@ -1450,7 +1450,7 @@ say "Project " ~completion_pct "% complete"
     {"start": date "2024-03-15T14:00:00Z", "end": date "2024-03-15T15:30:00Z"}
 ]
 
-action calc-duration ~meeting (
+function calc-duration ~meeting (
     ~duration is date-diff ~meeting.start ~meeting.end
     give ~duration.minutes
 )

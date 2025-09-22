@@ -82,7 +82,7 @@ Statement::YourFeature(args) => {
     // Evaluate arguments
     let evaluated_args = /* evaluate args */;
     
-    // Perform the feature's action
+    // Perform the feature's function
     // Return appropriate Value
     Ok(Value::String("result".to_string()))
 }

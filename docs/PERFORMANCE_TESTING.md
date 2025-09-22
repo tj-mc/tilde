@@ -153,7 +153,7 @@ cargo run --release --bin stress_test
 - `benchmark_comparison/benchmark_final.tilde` - Main performance benchmark
 - `benchmark_comparison/profile_benchmark.tilde` - Smaller profiling benchmark
 - `examples/fibonacci_action.tilde` - Recursive algorithm test
-- `examples/actions.tilde` - Action call overhead test
+- `examples/actions.tilde` - Function call overhead test
 
 ### Performance Tools Source
 - `tools/performance_main.rs` - Phase-level profiler (lexing/parsing/evaluation)

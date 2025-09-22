@@ -20,6 +20,19 @@ Fix Web REPL broken after rebrand
 ### Fixed
 - Various list operation bugs and stability improvements
 
+## [0.5.0] - 2025-09-22
+
+### Added
+- **Environment Variables**: New `env` stdlib function for accessing environment variables
+  - `env "VAR_NAME"` returns environment variable value as string or null if not set
+  - Perfect integration with `or` operator for fallbacks: `env "PORT" or 8080`
+  - Essential for cloud deployment and configuration management
+  - Comprehensive test coverage and documentation
+
+### Fixed
+- **REPL Stability**: Fixed UTF-8 input handling bug that caused crashes during variable assignment
+- **Input Error Handling**: Added proper error handling for stdin operations in REPL
+
 ## [0.4.0] - 2025-09-21
 
 ### Changed
