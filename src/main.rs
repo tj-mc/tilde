@@ -189,7 +189,7 @@ fn print_help() {
     println!("");
     println!("EXAMPLES:");
     println!("  tilde                 # Start REPL");
-    println!("  tilde hello.tilde     # Run hello.tilde");
+    println!("  tilde hello.tde     # Run hello.tde");
     println!("");
     println!("LANGUAGE FEATURES:");
     println!("  Variables:    ~name is \"Hello\"");

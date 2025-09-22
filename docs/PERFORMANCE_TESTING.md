@@ -32,7 +32,7 @@ cd benchmark_comparison
 
 **Purpose**: Direct performance comparison with industry-standard JavaScript runtime
 **Files**:
-- `benchmark_final.tilde` - Tilde benchmark
+- `benchmark_final.tde` - Tilde benchmark
 - `benchmark_final.js` - Equivalent Bun benchmark
 - `run_benchmarks.sh` - Automated runner
 
@@ -40,7 +40,7 @@ cd benchmark_comparison
 
 #### Performance Bottleneck Analysis
 ```bash
-cargo run --bin performance_main benchmark_comparison/profile_benchmark.tilde
+cargo run --bin performance_main benchmark_comparison/profile_benchmark.tde
 ```
 
 **Output Example**:
@@ -127,7 +127,7 @@ cargo run --release --bin stress_test
 
 1. **Identify Bottleneck**:
    ```bash
-   cargo run --bin performance_main your_test_program.tilde
+   cargo run --bin performance_main your_test_program.tde
    ```
 
 2. **Implement Optimization**
@@ -135,10 +135,10 @@ cargo run --release --bin stress_test
 3. **Measure Improvement**:
    ```bash
    # Before optimization
-   time cargo run --release your_test_program.tilde
+   time cargo run --release your_test_program.tde
 
    # After optimization
-   time cargo run --release your_test_program.tilde
+   time cargo run --release your_test_program.tde
    ```
 
 4. **Validate No Regressions**:
@@ -150,10 +150,10 @@ cargo run --release --bin stress_test
 ## Key Performance Files
 
 ### Benchmark Programs
-- `benchmark_comparison/benchmark_final.tilde` - Main performance benchmark
-- `benchmark_comparison/profile_benchmark.tilde` - Smaller profiling benchmark
-- `examples/fibonacci_action.tilde` - Recursive algorithm test
-- `examples/actions.tilde` - Function call overhead test
+- `benchmark_comparison/benchmark_final.tde` - Main performance benchmark
+- `benchmark_comparison/profile_benchmark.tde` - Smaller profiling benchmark
+- `examples/fibonacci_action.tde` - Recursive algorithm test
+- `examples/actions.tde` - Function call overhead test
 
 ### Performance Tools Source
 - `tools/performance_main.rs` - Phase-level profiler (lexing/parsing/evaluation)
@@ -197,7 +197,7 @@ Add to `tools/benchmarks.rs` in the `run_benchmarks()` function.
 Add to `tools/structured_benchmarks.rs` for CSV tracking over time.
 
 ### Comparison Benchmark
-Create equivalent `.tilde` and `.js` files in `benchmark_comparison/`.
+Create equivalent `.tde` and `.js` files in `benchmark_comparison/`.
 
 ## Troubleshooting
 
@@ -205,7 +205,7 @@ Create equivalent `.tilde` and `.js` files in `benchmark_comparison/`.
 If benchmarks take too long:
 1. Reduce iteration counts in benchmark programs
 2. Use smaller input values (e.g., fibonacci(15) instead of fibonacci(25))
-3. Use `profile_benchmark.tilde` instead of `benchmark_final.tilde`
+3. Use `profile_benchmark.tde` instead of `benchmark_final.tde`
 
 ### Memory Issues
 If running out of memory:

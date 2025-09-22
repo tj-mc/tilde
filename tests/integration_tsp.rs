@@ -86,7 +86,7 @@ if ~best_path.0 == 0 and ~best_path.1 == 1 and ~best_path.2 == 3 and ~best_path.
 "#;
 
     // Write the TSP program to a temporary file
-    let temp_file = "temp_tsp_test.tilde";
+    let temp_file = "temp_tsp_test.tde";
     std::fs::write(temp_file, tsp_program).expect("Failed to write test file");
 
     // Execute the Tilde interpreter
@@ -149,7 +149,7 @@ if ~result0 == 10 and ~result1 == 20 and ~result4 == 50 (
 )
 "#;
 
-    let temp_file = "temp_dynamic_test.tilde";
+    let temp_file = "temp_dynamic_test.tde";
     std::fs::write(temp_file, dynamic_access_program).expect("Failed to write test file");
 
     let output = Command::new("cargo")
@@ -192,7 +192,7 @@ if ~fact_5 == 120 (
 )
 "#;
 
-    let temp_file = "temp_recursive_test.tilde";
+    let temp_file = "temp_recursive_test.tde";
     std::fs::write(temp_file, recursive_program).expect("Failed to write test file");
 
     let output = Command::new("cargo")

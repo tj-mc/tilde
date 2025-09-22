@@ -31,7 +31,7 @@ Our design priorities (in order):
 ### Performance Analysis (Zero Dependencies)
 - `cargo build --release` - Optimized builds for performance testing
 - `RUSTFLAGS=-g cargo build --release` - Release with debug symbols for profiling
-- `time cargo run large_program.tilde` - Basic execution timing
+- `time cargo run large_program.tde` - Basic execution timing
 - Native OS tools: `time`, `top`, Activity Monitor for system profiling
 
 ### Performance Testing & Benchmarking
@@ -40,7 +40,7 @@ Our design priorities (in order):
 
 #### Quick Commands:
 - `./tools/perf_test.sh` - **FASTEST**: Quick Tilde vs Bun comparison with auto-build
-- `cargo run --bin performance_main <file.tilde>` - **NEW**: Identify bottlenecks (lexing vs parsing vs evaluation)
+- `cargo run --bin performance_main <file.tde>` - **NEW**: Identify bottlenecks (lexing vs parsing vs evaluation)
 - `./tools/production_benchmarks.sh` - **TRACKING**: CSV benchmarks for tracking over time
 - `cd benchmark_comparison && ./run_benchmarks.sh` - Full automated comparison with detailed analysis
 

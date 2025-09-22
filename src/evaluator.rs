@@ -901,8 +901,9 @@ impl Evaluator {
             None
         };
 
-        let (headers, _, timeout_ms) = parse_http_options(options)?;
-        let request = HttpRequest::new("GET", &url)
+        let (headers, _, timeout_ms, query_params) = parse_http_options(options)?;
+        let final_url = crate::http::build_url_with_query(&url, query_params);
+        let request = HttpRequest::new("GET", &final_url)
             .with_headers(headers)
             .with_timeout(timeout_ms);
 
@@ -934,8 +935,9 @@ impl Evaluator {
             None
         };
 
-        let (headers, body, timeout_ms) = parse_http_options(options)?;
-        let mut request = HttpRequest::new("POST", &url)
+        let (headers, body, timeout_ms, query_params) = parse_http_options(options)?;
+        let final_url = crate::http::build_url_with_query(&url, query_params);
+        let mut request = HttpRequest::new("POST", &final_url)
             .with_headers(headers)
             .with_timeout(timeout_ms);
 
@@ -970,8 +972,9 @@ impl Evaluator {
             None
         };
 
-        let (headers, body, timeout_ms) = parse_http_options(options)?;
-        let mut request = HttpRequest::new("PUT", &url)
+        let (headers, body, timeout_ms, query_params) = parse_http_options(options)?;
+        let final_url = crate::http::build_url_with_query(&url, query_params);
+        let mut request = HttpRequest::new("PUT", &final_url)
             .with_headers(headers)
             .with_timeout(timeout_ms);
 
@@ -1006,8 +1009,9 @@ impl Evaluator {
             None
         };
 
-        let (headers, _, timeout_ms) = parse_http_options(options)?;
-        let request = HttpRequest::new("DELETE", &url)
+        let (headers, _, timeout_ms, query_params) = parse_http_options(options)?;
+        let final_url = crate::http::build_url_with_query(&url, query_params);
+        let request = HttpRequest::new("DELETE", &final_url)
             .with_headers(headers)
             .with_timeout(timeout_ms);
 
@@ -1038,8 +1042,9 @@ impl Evaluator {
             None
         };
 
-        let (headers, body, timeout_ms) = parse_http_options(options)?;
-        let mut request = HttpRequest::new("PATCH", &url)
+        let (headers, body, timeout_ms, query_params) = parse_http_options(options)?;
+        let final_url = crate::http::build_url_with_query(&url, query_params);
+        let mut request = HttpRequest::new("PATCH", &final_url)
             .with_headers(headers)
             .with_timeout(timeout_ms);
 
@@ -1080,8 +1085,9 @@ impl Evaluator {
             None
         };
 
-        let (headers, body, timeout_ms) = parse_http_options(options)?;
-        let mut request = HttpRequest::new(&method, &url)
+        let (headers, body, timeout_ms, query_params) = parse_http_options(options)?;
+        let final_url = crate::http::build_url_with_query(&url, query_params);
+        let mut request = HttpRequest::new(&method, &final_url)
             .with_headers(headers)
             .with_timeout(timeout_ms);
 

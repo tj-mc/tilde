@@ -4,14 +4,14 @@
 # =======================
 #
 # This script automatically generates the web REPL examples section in web/index.html
-# from the curated .tilde files in the examples/ directory. This ensures a single
+# from the curated .tde files in the examples/ directory. This ensures a single
 # source of truth for all examples across the project.
 #
 # Usage:
 #   ./tools/build_web_examples.sh
 #
 # What it does:
-# - Reads selected .tilde files from examples/ directory
+# - Reads selected .tde files from examples/ directory
 # - Escapes content for HTML attributes (handles quotes, newlines, backslashes)
 # - Injects the examples into web/index.html between the examples-list markers
 # - Maintains metadata (titles and descriptions) for each example
@@ -36,31 +36,31 @@ escape_html_attr() {
 get_example_metadata() {
     local filename="$1"
     case "$filename" in
-        "hello_world.tilde")
+        "hello_world.tde")
             echo "Hello World|Basic variable assignment and output"
             ;;
-        "variables_math.tilde")
+        "variables_math.tde")
             echo "Variables & Math|Simple arithmetic operations"
             ;;
-        "conditionals.tilde")
+        "conditionals.tde")
             echo "Conditionals|Nested if statements and else-if chains"
             ;;
-        "objects.tilde")
+        "objects.tde")
             echo "Objects|Working with object properties"
             ;;
-        "functions.tilde")
+        "functions.tde")
             echo "Functions |Define and call custom functions with parameters"
             ;;
-        "fibonacci.tilde")
+        "fibonacci.tde")
             echo "Fibonacci Sequence|Functions with return values and loops"
             ;;
-        "nested_function_calls.tilde")
+        "nested_function_calls.tde")
             echo "🔥 Nested Function Calls|Mathematical compositions with parentheses"
             ;;
-        "data_structure_madness.tilde")
+        "data_structure_madness.tde")
             echo "🚀 Data Structure Madness|Functional programming patterns"
             ;;
-        "http_get.tilde")
+        "http_get.tde")
             echo "Network Request|Fetch data from APIs and display results"
             ;;
         *)
@@ -75,15 +75,15 @@ echo "🔧 Building web examples from $EXAMPLES_DIR..."
 
 # Carefully curated examples for web REPL - no duplicates, progressive complexity
 WEB_EXAMPLES=(
-    "hello_world.tilde"
-    "variables_math.tilde"
-    "conditionals.tilde"
-    "objects.tilde"
-    "functions.tilde"
-    "fibonacci.tilde"
-    "nested_function_calls.tilde"
-    "data_structure_madness.tilde"
-    "http_get.tilde"
+    "hello_world.tde"
+    "variables_math.tde"
+    "conditionals.tde"
+    "objects.tde"
+    "functions.tde"
+    "fibonacci.tde"
+    "nested_function_calls.tde"
+    "data_structure_madness.tde"
+    "http_get.tde"
 )
 
 # Generate examples HTML
@@ -134,7 +134,7 @@ mv "$TEMP_HTML" "$WEB_HTML"
 rm -f /tmp/examples_content.html
 
 # Count examples
-example_count=$(find "$EXAMPLES_DIR" -name "*.tilde" | wc -l)
+example_count=$(find "$EXAMPLES_DIR" -name "*.tde" | wc -l)
 
 echo "✅ Updated $WEB_HTML with $example_count examples from $EXAMPLES_DIR/"
 echo "🎉 Web examples build complete!"

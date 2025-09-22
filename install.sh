@@ -124,7 +124,7 @@ if command -v tilde >/dev/null 2>&1; then
     echo ""
     echo "Try it out:"
     echo "  tilde                 # Start REPL"
-    echo "  tilde myprogram.tilde # Run a file"
+    echo "  tilde myprogram.tde # Run a file"
     echo ""
     tilde --version 2>/dev/null || echo "Version: $VERSION"
 else

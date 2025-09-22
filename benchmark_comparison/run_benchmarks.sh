@@ -14,7 +14,7 @@ echo "=== Running Tilde Benchmark ==="
 echo "Running 3 iterations..."
 for i in {1..3}; do
     echo "Run $i:"
-    time ../target/release/tilde benchmark_final.tilde
+    time ../target/release/tilde benchmark_final.tde
     echo ""
 done
 

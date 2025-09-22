@@ -376,10 +376,11 @@ impl HttpClient {
 }
 
 /// Parse HTTP options from Tilde value
-pub fn parse_http_options(options_value: Option<Value>) -> Result<(HashMap<String, String>, Option<String>, u64), String> {
+pub fn parse_http_options(options_value: Option<Value>) -> Result<(HashMap<String, String>, Option<String>, u64, Option<HashMap<String, String>>), String> {
     let mut headers = HashMap::new();
     let mut body = None;
     let mut timeout_ms = 30000;
+    let mut query_params = None;
 
     if let Some(Value::Object(options)) = options_value {
         // Parse headers
@@ -423,9 +424,54 @@ pub fn parse_http_options(options_value: Option<Value>) -> Result<(HashMap<Strin
                 headers.insert("authorization".to_string(), format!("Basic {}", credentials));
             }
         }
+
+        // Parse query parameters
+        if let Some(Value::Object(params_obj)) = options.get("query") {
+            let mut params = HashMap::new();
+            for (key, value) in params_obj {
+                let param_value = match value {
+                    Value::String(s) => s.clone(),
+                    Value::Number(n) => n.to_string(),
+                    Value::Boolean(b) => b.to_string(),
+                    _ => return Err(format!("Query parameter '{}' must be a string, number, or boolean", key)),
+                };
+                params.insert(key.clone(), param_value);
+            }
+            query_params = Some(params);
+        }
     }
 
-    Ok((headers, body, timeout_ms))
+    Ok((headers, body, timeout_ms, query_params))
+}
+
+/// Builds a URL with query parameters
+pub fn build_url_with_query(base_url: &str, query_params: Option<HashMap<String, String>>) -> String {
+    if let Some(params) = query_params {
+        if params.is_empty() {
+            return base_url.to_string();
+        }
+
+        let query_string: Vec<String> = params
+            .iter()
+            .map(|(key, value)| format!("{}={}", url_encode(key), url_encode(value)))
+            .collect();
+
+        let separator = if base_url.contains('?') { "&" } else { "?" };
+        format!("{}{}{}", base_url, separator, query_string.join("&"))
+    } else {
+        base_url.to_string()
+    }
+}
+
+/// Simple URL encoding for query parameters
+fn url_encode(s: &str) -> String {
+    s.chars()
+        .map(|c| match c {
+            'A'..='Z' | 'a'..='z' | '0'..='9' | '-' | '_' | '.' | '~' => c.to_string(),
+            ' ' => "+".to_string(),
+            _ => format!("%{:02X}", c as u8),
+        })
+        .collect()
 }
 
 // Add base64 encoding for basic auth

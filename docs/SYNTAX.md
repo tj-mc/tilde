@@ -729,30 +729,11 @@ Tilde automatically creates errors for common failure scenarios:
 - **Property access errors**: `Cannot access property 'prop' on number`
 - **Date parsing errors**: `date-add first argument must be a date`
 
-### Error Values in Conditionals
-
-Error values are falsy in conditional expressions:
-
-```tilde
-attempt (
-    ~result is ~undefined_variable
-) rescue ~err (
-    ~error_var is ~err
-)
-
-if ~error_var (
-    say "This won't execute - errors are falsy"
-) else (
-    say "Error occurred but handled gracefully"
-)
-```
-
 ### Best Practices
 
 1. **Use for Expected Failures**: Use `attempt`/`rescue` for operations that might legitimately fail
 2. **Don't Hide Real Bugs**: Avoid using error handling to mask programming errors
 3. **Provide Meaningful Fallbacks**: Ensure rescue blocks provide sensible default behavior
-4. **Log Error Detilde**: Always log or handle the error information appropriately
 
 ```tilde
 # Good: Handle expected file operations
@@ -771,9 +752,3 @@ attempt (
     ~number is 0
 )
 ```
-
-## Design Principles
-- **Simplicity**: Minimal syntax, easy to parse
-- **Whitespace-delimited**: No complex tokenization needed
-- **Prefix notation for variables**: Clear distinction between variables and keywords
-- **Parentheses for blocks**: Explicit block boundaries without indentation sensitivity

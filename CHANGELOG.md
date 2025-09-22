@@ -95,9 +95,9 @@ Fix Web REPL broken after rebrand
 - **Terminal Control**: `clear` function for screen clearing in animations/games
 - **Negative Number Literals**: Direct support for negative numbers (e.g., `-42`, `-3.14`)
 - **Advanced Examples**:
-  - `stdlib_demo.tilde` - Comprehensive standard library showcase
-  - `functional_programming.tilde` - Real-world functional programming patterns
-  - `foreach_advanced.tilde` - Advanced iteration techniques
+  - `stdlib_demo.tde` - Comprehensive standard library showcase
+  - `functional_programming.tde` - Real-world functional programming patterns
+  - `foreach_advanced.tde` - Advanced iteration techniques
   - Multiple graphics examples (bouncing ball, matrix rain, simple game)
 
 ### Enhanced

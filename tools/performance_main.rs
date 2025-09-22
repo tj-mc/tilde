@@ -12,7 +12,7 @@ use performance_analysis::PerformanceAnalyzer;
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
-        eprintln!("Usage: {} <script.tilde>", args[0]);
+        eprintln!("Usage: {} <script.tde>", args[0]);
         process::exit(1);
     }
 

@@ -1492,6 +1492,15 @@ Make an HTTP GET request.
 # Simple GET request
 ~response is get "https://api.example.com/users"
 
+# GET request with query parameters (new feature!)
+~response is get "https://api.example.com/users" {
+    "query": {
+        "page": 1
+        "limit": 10
+        "sort": "name"
+    }
+}
+
 # Access response data
 ~status is ~response.status
 ~data is ~response.body
@@ -1774,5 +1783,5 @@ server listen (env "PORT" or 8080)
 ## See Also
 
 - [SYNTAX.md](SYNTAX.md) - Complete Tilde language reference
-- [examples/stdlib_demo.tilde](../examples/stdlib_demo.tilde) - Working examples
-- [examples/foreach_advanced.tilde](../examples/foreach_advanced.tilde) - Alternative iteration patterns
+- [examples/stdlib_demo.tde](../examples/stdlib_demo.tde) - Working examples
+- [examples/foreach_advanced.tde](../examples/foreach_advanced.tde) - Alternative iteration patterns

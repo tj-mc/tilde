@@ -12,7 +12,7 @@ echo ""
 echo "🧪 Testing Tilde (3 runs):"
 for i in {1..3}; do
     echo -n "  Run $i: "
-    time ./target/release/tilde benchmark_comparison/benchmark_final.tilde > /dev/null
+    time ./target/release/tilde benchmark_comparison/benchmark_final.tde > /dev/null
 done
 
 echo ""

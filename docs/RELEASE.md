@@ -68,9 +68,9 @@ tilde --version
 tilde --help
 
 # Test basic functionality
-echo '~name is "World"' > test.tilde
-echo 'say "Hello, " ~name "!"' >> test.tilde
-tilde test.tilde
+echo '~name is "World"' > test.tde
+echo 'say "Hello, " ~name "!"' >> test.tde
+tilde test.tde
 ```
 
 ## Manual Release (Alternative)

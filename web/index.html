@@ -119,7 +119,7 @@
                         <h4>Todo List Manager</h4>
                         <p>Lists and single-line conditionals</p>
                     </div>
-                    <div class="example-item" data-code='function generate-pattern ~size ~char (\n    ~row is 0\n    loop (\n        if ~row >= ~size break-loop\n        ~line is ""\n        ~col is 0\n        loop (\n            if ~col >= ~size break-loop\n            if ~row == 0 or ~row == (~size - 1) or ~col == 0 or ~col == (~size - 1) (\n                ~line is ~line + ~char\n            ) else (\n                ~line is ~line + " "\n            )\n            ~col is ~col + 1\n        )\n        say ~line\n        ~row is ~row + 1\n    )\n)\n\nsay "🎨 Pattern Generator"\nsay "==================="\nsay "Square border (5x5):"\n*generate-pattern 5 "*"\n\nsay ""\nsay "Smaller pattern:"\n*generate-pattern 3 "#"'>
+                    <div class="example-item" data-code='function generate-pattern ~size ~char (\n    ~row is 0\n    loop (\n        if ~row >= ~size break-loop\n        ~line is ""\n        ~col is 0\n        loop (\n            if ~col >= ~size break-loop\n            if ~row == 0 or ~row == (~size - 1) or ~col == 0 or ~col == (~size - 1) (\n                ~line is ~line + ~char\n            ) else (\n                ~line is ~line + " "\n            )\n            ~col up 1\n        )\n        say ~line\n        ~row up 1\n    )\n)\n\nsay "🎨 Pattern Generator"\nsay "==================="\nsay "Square border (5x5):"\n*generate-pattern 5 "*"\n\nsay ""\nsay "Smaller pattern:"\n*generate-pattern 3 "#"'>
                         <h4>Pattern Generator</h4>
                         <p>Nested loops and creative ASCII art</p>
                     </div>

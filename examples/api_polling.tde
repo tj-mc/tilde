@@ -1,0 +1,23 @@
+~config is {
+    api-url: "https://httpbin.org/get"
+    poll-interval: 5
+    max-polls: 3
+}
+
+~poll-count is 0
+
+loop (
+    ~poll-count up 1
+    say "Poll" ~poll-count "of" ~config.max-polls
+    
+    ~data is get ~config.api-url {
+        query: { key: "value" }
+    }
+
+    say "Received Status code:" ~data.status
+    
+    if ~poll-count >= ~config.max-polls break-loop
+    
+    say "Waiting" ~config.poll-interval "seconds..."
+    wait ~config.poll-interval
+)

@@ -48,7 +48,7 @@ impl KebabCaseConverter {
 
 fn main() {
     let converter = KebabCaseConverter::new();
-    let file_path = Path::new("test_conversion_sample.tilde");
+    let file_path = Path::new("test_conversion_sample.tde");
 
     println!("🔧 Testing conversion on sample file...");
 
