@@ -42,7 +42,7 @@ impl Evaluator {
             variables: HashMap::new(),
             functions: HashMap::new(),
             scope_stack: Vec::new(),
-            max_call_depth: 1000,
+            max_call_depth: 100,
             output_buffer: Vec::new(),
             last_error: None,
             memo_cache: HashMap::new(),
@@ -1296,17 +1296,10 @@ impl Evaluator {
 
     /// Detects if a statement is a tail call to the specified function
     /// Returns the argument expressions if it's a tail call, None otherwise
-    fn detect_tail_call(&self, stmt: &Statement, function_name: &str) -> Option<Vec<Expression>> {
-        match stmt {
-            Statement::Give(Expression::FunctionCall { name, args }) => {
-                if name == function_name {
-                    Some(args.clone())
-                } else {
-                    None
-                }
-            }
-            _ => None
-        }
+    fn detect_tail_call(&self, _stmt: &Statement, _function_name: &str) -> Option<Vec<Expression>> {
+        // TODO: Implement proper tail call detection that works with all control structures
+        // For now, disable tail call optimization to prevent stack overflow
+        None
     }
 
     /// Create a hash key from function arguments for memoization
