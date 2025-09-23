@@ -12,6 +12,10 @@ pub mod date;
 pub mod system;
 pub mod type_checking;
 pub mod json;
+pub mod encoding;
+pub mod crypto;
+pub mod filesystem;
+pub mod object_manipulation;
 mod utils;
 
 use crate::ast::Expression;
@@ -61,6 +65,14 @@ pub fn get_stdlib_function_names() -> &'static [&'static str] {
         "is-number", "is-string", "is-boolean", "is-list", "is-object", "is-null", "is-empty", "is-defined",
         // JSON functions
         "to-json", "from-json",
+        // Encoding functions
+        "base64-encode", "base64-decode", "url-encode", "url-decode",
+        // Cryptography functions
+        "sha256", "md5", "hmac-sha256",
+        // Filesystem functions
+        "file-exists", "dir-exists", "file-size",
+        // Object manipulation functions
+        "merge", "pick", "omit", "object-get", "object-set", "deep-merge",
     ]
 }
 
@@ -219,6 +231,30 @@ pub fn get_stdlib_function(name: &str) -> Option<fn(Vec<Expression>, &mut Evalua
         // JSON functions
         "to-json" => Some(json::eval_to_json),
         "from-json" => Some(json::eval_from_json),
+
+        // Encoding functions
+        "base64-encode" => Some(encoding::eval_base64_encode),
+        "base64-decode" => Some(encoding::eval_base64_decode),
+        "url-encode" => Some(encoding::eval_url_encode),
+        "url-decode" => Some(encoding::eval_url_decode),
+
+        // Cryptography functions
+        "sha256" => Some(crypto::eval_sha256),
+        "md5" => Some(crypto::eval_md5),
+        "hmac-sha256" => Some(crypto::eval_hmac_sha256),
+
+        // Filesystem functions
+        "file-exists" => Some(filesystem::eval_file_exists),
+        "dir-exists" => Some(filesystem::eval_dir_exists),
+        "file-size" => Some(filesystem::eval_file_size),
+
+        // Object manipulation functions
+        "merge" => Some(object_manipulation::eval_merge),
+        "pick" => Some(object_manipulation::eval_pick),
+        "omit" => Some(object_manipulation::eval_omit),
+        "object-get" => Some(object_manipulation::eval_object_get),
+        "object-set" => Some(object_manipulation::eval_object_set),
+        "deep-merge" => Some(object_manipulation::eval_deep_merge),
 
         _ => None,
     }

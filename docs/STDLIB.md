@@ -2247,6 +2247,210 @@ server listen (env "PORT" or 8080)
 - Missing environment variables return `null` (not an error)
 - Use with `or` operator for graceful fallbacks
 
+## Encoding Functions
+
+### `base64-encode string`
+
+Encodes a string to base64 format.
+
+**Example:**
+```tilde
+~text is "Hello, World!"
+~encoded is base64-encode ~text
+say ~encoded  # "SGVsbG8sIFdvcmxkIQ=="
+```
+
+### `base64-decode string`
+
+Decodes a base64-encoded string.
+
+**Example:**
+```tilde
+~encoded is "SGVsbG8sIFdvcmxkIQ=="
+~decoded is base64-decode ~encoded
+say ~decoded  # "Hello, World!"
+```
+
+### `url-encode string`
+
+URL-encodes a string, suitable for query parameters and AWS S3 paths.
+
+**Example:**
+```tilde
+~text is "my file.txt"
+~encoded is url-encode ~text
+say ~encoded  # "my%20file.txt"
+
+~path is "/my-bucket/my key.txt"
+~encoded_path is url-encode ~path
+say ~encoded_path  # "%2Fmy-bucket%2Fmy%20key.txt"
+```
+
+### `url-decode string`
+
+URL-decodes a string.
+
+**Example:**
+```tilde
+~encoded is "my%20file.txt"
+~decoded is url-decode ~encoded
+say ~decoded  # "my file.txt"
+```
+
+## Cryptography Functions
+
+### `sha256 string`
+
+Computes the SHA256 hash of a string and returns it as a hexadecimal string.
+
+**Example:**
+```tilde
+~text is "Hello, World!"
+~hash is sha256 ~text
+say ~hash  # "dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f"
+```
+
+### `md5 string`
+
+Computes the MD5 hash of a string and returns it as a hexadecimal string.
+
+**Example:**
+```tilde
+~text is "Hello, World!"
+~hash is md5 ~text
+say ~hash  # "65a8e27d8879283831b664bd8b7f0ad4"
+```
+
+### `hmac-sha256 key message`
+
+Computes the HMAC-SHA256 of a message with a key and returns it as a hexadecimal string. Essential for AWS signatures.
+
+**Example:**
+```tilde
+~message is "Hello, World!"
+~key is "secret"
+~hmac is hmac-sha256 ~key ~message
+say ~hmac  # "fcfaffa7fef86515c7beb6b62d779fa4ccf092f2e61c164376054271252821ff"
+```
+
+## Filesystem Functions
+
+### `file-exists path`
+
+Checks if a file exists at the given path.
+
+**Example:**
+```tilde
+~exists is file-exists "/etc/hosts"
+say ~exists  # true
+
+~missing is file-exists "/nonexistent/file.txt"
+say ~missing  # false
+```
+
+### `dir-exists path`
+
+Checks if a directory exists at the given path.
+
+**Example:**
+```tilde
+~exists is dir-exists "/tmp"
+say ~exists  # true
+
+~missing is dir-exists "/nonexistent/directory"
+say ~missing  # false
+```
+
+### `file-size path`
+
+Gets the size of a file in bytes.
+
+**Example:**
+```tilde
+~size is file-size "/etc/hosts"
+say ~size  # 158
+```
+
+
+## Object Manipulation Functions
+
+### `merge object1 object2`
+
+Merges two objects, with the second object overwriting fields from the first.
+
+**Example:**
+```tilde
+~obj1 is {"name": "John", "age": 30}
+~obj2 is {"city": "New York", "age": 35}
+~merged is merge ~obj1 ~obj2
+say ~merged.name  # "John"
+say ~merged.age   # 35 (overwritten)
+say ~merged.city  # "New York"
+```
+
+### `pick object fields`
+
+Creates a new object containing only the specified fields.
+
+**Example:**
+```tilde
+~user is {"name": "Alice", "age": 25, "city": "Boston", "country": "USA"}
+~basic is pick ~user ["name", "city"]
+say ~basic  # {"name": "Alice", "city": "Boston"}
+```
+
+### `omit object fields`
+
+Creates a new object excluding the specified fields.
+
+**Example:**
+```tilde
+~user is {"name": "Bob", "age": 40, "password": "secret", "email": "bob@example.com"}
+~safe is omit ~user ["password"]
+say ~safe  # {"name": "Bob", "age": 40, "email": "bob@example.com"}
+```
+
+### `object-get object path`
+
+Gets a value from an object using a dot-separated path.
+
+**Example:**
+```tilde
+~data is {"user": {"profile": {"name": "Charlie"}}}
+~name is object-get ~data "user.profile.name"
+say ~name  # "Charlie"
+
+~missing is object-get ~data "user.settings.theme"
+say ~missing  # null
+```
+
+### `object-set object path value`
+
+Sets a value in an object using a dot-separated path, creating nested objects as needed.
+
+**Example:**
+```tilde
+~data is {"user": {"profile": {"name": "David"}}}
+~updated is object-set ~data "user.profile.age" 28
+~age is object-get ~updated "user.profile.age"
+say ~age  # 28
+```
+
+### `deep-merge object1 object2`
+
+Recursively merges two objects, preserving nested structure.
+
+**Example:**
+```tilde
+~obj1 is {"user": {"profile": {"name": "Eve"}, "settings": {"theme": "dark"}}}
+~obj2 is {"user": {"profile": {"age": 30}, "permissions": ["read"]}}
+~merged is deep-merge ~obj1 ~obj2
+
+~name is object-get ~merged "user.profile.name"   # "Eve" (preserved)
+~age is object-get ~merged "user.profile.age"     # 30 (added)
+~theme is object-get ~merged "user.settings.theme" # "dark" (preserved)
+```
+
 ## See Also
 
 - [SYNTAX.md](SYNTAX.md) - Complete Tilde language reference
