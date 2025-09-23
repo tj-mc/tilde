@@ -18,7 +18,7 @@ function calculate-distance ~path ~distances (
     ~i is 0
     ~path_len is length ~path
     loop (
-        ~next_i is ~i + 1
+        ~next_i up 1
         if ~next_i >= ~path_len break-loop
         ~from is ~path.~i
         ~to is ~path.~next_i
@@ -63,7 +63,7 @@ loop (
         ~best_distance is ~distance
         ~best_path is ~path
     )
-    ~i is ~i + 1
+    ~i up 1
 )
 
 say ""

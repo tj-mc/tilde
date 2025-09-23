@@ -265,7 +265,7 @@ fn test_write_in_loop() {
             if ~result.success (
                 ~total_bytes is ~total_bytes + ~result.bytes_written
             )
-            ~i is ~i + 1
+            ~i up 1
         )
     "#;
 

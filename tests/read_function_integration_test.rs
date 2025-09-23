@@ -231,7 +231,7 @@ fn test_read_in_loop() {
             if ~file.exists (
                 ~total_size is ~total_size + ~file.size
             )
-            ~i is ~i + 1
+            ~i up 1
         )
     "#;
 

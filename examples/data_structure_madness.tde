@@ -8,7 +8,7 @@ function sum_list ~list (
     loop (
         if ~i >= ~len break-loop
         ~sum is ~sum + ~list.~i
-        ~i is ~i + 1
+        ~i up 1
     )
     give ~sum
 )
@@ -23,7 +23,7 @@ function max_list ~list (
         if ~list.~i > ~max_val (
             ~max_val is ~list.~i
         )
-        ~i is ~i + 1
+        ~i up 1
     )
     give ~max_val
 )
@@ -34,7 +34,7 @@ function create_range ~start ~end (
     loop (
         if ~i > ~end break-loop
         ~result is append ~result ~i
-        ~i is ~i + 1
+        ~i up 1
     )
     give ~result
 )
@@ -48,7 +48,7 @@ function filter_even ~list (
         if ~list.~i % 2 == 0 (
             ~result is append ~result ~list.~i
         )
-        ~i is ~i + 1
+        ~i up 1
     )
     give ~result
 )

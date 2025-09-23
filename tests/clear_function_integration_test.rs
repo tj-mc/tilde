@@ -77,7 +77,7 @@ fn test_clear_in_loop() {
             if ~i >= 3 break-loop
             clear
             ~clear_count is ~clear_count + 1
-            ~i is ~i + 1
+            ~i up 1
         )
     "#;
 
@@ -203,7 +203,7 @@ fn test_clear_with_action_definition() {
                 if ~i >= ~frame_count break-loop
                 clear
                 say "Animation frame: " ~i
-                ~i is ~i + 1
+                ~i up 1
             )
             give ~frame_count
         )

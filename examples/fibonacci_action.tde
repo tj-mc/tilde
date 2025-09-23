@@ -11,5 +11,5 @@ loop (
     if ~i > 10 break-loop
     ~result is *fib ~i
     say "fib(" ~i ") = " ~result
-    ~i is ~i + 1
+    ~i up 1
 )

@@ -181,7 +181,7 @@ fn test_nested_if_in_loop() {
         ~i is 0
         
         loop (
-            ~i is ~i + 1
+            ~i up 1
             if ~i > 5 break-loop
             if ~i < 3 ~sum is ~sum + ~i
         )

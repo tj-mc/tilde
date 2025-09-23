@@ -10,7 +10,7 @@ function fibonacci ~n (
         ~temp is ~b
         ~b is ~a + ~b
         ~a is ~temp
-        ~i is ~i + 1
+        ~i up 1
     )
     give ~b
 )
@@ -21,5 +21,5 @@ loop (
     if ~i > 10 break-loop
     ~fib is *fibonacci ~i
     say "F(" ~i ") = " ~fib
-    ~i is ~i + 1
+    ~i up 1
 )
