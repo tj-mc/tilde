@@ -58,7 +58,7 @@ pub fn get_stdlib_function_names() -> &'static [&'static str] {
         // Common helper functions - transformations
         "double", "triple", "quadruple", "half", "square", "increment", "decrement",
         // Common helper functions - reductions
-        "add", "multiply", "max", "min",
+        "add", "multiply", "max", "min", "fibonacci",
         // System functions
         "env",
         // Type checking functions
@@ -214,6 +214,7 @@ pub fn get_stdlib_function(name: &str) -> Option<fn(Vec<Expression>, &mut Evalua
         "multiply" => Some(helpers::eval_multiply),
         "max" => Some(helpers::eval_max),
         "min" => Some(helpers::eval_min),
+        "fibonacci" => Some(helpers::eval_fibonacci),
 
         // System functions
         "env" => Some(system::eval_env),

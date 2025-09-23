@@ -3,6 +3,43 @@ use crate::evaluator::Evaluator;
 use crate::value::Value;
 use super::utils::*;
 
+/// Fast iterative Fibonacci implementation
+fn fibonacci_iterative(n: u32) -> f64 {
+    if n <= 1 {
+        return n as f64;
+    }
+
+    let mut a = 0.0;
+    let mut b = 1.0;
+
+    for _ in 2..=n {
+        let temp = a + b;
+        a = b;
+        b = temp;
+    }
+
+    b
+}
+
+// Helper macros for native function optimization
+macro_rules! native_map {
+    ($list:expr, $transform:expr) => {
+        Ok(Value::List($list.into_iter().map($transform).collect()))
+    };
+}
+
+macro_rules! native_filter {
+    ($list:expr, $predicate:expr) => {
+        Ok(Value::List($list.into_iter().filter($predicate).collect()))
+    };
+}
+
+macro_rules! native_reduce {
+    ($list:expr, $acc:expr, $reducer:expr) => {
+        $list.iter().try_fold($acc, $reducer)
+    };
+}
+
 /// Helper function to evaluate a predicate function (either user function or stdlib function)
 fn eval_predicate(function_name: &str, item: &Value, evaluator: &mut Evaluator) -> Result<Value, String> {
     eval_function_on_item(function_name, item, evaluator)
@@ -102,13 +139,82 @@ pub fn eval_map(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Valu
         _ => return Err("map second argument must be a function name".to_string()),
     };
 
-    // Use the helper function to evaluate the function on each item
-    let mut result = Vec::new();
-    for item in list {
-        let mapped_value = eval_function_on_item(&function_name, &item, evaluator)?;
-        result.push(mapped_value);
+    // Native fast paths for common stdlib functions
+    match function_name.as_str() {
+        "double" => native_map!(list, |v| match v {
+            Value::Number(n) => Value::Number(n * 2.0),
+            _ => v
+        }),
+        "square" => native_map!(list, |v| match v {
+            Value::Number(n) => Value::Number(n * n),
+            _ => v
+        }),
+        "triple" => native_map!(list, |v| match v {
+            Value::Number(n) => Value::Number(n * 3.0),
+            _ => v
+        }),
+        "quadruple" => native_map!(list, |v| match v {
+            Value::Number(n) => Value::Number(n * 4.0),
+            _ => v
+        }),
+        "half" => native_map!(list, |v| match v {
+            Value::Number(n) => Value::Number(n / 2.0),
+            _ => v
+        }),
+        "increment" => native_map!(list, |v| match v {
+            Value::Number(n) => Value::Number(n + 1.0),
+            _ => v
+        }),
+        "decrement" => native_map!(list, |v| match v {
+            Value::Number(n) => Value::Number(n - 1.0),
+            _ => v
+        }),
+        "uppercase" => native_map!(list, |v| match v {
+            Value::String(s) => Value::String(s.to_uppercase()),
+            _ => v
+        }),
+        "lowercase" => native_map!(list, |v| match v {
+            Value::String(s) => Value::String(s.to_lowercase()),
+            _ => v
+        }),
+        "absolute" => native_map!(list, |v| match v {
+            Value::Number(n) => Value::Number(n.abs()),
+            _ => v
+        }),
+        "square-root" => native_map!(list, |v| match v {
+            Value::Number(n) => {
+                if n >= 0.0 {
+                    Value::Number(n.sqrt())
+                } else {
+                    v // Keep original for negative numbers
+                }
+            },
+            _ => v
+        }),
+        "trim" => native_map!(list, |v| match v {
+            Value::String(s) => Value::String(s.trim().to_string()),
+            _ => v
+        }),
+        "fibonacci" => native_map!(list, |v| match v {
+            Value::Number(n) => {
+                if n >= 0.0 && n <= 1476.0 { // Max safe fibonacci in f64
+                    Value::Number(fibonacci_iterative(n as u32))
+                } else {
+                    v // Keep original for out-of-range values
+                }
+            },
+            _ => v
+        }),
+        _ => {
+            // Slow path: Use the helper function to evaluate the function on each item
+            let mut result = Vec::new();
+            for item in list {
+                let mapped_value = eval_function_on_item(&function_name, &item, evaluator)?;
+                result.push(mapped_value);
+            }
+            Ok(Value::List(result))
+        }
     }
-    Ok(Value::List(result))
 }
 
 /// Filters elements in a list using the provided predicate function.
@@ -141,16 +247,40 @@ pub fn eval_filter(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<V
         _ => return Err("filter second argument must be a function name (like 'is_even' or '.is-even' for stdlib)".to_string()),
     };
 
-    // Use the helper function to evaluate the predicate on each item
-    let mut result = Vec::new();
-    for item in list {
-        let predicate_result = eval_predicate(&function_name, &item, evaluator)?;
-        if let Value::Boolean(true) = predicate_result {
-            result.push(item);
+    // Native fast paths for common stdlib predicates
+    match function_name.as_str() {
+        "is-even" => native_filter!(list, |v| match v {
+            Value::Number(n) => (*n as i64) % 2 == 0,
+            _ => false
+        }),
+        "is-odd" => native_filter!(list, |v| match v {
+            Value::Number(n) => (*n as i64) % 2 != 0,
+            _ => false
+        }),
+        "is-positive" => native_filter!(list, |v| match v {
+            Value::Number(n) => *n > 0.0,
+            _ => false
+        }),
+        "is-negative" => native_filter!(list, |v| match v {
+            Value::Number(n) => *n < 0.0,
+            _ => false
+        }),
+        "is-zero" => native_filter!(list, |v| match v {
+            Value::Number(n) => *n == 0.0,
+            _ => false
+        }),
+        _ => {
+            // Slow path: Use the helper function to evaluate the predicate on each item
+            let mut result = Vec::new();
+            for item in list {
+                let predicate_result = eval_predicate(&function_name, &item, evaluator)?;
+                if let Value::Boolean(true) = predicate_result {
+                    result.push(item);
+                }
+            }
+            Ok(Value::List(result))
         }
     }
-
-    Ok(Value::List(result))
 }
 
 pub fn eval_reduce(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
@@ -170,10 +300,44 @@ pub fn eval_reduce(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<V
         _ => return Err("reduce second argument must be a function name (like 'add' or '.add' for stdlib)".to_string()),
     };
 
-    let mut accumulator = evaluator.eval_expression(args[2].clone())?;
+    let accumulator = evaluator.eval_expression(args[2].clone())?;
+
+    // Native fast paths for common reduce functions
+    match function_name.as_str() {
+        "add" => {
+            let result = native_reduce!(list, accumulator, |acc, item| match (acc, item) {
+                (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a + b)),
+                _ => Err("add requires numbers".to_string())
+            })?;
+            return Ok(result);
+        },
+        "multiply" => {
+            let result = native_reduce!(list, accumulator, |acc, item| match (acc, item) {
+                (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a * b)),
+                _ => Err("multiply requires numbers".to_string())
+            })?;
+            return Ok(result);
+        },
+        "max" => {
+            let result = native_reduce!(list, accumulator, |acc, item| match (acc, item) {
+                (Value::Number(a), Value::Number(b)) => Ok(Value::Number(if *b > a { *b } else { a })),
+                _ => Err("max requires numbers".to_string())
+            })?;
+            return Ok(result);
+        },
+        "min" => {
+            let result = native_reduce!(list, accumulator, |acc, item| match (acc, item) {
+                (Value::Number(a), Value::Number(b)) => Ok(Value::Number(if *b < a { *b } else { a })),
+                _ => Err("min requires numbers".to_string())
+            })?;
+            return Ok(result);
+        },
+        _ => {}
+    }
 
     // Check if it's a stdlib function first
     if let Some(stdlib_func) = crate::stdlib::get_stdlib_function(&function_name) {
+        let mut accumulator = accumulator;
             for item in list {
                 // Create arguments for the accumulator and current item
                 let acc_expr = match &accumulator {

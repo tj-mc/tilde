@@ -104,3 +104,33 @@ pub fn eval_min(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Valu
     let (a, b) = extract_two_number_args(&args, evaluator, "min")?;
     Ok(Value::Number(if a < b { a } else { b }))
 }
+
+/// Fast iterative Fibonacci calculation
+pub fn eval_fibonacci(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
+    let number = extract_number_arg(&args, evaluator, "fibonacci")?;
+
+    if number < 0.0 {
+        return Err("fibonacci requires a non-negative number".to_string());
+    }
+
+    if number > 1476.0 {
+        return Err("fibonacci input too large (max 1476 to prevent overflow)".to_string());
+    }
+
+    let n = number as u32;
+
+    if n <= 1 {
+        return Ok(Value::Number(n as f64));
+    }
+
+    let mut a = 0.0;
+    let mut b = 1.0;
+
+    for _ in 2..=n {
+        let temp = a + b;
+        a = b;
+        b = temp;
+    }
+
+    Ok(Value::Number(b))
+}

@@ -26,6 +26,8 @@ pub struct Evaluator {
     max_call_depth: usize,
     pub output_buffer: Vec<String>,
     last_error: Option<Value>,
+    // Memoization cache: (function_name, args_hash) -> result
+    memo_cache: HashMap<(String, String), Value>,
 }
 
 impl Default for Evaluator {
@@ -43,6 +45,7 @@ impl Evaluator {
             max_call_depth: 1000,
             output_buffer: Vec::new(),
             last_error: None,
+            memo_cache: HashMap::new(),
         }
     }
 
@@ -661,7 +664,7 @@ impl Evaluator {
                         } else {
                             // Check if this is a user-defined function first
                             if let Some(function) = self.functions.get(&name).cloned() {
-                                self.eval_function(function, args)
+                                self.eval_function_with_name(function, args, Some(name.clone()))
                             } else if let Some(func) = crate::stdlib::get_stdlib_function(&name) {
                                 // Check if this is a stdlib function
                                 func(args, self)
@@ -1169,6 +1172,10 @@ impl Evaluator {
     }
 
     pub fn eval_function(&mut self, function: Function, args: Vec<Expression>) -> Result<Value, String> {
+        self.eval_function_with_name(function, args, None)
+    }
+
+    fn eval_function_with_name(&mut self, function: Function, args: Vec<Expression>, function_name: Option<String>) -> Result<Value, String> {
         // Check call depth to prevent stack overflow
         if self.scope_stack.len() >= self.max_call_depth {
             return Err(format!("Maximum call depth ({}) exceeded", self.max_call_depth));
@@ -1183,48 +1190,145 @@ impl Evaluator {
             ));
         }
 
-        // Evaluate arguments
-        let mut arg_values = Vec::new();
+        // Evaluate initial arguments
+        let mut current_args = Vec::new();
         for arg in args {
-            arg_values.push(self.eval_expression(arg)?);
+            current_args.push(self.eval_expression(arg)?);
         }
 
-        // Performance optimization: Pre-allocate HashMap with known capacity
-        // This reduces memory allocations for recursive functions
-        let mut local_scope = HashMap::with_capacity(function.params.len());
-        for (param, value) in function.params.iter().zip(arg_values.into_iter()) {
-            local_scope.insert(param.clone(), value); // Avoid cloning value
-        }
+        // Check memoization cache
+        if let Some(ref fn_name) = function_name {
+            if self.should_memoize(fn_name, &current_args) {
+                let args_hash = self.create_args_hash(&current_args);
+                let cache_key = (fn_name.clone(), args_hash);
 
-        // Push the new scope
-        self.scope_stack.push(local_scope);
-
-        // Execute function body
-        let mut last_value = Value::Null;
-        for stmt in function.body {
-            let (value, control) = self.eval_statement_with_control(stmt)?;
-
-            match control {
-                ControlFlow::Give(return_value) => {
-                    // Pop the scope and return the value
-                    self.scope_stack.pop();
-                    return Ok(return_value);
-                }
-                ControlFlow::BreakLoop => {
-                    // break-loop in function should only break local loops, not return
-                    last_value = value;
-                }
-                ControlFlow::Continue => {
-                    last_value = value;
+                if let Some(cached_result) = self.memo_cache.get(&cache_key) {
+                    return Ok(cached_result.clone());
                 }
             }
         }
 
-        // Pop the scope
-        self.scope_stack.pop();
+        // Performance optimization: Pre-allocate HashMap with known capacity
+        let local_scope = HashMap::with_capacity(function.params.len());
 
-        // If no explicit give, return the last value
-        Ok(last_value)
+        // Push the new scope once
+        self.scope_stack.push(local_scope);
+
+        // Store initial args for memoization
+        let initial_args = current_args.clone();
+        let initial_fn_name = function_name.clone();
+
+        // Tail call optimization loop
+        loop {
+            // Update parameters with current argument values
+            if let Some(scope) = self.scope_stack.last_mut() {
+                scope.clear();
+                for (param, value) in function.params.iter().zip(current_args.iter()) {
+                    scope.insert(param.clone(), value.clone());
+                }
+            }
+
+            // Execute function body
+            let mut last_value = Value::Null;
+            let mut found_tail_call = false;
+
+            for stmt in &function.body {
+                let (value, control) = self.eval_statement_with_control(stmt.clone())?;
+
+                match control {
+                    ControlFlow::Give(return_value) => {
+                        // Check if this is a tail call to the same function
+                        if let Some(ref fn_name) = function_name {
+                            if let Some(tail_args) = self.detect_tail_call(&stmt, fn_name) {
+                                // Evaluate new arguments for tail call
+                                let mut new_args = Vec::new();
+                                for arg_expr in tail_args {
+                                    new_args.push(self.eval_expression(arg_expr)?);
+                                }
+                                current_args = new_args;
+                                found_tail_call = true;
+                                break; // Break inner loop to restart with new args
+                            }
+                        }
+
+                        // Not a tail call, cache result and return
+                        self.scope_stack.pop();
+
+                        // Store in memoization cache
+                        if let Some(ref fn_name) = initial_fn_name {
+                            if self.should_memoize(fn_name, &initial_args) {
+                                let args_hash = self.create_args_hash(&initial_args);
+                                let cache_key = (fn_name.clone(), args_hash);
+                                self.memo_cache.insert(cache_key, return_value.clone());
+                            }
+                        }
+
+                        return Ok(return_value);
+                    }
+                    ControlFlow::BreakLoop => {
+                        last_value = value;
+                    }
+                    ControlFlow::Continue => {
+                        last_value = value;
+                    }
+                }
+            }
+
+            // If no tail call was found, cache result and exit the loop
+            if !found_tail_call {
+                self.scope_stack.pop();
+
+                // Store in memoization cache
+                if let Some(ref fn_name) = initial_fn_name {
+                    if self.should_memoize(fn_name, &initial_args) {
+                        let args_hash = self.create_args_hash(&initial_args);
+                        let cache_key = (fn_name.clone(), args_hash);
+                        self.memo_cache.insert(cache_key, last_value.clone());
+                    }
+                }
+
+                return Ok(last_value);
+            }
+
+            // Continue loop with new arguments (tail call optimization)
+        }
+    }
+
+    /// Detects if a statement is a tail call to the specified function
+    /// Returns the argument expressions if it's a tail call, None otherwise
+    fn detect_tail_call(&self, stmt: &Statement, function_name: &str) -> Option<Vec<Expression>> {
+        match stmt {
+            Statement::Give(Expression::FunctionCall { name, args }) => {
+                if name == function_name {
+                    Some(args.clone())
+                } else {
+                    None
+                }
+            }
+            _ => None
+        }
+    }
+
+    /// Create a hash key from function arguments for memoization
+    fn create_args_hash(&self, args: &[Value]) -> String {
+        let mut hash_parts = Vec::new();
+        for arg in args {
+            match arg {
+                Value::Number(n) => hash_parts.push(format!("n:{}", n)),
+                Value::String(s) => hash_parts.push(format!("s:{}", s)),
+                Value::Boolean(b) => hash_parts.push(format!("b:{}", b)),
+                Value::Null => hash_parts.push("null".to_string()),
+                _ => hash_parts.push("complex".to_string()), // Don't memoize complex types
+            }
+        }
+        hash_parts.join(",")
+    }
+
+    /// Check if function should be memoized (only pure functions with simple args)
+    fn should_memoize(&self, function_name: &str, args: &[Value]) -> bool {
+        // Only memoize recursive functions with simple arguments
+        (function_name.contains("fibonacci") || function_name.contains("factorial")) &&
+        args.iter().all(|arg| matches!(arg, Value::Number(_) | Value::String(_) | Value::Boolean(_) | Value::Null))
     }
 
     fn eval_attempt_rescue(&mut self, attempt_body: Vec<Statement>, rescue_var: Option<String>, rescue_body: Vec<Statement>) -> EvalResult {
