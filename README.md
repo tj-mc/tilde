@@ -12,7 +12,7 @@ With friendly syntax, built-in HTTP, and an extensive library of helper function
 say "Found user: `~user.name` with `~user.public_repos` repos"
 ```
 
-### Break code into Function 
+### Break code into Functions
 ```tilde
 function greet-user ~name (
     say "Welcome, `~name`!"
@@ -22,7 +22,7 @@ function greet-user ~name (
 *greet-user "Alice"
 ```
 
-### Filter and sort with ease 
+### Filter and sort like a pro
 ```tilde
                         👇 built-in helpers 👇
 ~uppercase-usernames is map ~usernames uppercase
