@@ -158,8 +158,8 @@ fn test_is_empty() {
 fn test_is_defined() {
     let input = r#"
         ~defined_var is 42
-        ~result1 is is-defined defined_var
-        ~result2 is is-defined undefined_var
+        ~result1 is is-defined ~defined_var
+        ~result2 is is-defined ~undefined_var
         ~result3 is is-defined "hello"
         ~result4 is is-defined 0
         ~result5 is is-defined false
