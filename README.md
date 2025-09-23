@@ -2,7 +2,7 @@
 
 *The easy-to-read programming language*
 
-With friendly syntax, built-in HTTP, and an extensive standard library, Tilde makes scripts that anyone can understand.
+With friendly syntax, built-in HTTP, and an extensive library of helper functions, Tilde makes scripts that anyone can understand.
 
 ## ⚡️ See It In Action
 
@@ -180,4 +180,4 @@ It's not _all_ bad.
     - The simple interpreter design means runtime is a bit slower, but start is instant.
 
 #
- _Born in Australia_
+ _Born in Melbourne, Australia_
