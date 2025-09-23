@@ -1,7 +1,6 @@
 use crate::ast::Expression;
 use crate::evaluator::Evaluator;
 use crate::value::Value;
-use super::utils::*;
 
 /// Checks if a value is a number
 pub fn eval_is_number(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
@@ -94,7 +93,7 @@ pub fn eval_is_defined(args: Vec<Expression>, evaluator: &mut Evaluator) -> Resu
 
     // For is-defined, we only care about variables, not general expressions
     match &args[0] {
-        Expression::Variable(var_name) => {
+        Expression::Variable(_var_name) => {
             // Try to get the variable value - if it succeeds, the variable is defined
             match evaluator.eval_expression(args[0].clone()) {
                 Ok(_) => Ok(Value::Boolean(true)),
