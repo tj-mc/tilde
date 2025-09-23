@@ -10,6 +10,8 @@ pub mod object;
 pub mod collection;
 pub mod date;
 pub mod system;
+pub mod type_checking;
+pub mod json;
 mod utils;
 
 use crate::ast::Expression;
@@ -34,8 +36,11 @@ pub fn get_stdlib_function_names() -> &'static [&'static str] {
         "union", "difference", "intersection",
         // String functions
         "split", "join", "trim", "uppercase", "lowercase",
+        "starts-with", "ends-with", "substring", "replace", "repeat", "pad-left", "pad-right",
         // Math functions
         "absolute", "square-root", "random",
+        "sin", "cos", "tan", "asin", "acos", "atan", "atan2",
+        "log", "log10", "exp", "pow", "round", "floor", "ceil", "pi", "e",
         // Date functions
         "now", "date", "date-add", "date-subtract", "date-diff", "date-format", "date-parse",
         "date-year", "date-month", "date-day", "date-hour", "date-minute", "date-second", "date-weekday",
@@ -52,6 +57,10 @@ pub fn get_stdlib_function_names() -> &'static [&'static str] {
         "add", "multiply", "max", "min",
         // System functions
         "env",
+        // Type checking functions
+        "is-number", "is-string", "is-boolean", "is-list", "is-object", "is-null", "is-empty", "is-defined",
+        // JSON functions
+        "to-json", "from-json",
     ]
 }
 
@@ -115,11 +124,34 @@ pub fn get_stdlib_function(name: &str) -> Option<fn(Vec<Expression>, &mut Evalua
         "trim" => Some(string::eval_trim),
         "uppercase" => Some(string::eval_uppercase),
         "lowercase" => Some(string::eval_lowercase),
+        "starts-with" => Some(string::eval_starts_with),
+        "ends-with" => Some(string::eval_ends_with),
+        "substring" => Some(string::eval_substring),
+        "replace" => Some(string::eval_replace),
+        "repeat" => Some(string::eval_repeat),
+        "pad-left" => Some(string::eval_pad_left),
+        "pad-right" => Some(string::eval_pad_right),
 
         // Math functions
         "absolute" => Some(math::eval_absolute),
         "square-root" => Some(math::eval_square_root),
         "random" => Some(crate::random::eval_random_positional_wrapper),
+        "sin" => Some(math::eval_sin),
+        "cos" => Some(math::eval_cos),
+        "tan" => Some(math::eval_tan),
+        "asin" => Some(math::eval_asin),
+        "acos" => Some(math::eval_acos),
+        "atan" => Some(math::eval_atan),
+        "atan2" => Some(math::eval_atan2),
+        "log" => Some(math::eval_log),
+        "log10" => Some(math::eval_log10),
+        "exp" => Some(math::eval_exp),
+        "pow" => Some(math::eval_pow),
+        "round" => Some(math::eval_round),
+        "floor" => Some(math::eval_floor),
+        "ceil" => Some(math::eval_ceil),
+        "pi" => Some(math::eval_pi),
+        "e" => Some(math::eval_e),
 
         // Date functions
         "now" => Some(date::eval_now),
@@ -173,6 +205,20 @@ pub fn get_stdlib_function(name: &str) -> Option<fn(Vec<Expression>, &mut Evalua
 
         // System functions
         "env" => Some(system::eval_env),
+
+        // Type checking functions
+        "is-number" => Some(type_checking::eval_is_number),
+        "is-string" => Some(type_checking::eval_is_string),
+        "is-boolean" => Some(type_checking::eval_is_boolean),
+        "is-list" => Some(type_checking::eval_is_list),
+        "is-object" => Some(type_checking::eval_is_object),
+        "is-null" => Some(type_checking::eval_is_null),
+        "is-empty" => Some(type_checking::eval_is_empty),
+        "is-defined" => Some(type_checking::eval_is_defined),
+
+        // JSON functions
+        "to-json" => Some(json::eval_to_json),
+        "from-json" => Some(json::eval_from_json),
 
         _ => None,
     }

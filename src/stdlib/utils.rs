@@ -97,3 +97,43 @@ pub fn evaluate_args(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result
     }
     Ok(result)
 }
+
+/// Extract a string value from an expression
+pub fn extract_string_value(expr: &Expression, evaluator: &mut Evaluator) -> Result<String, String> {
+    let value = evaluator.eval_expression(expr.clone())?;
+    match value {
+        Value::String(s) => Ok(s),
+        _ => Err("Argument must be a string".to_string()),
+    }
+}
+
+/// Extract a number value from an expression
+pub fn extract_number_value(expr: &Expression, evaluator: &mut Evaluator) -> Result<f64, String> {
+    let value = evaluator.eval_expression(expr.clone())?;
+    match value {
+        Value::Number(n) => Ok(n),
+        _ => Err("Argument must be a number".to_string()),
+    }
+}
+
+/// Extract string and number arguments
+pub fn extract_string_number_args(args: &[Expression], evaluator: &mut Evaluator, function_name: &str) -> Result<(String, f64), String> {
+    if args.len() != 2 {
+        return Err(format!("{} requires exactly 2 arguments (string, number)", function_name));
+    }
+
+    let string_val = evaluator.eval_expression(args[0].clone())?;
+    let number_val = evaluator.eval_expression(args[1].clone())?;
+
+    let string = match string_val {
+        Value::String(s) => s,
+        _ => return Err(format!("{} first argument must be a string", function_name)),
+    };
+
+    let number = match number_val {
+        Value::Number(n) => n,
+        _ => return Err(format!("{} second argument must be a number", function_name)),
+    };
+
+    Ok((string, number))
+}

@@ -1012,6 +1012,114 @@ Removes whitespace from the beginning and end of a string.
 say "'" ~clean "'"  # 'hello world'
 ```
 
+### Advanced String Functions
+
+#### `starts-with string prefix`
+
+Checks if a string starts with a given prefix.
+
+**Example:**
+```tilde
+~text is "hello world"
+~starts_hello is starts-with ~text "hello"
+say ~starts_hello  # true
+
+~starts_world is starts-with ~text "world"
+say ~starts_world  # false
+```
+
+#### `ends-with string suffix`
+
+Checks if a string ends with a given suffix.
+
+**Example:**
+```tilde
+~text is "hello world"
+~ends_world is ends-with ~text "world"
+say ~ends_world  # true
+
+~ends_hello is ends-with ~text "hello"
+say ~ends_hello  # false
+```
+
+#### `substring string start [length]`
+
+Extracts a substring from a string starting at the given index. If length is provided, extracts that many characters; otherwise extracts to the end.
+
+**Example:**
+```tilde
+~text is "hello world"
+~sub1 is substring ~text 0 5
+say ~sub1  # "hello"
+
+~sub2 is substring ~text 6
+say ~sub2  # "world"
+
+~sub3 is substring ~text 6 5
+say ~sub3  # "world"
+```
+
+#### `replace string old_text new_text`
+
+Replaces all occurrences of a substring with another string.
+
+**Example:**
+```tilde
+~text is "hello world hello"
+~replaced is replace ~text "hello" "hi"
+say ~replaced  # "hi world hi"
+
+~text2 is "foo bar foo"
+~replaced2 is replace ~text2 "foo" "baz"
+say ~replaced2  # "baz bar baz"
+```
+
+#### `repeat string count`
+
+Repeats a string a specified number of times.
+
+**Example:**
+```tilde
+~text is "hi"
+~repeated is repeat ~text 3
+say ~repeated  # "hihihi"
+
+~dashes is repeat "-" 10
+say ~dashes  # "----------"
+```
+
+#### `pad-left string length [char]`
+
+Pads a string on the left to reach the specified length. Uses spaces by default, or the provided character.
+
+**Example:**
+```tilde
+~text is "hi"
+~padded is pad-left ~text 5
+say "'" ~padded "'"  # '   hi'
+
+~padded_star is pad-left ~text 5 "*"
+say ~padded_star  # "***hi"
+
+# No padding if already long enough
+~already_long is pad-left "hello" 3
+say ~already_long  # "hello"
+```
+
+#### `pad-right string length [char]`
+
+Pads a string on the right to reach the specified length. Uses spaces by default, or the provided character.
+
+**Example:**
+```tilde
+~text is "hi"
+~padded is pad-right ~text 5
+say "'" ~padded "'"  # 'hi   '
+
+~padded_star is pad-right ~text 5 "*"
+say ~padded_star  # "hi***"
+```
+
 ## Math Operations
 
 ### `absolute number`
@@ -1041,6 +1149,365 @@ say ~decimal  # 1.4142135623730951
 ```
 
 **Error:** Throws an error if the number is negative.
+
+### Advanced Math Functions
+
+#### Trigonometric Functions
+
+##### `sin radians`
+Returns the sine of an angle in radians.
+
+**Example:**
+```tilde
+~result is sin 0
+say ~result  # 0
+
+~half_pi is pi / 2
+~result2 is sin ~half_pi
+say ~result2  # 1
+```
+
+##### `cos radians`
+Returns the cosine of an angle in radians.
+
+**Example:**
+```tilde
+~result is cos 0
+say ~result  # 1
+
+~pi_val is pi
+~result2 is cos ~pi_val
+say ~result2  # -1
+```
+
+##### `tan radians`
+Returns the tangent of an angle in radians.
+
+**Example:**
+```tilde
+~result is tan 0
+say ~result  # 0
+
+~quarter_pi is pi / 4
+~result2 is tan ~quarter_pi
+say ~result2  # 1
+```
+
+##### `asin value`
+Returns the arcsine (inverse sine) of a value. Input must be between -1 and 1.
+
+**Example:**
+```tilde
+~result is asin 0
+say ~result  # 0
+
+~result2 is asin 1
+say ~result2  # 1.5707963267948966 (π/2)
+```
+
+##### `acos value`
+Returns the arccosine (inverse cosine) of a value. Input must be between -1 and 1.
+
+**Example:**
+```tilde
+~result is acos 1
+say ~result  # 0
+
+~result2 is acos 0
+say ~result2  # 1.5707963267948966 (π/2)
+```
+
+##### `atan value`
+Returns the arctangent (inverse tangent) of a value.
+
+**Example:**
+```tilde
+~result is atan 0
+say ~result  # 0
+
+~result2 is atan 1
+say ~result2  # 0.7853981633974483 (π/4)
+```
+
+##### `atan2 y x`
+Returns the arctangent of y/x, using the signs of both arguments to determine the quadrant.
+
+**Example:**
+```tilde
+~result is atan2 1 1
+say ~result  # 0.7853981633974483 (π/4)
+
+~result2 is atan2 1 -1
+say ~result2  # 2.356194490192345 (3π/4)
+```
+
+#### Logarithmic and Exponential Functions
+
+##### `log value [base]`
+Returns the logarithm of a value. If base is not provided, returns the natural logarithm (base e).
+
+**Example:**
+```tilde
+~e_val is e
+~result is log ~e_val
+say ~result  # 1 (natural log of e)
+
+~result2 is log 8 2
+say ~result2  # 3 (log base 2 of 8)
+
+~result3 is log 1000 10
+say ~result3  # 3 (log base 10 of 1000)
+```
+
+##### `log10 value`
+Returns the base-10 logarithm of a value.
+
+**Example:**
+```tilde
+~result is log10 100
+say ~result  # 2
+
+~result2 is log10 1000
+say ~result2  # 3
+```
+
+##### `exp value`
+Returns e raised to the power of the given value.
+
+**Example:**
+```tilde
+~result is exp 0
+say ~result  # 1
+
+~result2 is exp 1
+say ~result2  # 2.718281828459045 (e)
+```
+
+##### `pow base exponent`
+Returns base raised to the power of exponent.
+
+**Example:**
+```tilde
+~result is pow 2 3
+say ~result  # 8
+
+~result2 is pow 5 2
+say ~result2  # 25
+
+~result3 is pow 2 0.5
+say ~result3  # 1.4142135623730951 (√2)
+```
+
+#### Rounding Functions
+
+##### `round value [precision]`
+Rounds a value to the nearest integer, or to the specified number of decimal places.
+
+**Example:**
+```tilde
+~result is round 3.7
+say ~result  # 4
+
+~result2 is round 3.14159 2
+say ~result2  # 3.14
+
+~result3 is round 3.5
+say ~result3  # 4
+```
+
+##### `floor value`
+Returns the largest integer less than or equal to the value.
+
+**Example:**
+```tilde
+~result is floor 3.7
+say ~result  # 3
+
+~result2 is floor -2.3
+say ~result2  # -3
+```
+
+##### `ceil value`
+Returns the smallest integer greater than or equal to the value.
+
+**Example:**
+```tilde
+~result is ceil 3.2
+say ~result  # 4
+
+~result2 is ceil -2.8
+say ~result2  # -2
+```
+
+#### Mathematical Constants
+
+##### `pi`
+The mathematical constant π (pi).
+
+**Example:**
+```tilde
+~pi_val is pi
+say ~pi_val  # 3.141592653589793
+
+~circumference is 2 * ~pi_val * 5  # radius = 5
+say ~circumference  # 31.41592653589793
+```
+
+##### `e`
+The mathematical constant e (Euler's number).
+
+**Example:**
+```tilde
+~e_val is e
+say ~e_val  # 2.718281828459045
+
+~natural_growth is pow ~e_val 2
+say ~natural_growth  # 7.3890560989306504
+```
+
+## JSON Functions
+
+### `to-json value`
+Converts a Tilde value to a JSON string representation.
+
+**Example:**
+```tilde
+~obj is {"name": "John", "age": 30, "active": true}
+~json_str is to-json ~obj
+say ~json_str  # {"active":true,"age":30.0,"name":"John"}
+
+~list is [1, 2, "three", true]
+~json_list is to-json ~list
+say ~json_list  # [1.0,2.0,"three",true]
+
+~simple is to-json "hello"
+say ~simple  # "hello"
+```
+
+### `from-json json_string`
+Parses a JSON string and returns the corresponding Tilde value.
+
+**Example:**
+```tilde
+~json_str is "{\"name\":\"John\",\"age\":30}"
+~obj is from-json ~json_str
+say ~obj.name  # "John"
+say ~obj.age   # 30
+
+~json_list is "[1,2,\"three\"]"
+~list is from-json ~json_list
+say ~list[0]  # 1
+say ~list[2]  # "three"
+```
+
+**Error Handling:**
+```tilde
+attempt (
+    ~invalid is from-json "invalid json {"
+) rescue ~error (
+    say "JSON parsing failed: " ~error.message
+)
+```
+
+## Type Checking Functions
+
+These functions help determine the type of values at runtime.
+
+### `is-number value`
+Returns `true` if the value is a number, `false` otherwise.
+
+**Example:**
+```tilde
+~result1 is is-number 42
+say ~result1  # true
+
+~result2 is is-number "hello"
+say ~result2  # false
+
+~result3 is is-number 3.14
+say ~result3  # true
+```
+
+### `is-string value`
+Returns `true` if the value is a string, `false` otherwise.
+
+**Example:**
+```tilde
+~result1 is is-string "hello"
+say ~result1  # true
+
+~result2 is is-string 42
+say ~result2  # false
+
+~result3 is is-string ""
+say ~result3  # true
+```
+
+### `is-boolean value`
+Returns `true` if the value is a boolean, `false` otherwise.
+
+**Example:**
+```tilde
+~result1 is is-boolean true
+say ~result1  # true
+
+~result2 is is-boolean false
+say ~result2  # true
+
+~result3 is is-boolean "true"
+say ~result3  # false
+```
+
+### `is-list value`
+Returns `true` if the value is a list, `false` otherwise.
+
+**Example:**
+```tilde
+~result1 is is-list [1, 2, 3]
+say ~result1  # true
+
+~result2 is is-list []
+say ~result2  # true
+
+~result3 is is-list "hello"
+say ~result3  # false
+```
+
+### `is-object value`
+Returns `true` if the value is an object, `false` otherwise.
+
+**Example:**
+```tilde
+~result1 is is-object {"key": "value"}
+say ~result1  # true
+
+~result2 is is-object {}
+say ~result2  # true
+
+~result3 is is-object [1, 2, 3]
+say ~result3  # false
+```
+
+### `is-empty value`
+Returns `true` if the value is empty (empty string, list, or object), `false` otherwise.
+
+**Example:**
+```tilde
+~result1 is is-empty ""
+say ~result1  # true
+
+~result2 is is-empty []
+say ~result2  # true
+
+~result3 is is-empty {}
+say ~result3  # true
+
+~result4 is is-empty "hello"
+say ~result4  # false
+
+~result5 is is-empty [1, 2, 3]
+say ~result5  # false
+```
 
 ## Date and Time Operations
 
