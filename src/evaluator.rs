@@ -26,8 +26,6 @@ pub struct Evaluator {
     max_call_depth: usize,
     pub output_buffer: Vec<String>,
     last_error: Option<Value>,
-    // Memoization cache: (function_name, args_hash) -> result
-    memo_cache: HashMap<(String, String), Value>,
 }
 
 impl Default for Evaluator {
@@ -45,7 +43,6 @@ impl Evaluator {
             max_call_depth: 100,
             output_buffer: Vec::new(),
             last_error: None,
-            memo_cache: HashMap::new(),
         }
     }
 
@@ -442,6 +439,10 @@ impl Evaluator {
 
 
     pub fn eval_expression(&mut self, expr: Expression) -> Result<Value, String> {
+        self.eval_expression_with_context(expr, false, None)
+    }
+
+    fn eval_expression_with_context(&mut self, expr: Expression, _in_tail_position: bool, _current_function: Option<&str>) -> Result<Value, String> {
         match expr {
             Expression::Number(n, _) => Ok(Value::Number(n)),
             Expression::String(s) => Ok(Value::String(s)),
@@ -662,15 +663,19 @@ impl Evaluator {
                                 Err(format!("Invalid block syntax: {}", name))
                             }
                         } else {
-                            // Check if this is a user-defined function first
-                            if let Some(function) = self.functions.get(&name).cloned() {
-                                self.eval_function_with_name(function, args, Some(name.clone()))
-                            } else if let Some(func) = crate::stdlib::get_stdlib_function(&name) {
-                                // Check if this is a stdlib function
-                                func(args, self)
+
+                            // Check if this is a user-defined function
+                            let function = if let Some(function) = self.functions.get(&name) {
+                                function.clone()
                             } else {
-                                Err(format!("Unknown function: {}", name))
-                            }
+                                // Function not found, try stdlib
+                                if let Some(func) = crate::stdlib::get_stdlib_function(&name) {
+                                    return func(args, self);
+                                } else {
+                                    return Err(format!("Unknown function: {}", name));
+                                }
+                            };
+                            self.eval_function_with_name(function, args, Some(name.clone()))
                         }
                     }
                 }
@@ -1190,55 +1195,56 @@ impl Evaluator {
             ));
         }
 
-        // Evaluate initial arguments
-        let mut current_args = Vec::new();
+        // Critical optimization: Pre-allocate and reuse argument vector
+        let mut current_args = Vec::with_capacity(function.params.len());
         for arg in args {
             current_args.push(self.eval_expression(arg)?);
         }
 
-        // Check memoization cache
-        if let Some(ref fn_name) = function_name {
-            if self.should_memoize(fn_name, &current_args) {
-                let args_hash = self.create_args_hash(&current_args);
-                let cache_key = (fn_name.clone(), args_hash);
 
-                if let Some(cached_result) = self.memo_cache.get(&cache_key) {
-                    return Ok(cached_result.clone());
-                }
-            }
+        // Critical optimization: Pre-populate scope to avoid repeated HashMap operations
+        let mut local_scope = HashMap::with_capacity(function.params.len());
+        for (param, value) in function.params.iter().zip(current_args.iter()) {
+            local_scope.insert(param.clone(), value.clone());
         }
 
-        // Performance optimization: Pre-allocate HashMap with known capacity
-        let local_scope = HashMap::with_capacity(function.params.len());
-
-        // Push the new scope once
+        // Push the pre-populated scope
         self.scope_stack.push(local_scope);
 
-        // Store initial args for memoization
-        let initial_args = current_args.clone();
-        let initial_fn_name = function_name.clone();
 
         // Tail call optimization loop
+        let mut found_tail_call = false;
         loop {
-            // Update parameters with current argument values
-            if let Some(scope) = self.scope_stack.last_mut() {
-                scope.clear();
-                for (param, value) in function.params.iter().zip(current_args.iter()) {
-                    scope.insert(param.clone(), value.clone());
+            // Hot path optimization: Only update scope on tail calls
+            if found_tail_call {
+                if let Some(scope) = self.scope_stack.last_mut() {
+                    // Reuse existing keys, just update values to avoid allocations
+                    for (param, value) in function.params.iter().zip(current_args.iter()) {
+                        scope.insert(param.clone(), value.clone());
+                    }
                 }
+                found_tail_call = false; // Reset for next iteration
             }
 
             // Execute function body
             let mut last_value = Value::Null;
-            let mut found_tail_call = false;
 
             for stmt in &function.body {
+                if std::env::var("TILDE_DEBUG_TAIL_CALL").is_ok() {
+                    eprintln!("Executing statement: {:?}", stmt);
+                }
                 let (value, control) = self.eval_statement_with_control(stmt.clone())?;
+                if std::env::var("TILDE_DEBUG_TAIL_CALL").is_ok() {
+                    eprintln!("Statement result: value={:?}, control={:?}", value, control);
+                }
 
                 match control {
                     ControlFlow::Give(return_value) => {
                         // Check if this is a tail call to the same function
                         if let Some(ref fn_name) = function_name {
+                            if std::env::var("TILDE_DEBUG_TAIL_CALL").is_ok() {
+                                eprintln!("Checking statement for tail call: {:?}", stmt);
+                            }
                             if let Some(tail_args) = self.detect_tail_call(&stmt, fn_name) {
                                 // Evaluate new arguments for tail call
                                 let mut new_args = Vec::new();
@@ -1254,14 +1260,6 @@ impl Evaluator {
                         // Not a tail call, cache result and return
                         self.scope_stack.pop();
 
-                        // Store in memoization cache
-                        if let Some(ref fn_name) = initial_fn_name {
-                            if self.should_memoize(fn_name, &initial_args) {
-                                let args_hash = self.create_args_hash(&initial_args);
-                                let cache_key = (fn_name.clone(), args_hash);
-                                self.memo_cache.insert(cache_key, return_value.clone());
-                            }
-                        }
 
                         return Ok(return_value);
                     }
@@ -1278,14 +1276,6 @@ impl Evaluator {
             if !found_tail_call {
                 self.scope_stack.pop();
 
-                // Store in memoization cache
-                if let Some(ref fn_name) = initial_fn_name {
-                    if self.should_memoize(fn_name, &initial_args) {
-                        let args_hash = self.create_args_hash(&initial_args);
-                        let cache_key = (fn_name.clone(), args_hash);
-                        self.memo_cache.insert(cache_key, last_value.clone());
-                    }
-                }
 
                 return Ok(last_value);
             }
@@ -1296,33 +1286,74 @@ impl Evaluator {
 
     /// Detects if a statement is a tail call to the specified function
     /// Returns the argument expressions if it's a tail call, None otherwise
-    fn detect_tail_call(&self, _stmt: &Statement, _function_name: &str) -> Option<Vec<Expression>> {
-        // TODO: Implement proper tail call detection that works with all control structures
-        // For now, disable tail call optimization to prevent stack overflow
-        None
+    fn detect_tail_call(&self, stmt: &Statement, function_name: &str) -> Option<Vec<Expression>> {
+        self.find_tail_call_in_statement(stmt, function_name)
+    }
+
+    /// Recursively search for tail calls in any statement structure
+    fn find_tail_call_in_statement(&self, stmt: &Statement, function_name: &str) -> Option<Vec<Expression>> {
+        match stmt {
+            // Direct function call in give statement
+            Statement::Give(Expression::FunctionCall { name, args }) => {
+                if name == function_name {
+                    if std::env::var("TILDE_DEBUG_TAIL_CALL").is_ok() {
+                        eprintln!("TAIL CALL DETECTED: {} with {} args", name, args.len());
+                    }
+                    Some(args.clone())
+                } else {
+                    None
+                }
+            }
+            // Check if/else branches
+            Statement::If { condition: _, then_stmt, else_stmt } => {
+                if std::env::var("TILDE_DEBUG_TAIL_CALL").is_ok() {
+                    eprintln!("Checking if statement: then={:?}, else={:?}", then_stmt, else_stmt);
+                }
+                // Check the then branch
+                if let Some(tail_args) = self.find_tail_call_in_statement(then_stmt, function_name) {
+                    return Some(tail_args);
+                }
+                // Check the else branch if it exists
+                if let Some(else_branch) = else_stmt {
+                    if let Some(tail_args) = self.find_tail_call_in_statement(else_branch, function_name) {
+                        return Some(tail_args);
+                    }
+                }
+                None
+            }
+            // Check block statements (look at the last statement)
+            Statement::Block { body } => {
+                if let Some(last_stmt) = body.last() {
+                    self.find_tail_call_in_statement(last_stmt, function_name)
+                } else {
+                    None
+                }
+            }
+            // Try/catch blocks
+            Statement::AttemptRescue { attempt_body, rescue_var: _, rescue_body } => {
+                // Check the attempt body (last statement could be tail)
+                if let Some(last_stmt) = attempt_body.last() {
+                    if let Some(tail_args) = self.find_tail_call_in_statement(last_stmt, function_name) {
+                        return Some(tail_args);
+                    }
+                }
+                // Check the rescue body (last statement could be tail)
+                if let Some(last_stmt) = rescue_body.last() {
+                    if let Some(tail_args) = self.find_tail_call_in_statement(last_stmt, function_name) {
+                        return Some(tail_args);
+                    }
+                }
+                None
+            }
+            // For other statement types, no tail call possible
+            _ => None
+        }
     }
 
     /// Create a hash key from function arguments for memoization
-    fn create_args_hash(&self, args: &[Value]) -> String {
-        let mut hash_parts = Vec::new();
-        for arg in args {
-            match arg {
-                Value::Number(n) => hash_parts.push(format!("n:{}", n)),
-                Value::String(s) => hash_parts.push(format!("s:{}", s)),
-                Value::Boolean(b) => hash_parts.push(format!("b:{}", b)),
-                Value::Null => hash_parts.push("null".to_string()),
-                _ => hash_parts.push("complex".to_string()), // Don't memoize complex types
-            }
-        }
-        hash_parts.join(",")
-    }
 
-    /// Check if function should be memoized (only pure functions with simple args)
-    fn should_memoize(&self, function_name: &str, args: &[Value]) -> bool {
-        // Only memoize recursive functions with simple arguments
-        (function_name.contains("fibonacci") || function_name.contains("factorial")) &&
-        args.iter().all(|arg| matches!(arg, Value::Number(_) | Value::String(_) | Value::Boolean(_) | Value::Null))
-    }
+
+
 
     fn eval_attempt_rescue(&mut self, attempt_body: Vec<Statement>, rescue_var: Option<String>, rescue_body: Vec<Statement>) -> EvalResult {
         // Try to execute the attempt block
