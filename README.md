@@ -160,7 +160,7 @@ All software has limitations and caveats; here's the most notable shortcomings o
   - Coming soon!
 - Young
   - We're just getting started, so we haven't found all the cracks and edges yet.
-- Struggles with deep recursion
+- Struggles with deep recursion (functoin that calls itself)
   - With Fibonacci @ 35 depth:
     - Bun: ~40ms
     - Tilde: 22s (yes, SECONDS)
