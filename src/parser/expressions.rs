@@ -195,8 +195,19 @@ impl Parser {
 
                     // Parse arguments like any stdlib function
                     let mut args = Vec::new();
-                    while !self.is_expression_terminator() && !matches!(self.current_token(), Token::LeftParen | Token::Is) && !self.is_binary_operator(self.current_token()) {
-                        args.push(self.parse_function_argument()?);
+                    while !self.is_expression_terminator() && !matches!(self.current_token(), Token::Is) && !self.is_binary_operator(self.current_token()) {
+                        // Check if we're at a parenthesized expression
+                        if *self.current_token() == Token::LeftParen {
+                            let arg = self.parse_primary()?;
+                            args.push(arg);
+
+                            // If next token is an operator, we should stop parsing args
+                            if self.is_binary_operator(self.current_token()) {
+                                break;
+                            }
+                        } else {
+                            args.push(self.parse_function_argument()?);
+                        }
                     }
 
                     Ok(Expression::FunctionCall {
@@ -238,22 +249,6 @@ impl Parser {
                         name: name[1..].to_string(), // Remove the * prefix
                         args,
                     })
-                } else if *self.current_token() == Token::LeftParen {
-                    // Regular function call with parentheses
-                    self.advance();
-                    let mut args = Vec::new();
-
-                    // Parse arguments
-                    while *self.current_token() != Token::RightParen {
-                        if !args.is_empty() {
-                            self.expect(Token::Comma)?;
-                        }
-                        args.push(self.parse_expression()?);
-                    }
-
-                    self.expect(Token::RightParen)?;
-
-                    Ok(Expression::FunctionCall { name, args })
                 } else {
                     // Check if this is a built-in function that can take arguments without parentheses
                     let is_builtin = [].contains(&name.as_str()); // All functions are now in stdlib
@@ -264,8 +259,19 @@ impl Parser {
                         let mut args = Vec::new();
 
                         // Parse arguments until we hit a terminator
-                        while !self.is_expression_terminator() && !matches!(self.current_token(), Token::LeftParen | Token::Is) && !self.is_binary_operator(self.current_token()) {
-                            args.push(self.parse_function_argument()?);
+                        while !self.is_expression_terminator() && !matches!(self.current_token(), Token::Is) && !self.is_binary_operator(self.current_token()) {
+                            // Check if we're at a parenthesized expression
+                            if *self.current_token() == Token::LeftParen {
+                                let arg = self.parse_primary()?;
+                                args.push(arg);
+
+                                // If next token is an operator, we should stop parsing args
+                                if self.is_binary_operator(self.current_token()) {
+                                    break;
+                                }
+                            } else {
+                                args.push(self.parse_function_argument()?);
+                            }
                         }
 
                         Ok(Expression::FunctionCall { name, args })

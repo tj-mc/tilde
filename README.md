@@ -9,7 +9,7 @@ With friendly syntax, built-in HTTP, and an extensive library of helper function
 ### Hit the web like Spiderman
 ```tilde
 ~user is get "https://api.github.com/users/octocat"
-say "Found user: `~user.name` with `~user.public_repos` repos"
+say "Found user: `~user.body.name` with `~user.body.public_repos` repos"
 ```
 
 ### Break code into Functions
