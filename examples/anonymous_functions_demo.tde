@@ -1,0 +1,18 @@
+say "Anonymous Functions Demo"
+say "========================"
+
+~numbers is [1, 2, 3, 4, 5]
+say "Original: " ~numbers
+
+~doubled is map ~numbers |~x (~x * 2)|
+say "Doubled: " ~doubled
+
+~evens is filter ~numbers |~n (~n % 2 == 0)|
+say "Evens: " ~evens
+
+~sum is reduce ~numbers |~a ~b (~a + ~b)| 0
+say "Sum: " ~sum
+
+~orders is [{"id": 101, "amount": 50}, {"id": 102, "amount": 75}]
+~ids is map ~orders |~order (~order.id)|
+say "Order IDs: " ~ids
