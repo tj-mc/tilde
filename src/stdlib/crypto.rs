@@ -1,9 +1,9 @@
 use crate::ast::Expression;
 use crate::evaluator::Evaluator;
 use crate::value::Value;
-use sha2::{Sha256, Digest};
 use hmac::{Hmac, Mac};
 use md5::Md5;
+use sha2::{Digest, Sha256};
 
 /// Computes SHA256 hash of a string and returns it as hexadecimal
 pub fn eval_sha256(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
@@ -65,8 +65,7 @@ pub fn eval_hmac_sha256(args: Vec<Expression>, evaluator: &mut Evaluator) -> Res
 
     type HmacSha256 = Hmac<Sha256>;
 
-    let mut mac = HmacSha256::new_from_slice(key.as_bytes())
-        .map_err(|_| "Invalid HMAC key")?;
+    let mut mac = HmacSha256::new_from_slice(key.as_bytes()).map_err(|_| "Invalid HMAC key")?;
 
     mac.update(message.as_bytes());
     let result = mac.finalize();

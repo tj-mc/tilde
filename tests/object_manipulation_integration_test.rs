@@ -1,4 +1,4 @@
-use tilde::{parser::Parser, evaluator::Evaluator};
+use tilde::{evaluator::Evaluator, parser::Parser};
 
 #[test]
 fn test_merge_objects() {
@@ -19,7 +19,10 @@ fn test_merge_objects() {
 
     assert_eq!(evaluator.get_variable("name").unwrap().to_string(), "John");
     assert_eq!(evaluator.get_variable("age").unwrap().to_string(), "35"); // obj2 overwrites obj1
-    assert_eq!(evaluator.get_variable("city").unwrap().to_string(), "New York");
+    assert_eq!(
+        evaluator.get_variable("city").unwrap().to_string(),
+        "New York"
+    );
 }
 
 #[test]
@@ -38,7 +41,10 @@ fn test_pick_fields() {
     evaluator.eval_program(program).unwrap();
 
     assert_eq!(evaluator.get_variable("name").unwrap().to_string(), "Alice");
-    assert_eq!(evaluator.get_variable("city").unwrap().to_string(), "Boston");
+    assert_eq!(
+        evaluator.get_variable("city").unwrap().to_string(),
+        "Boston"
+    );
 
     // Should not have age or country
     if let Some(tilde::value::Value::Object(obj)) = evaluator.get_variable("picked") {
@@ -68,7 +74,10 @@ fn test_omit_fields() {
 
     assert_eq!(evaluator.get_variable("name").unwrap().to_string(), "Bob");
     assert_eq!(evaluator.get_variable("age").unwrap().to_string(), "40");
-    assert_eq!(evaluator.get_variable("email").unwrap().to_string(), "bob@example.com");
+    assert_eq!(
+        evaluator.get_variable("email").unwrap().to_string(),
+        "bob@example.com"
+    );
 
     // Should not have password
     if let Some(tilde::value::Value::Object(obj)) = evaluator.get_variable("safe") {
@@ -93,7 +102,10 @@ fn test_object_get() {
 
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("name").unwrap().to_string(), "Charlie");
+    assert_eq!(
+        evaluator.get_variable("name").unwrap().to_string(),
+        "Charlie"
+    );
 
     // Missing path should return null
     if let Some(tilde::value::Value::Null) = evaluator.get_variable("missing") {

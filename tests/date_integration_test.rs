@@ -66,7 +66,10 @@ fn test_date_string_interpolation() {
     assert!(result.is_ok());
 
     let message = evaluator.get_variable("message").unwrap();
-    assert_eq!(message.to_string(), "The event is scheduled for 2024-03-15T14:30:00Z");
+    assert_eq!(
+        message.to_string(),
+        "The event is scheduled for 2024-03-15T14:30:00Z"
+    );
 }
 
 #[test]
@@ -278,5 +281,8 @@ fn test_multiple_date_operations() {
     }
 
     // Verify string interpolation worked
-    assert_eq!(summary.to_string(), "Event from 2024-12-25T09:00:00Z to 2024-12-25T17:00:00Z");
+    assert_eq!(
+        summary.to_string(),
+        "Event from 2024-12-25T09:00:00Z to 2024-12-25T17:00:00Z"
+    );
 }

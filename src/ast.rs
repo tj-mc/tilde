@@ -84,6 +84,11 @@ pub enum Expression {
     ObjectLiteral {
         pairs: Vec<(String, Expression)>,
     },
+
+    AnonymousFunction {
+        params: Vec<String>,
+        body: Box<Expression>,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq)]

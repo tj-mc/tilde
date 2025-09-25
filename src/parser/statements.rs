@@ -3,7 +3,6 @@ use crate::ast::*;
 use crate::lexer::Token;
 
 impl Parser {
-
     pub fn parse_statement(&mut self) -> Result<Statement, String> {
         match self.current_token() {
             Token::Variable(name) => {
@@ -56,7 +55,10 @@ impl Parser {
                                     n.to_string()
                                 }
                             }
-                            _ => return Err("Expected property name or number after '.'".to_string()),
+                            Token::Boolean(b) => b.to_string(),
+                            _ => {
+                                return Err("Expected property name or number after '.'".to_string());
+                            }
                         };
                         self.advance();
 
@@ -210,7 +212,11 @@ impl Parser {
 
         self.expect(Token::RightParen)?;
 
-        Ok(Statement::ForEach { variables, iterable, body })
+        Ok(Statement::ForEach {
+            variables,
+            iterable,
+            body,
+        })
     }
 
     pub fn parse_block(&mut self) -> Result<Statement, String> {
@@ -266,11 +272,7 @@ impl Parser {
 
         self.expect(Token::RightParen)?;
 
-        Ok(Statement::FunctionDefinition {
-            name,
-            params,
-            body,
-        })
+        Ok(Statement::FunctionDefinition { name, params, body })
     }
 
     pub fn parse_attempt_rescue(&mut self) -> Result<Statement, String> {

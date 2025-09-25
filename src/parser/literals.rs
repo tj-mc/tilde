@@ -140,7 +140,11 @@ mod tests {
     fn test_object_literal_invalid_key() {
         let result = parse_expression("{123: \"value\"}");
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("Expected string or identifier key"));
+        assert!(
+            result
+                .unwrap_err()
+                .contains("Expected string or identifier key")
+        );
     }
 
     #[test]
@@ -194,7 +198,7 @@ mod tests {
                 assert_eq!(items.len(), 2);
                 for item in items {
                     match item {
-                        Expression::ObjectLiteral { .. } => {},
+                        Expression::ObjectLiteral { .. } => {}
                         _ => panic!("Expected object in list"),
                     }
                 }

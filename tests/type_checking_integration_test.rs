@@ -1,4 +1,4 @@
-use tilde::{parser::Parser, evaluator::Evaluator};
+use tilde::{evaluator::Evaluator, parser::Parser};
 
 #[test]
 fn test_is_number() {
@@ -17,12 +17,30 @@ fn test_is_number() {
 
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("result1").unwrap().to_string(), "true");
-    assert_eq!(evaluator.get_variable("result2").unwrap().to_string(), "false");
-    assert_eq!(evaluator.get_variable("result3").unwrap().to_string(), "false");
-    assert_eq!(evaluator.get_variable("result4").unwrap().to_string(), "false");
-    assert_eq!(evaluator.get_variable("result5").unwrap().to_string(), "false");
-    assert_eq!(evaluator.get_variable("result6").unwrap().to_string(), "true");
+    assert_eq!(
+        evaluator.get_variable("result1").unwrap().to_string(),
+        "true"
+    );
+    assert_eq!(
+        evaluator.get_variable("result2").unwrap().to_string(),
+        "false"
+    );
+    assert_eq!(
+        evaluator.get_variable("result3").unwrap().to_string(),
+        "false"
+    );
+    assert_eq!(
+        evaluator.get_variable("result4").unwrap().to_string(),
+        "false"
+    );
+    assert_eq!(
+        evaluator.get_variable("result5").unwrap().to_string(),
+        "false"
+    );
+    assert_eq!(
+        evaluator.get_variable("result6").unwrap().to_string(),
+        "true"
+    );
 }
 
 #[test]
@@ -42,12 +60,30 @@ fn test_is_string() {
 
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("result1").unwrap().to_string(), "true");
-    assert_eq!(evaluator.get_variable("result2").unwrap().to_string(), "false");
-    assert_eq!(evaluator.get_variable("result3").unwrap().to_string(), "false");
-    assert_eq!(evaluator.get_variable("result4").unwrap().to_string(), "false");
-    assert_eq!(evaluator.get_variable("result5").unwrap().to_string(), "false");
-    assert_eq!(evaluator.get_variable("result6").unwrap().to_string(), "true");
+    assert_eq!(
+        evaluator.get_variable("result1").unwrap().to_string(),
+        "true"
+    );
+    assert_eq!(
+        evaluator.get_variable("result2").unwrap().to_string(),
+        "false"
+    );
+    assert_eq!(
+        evaluator.get_variable("result3").unwrap().to_string(),
+        "false"
+    );
+    assert_eq!(
+        evaluator.get_variable("result4").unwrap().to_string(),
+        "false"
+    );
+    assert_eq!(
+        evaluator.get_variable("result5").unwrap().to_string(),
+        "false"
+    );
+    assert_eq!(
+        evaluator.get_variable("result6").unwrap().to_string(),
+        "true"
+    );
 }
 
 #[test]
@@ -67,12 +103,30 @@ fn test_is_boolean() {
 
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("result1").unwrap().to_string(), "true");
-    assert_eq!(evaluator.get_variable("result2").unwrap().to_string(), "true");
-    assert_eq!(evaluator.get_variable("result3").unwrap().to_string(), "false");
-    assert_eq!(evaluator.get_variable("result4").unwrap().to_string(), "false");
-    assert_eq!(evaluator.get_variable("result5").unwrap().to_string(), "false");
-    assert_eq!(evaluator.get_variable("result6").unwrap().to_string(), "false");
+    assert_eq!(
+        evaluator.get_variable("result1").unwrap().to_string(),
+        "true"
+    );
+    assert_eq!(
+        evaluator.get_variable("result2").unwrap().to_string(),
+        "true"
+    );
+    assert_eq!(
+        evaluator.get_variable("result3").unwrap().to_string(),
+        "false"
+    );
+    assert_eq!(
+        evaluator.get_variable("result4").unwrap().to_string(),
+        "false"
+    );
+    assert_eq!(
+        evaluator.get_variable("result5").unwrap().to_string(),
+        "false"
+    );
+    assert_eq!(
+        evaluator.get_variable("result6").unwrap().to_string(),
+        "false"
+    );
 }
 
 #[test]
@@ -92,12 +146,30 @@ fn test_is_list() {
 
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("result1").unwrap().to_string(), "true");
-    assert_eq!(evaluator.get_variable("result2").unwrap().to_string(), "true");
-    assert_eq!(evaluator.get_variable("result3").unwrap().to_string(), "false");
-    assert_eq!(evaluator.get_variable("result4").unwrap().to_string(), "false");
-    assert_eq!(evaluator.get_variable("result5").unwrap().to_string(), "false");
-    assert_eq!(evaluator.get_variable("result6").unwrap().to_string(), "false");
+    assert_eq!(
+        evaluator.get_variable("result1").unwrap().to_string(),
+        "true"
+    );
+    assert_eq!(
+        evaluator.get_variable("result2").unwrap().to_string(),
+        "true"
+    );
+    assert_eq!(
+        evaluator.get_variable("result3").unwrap().to_string(),
+        "false"
+    );
+    assert_eq!(
+        evaluator.get_variable("result4").unwrap().to_string(),
+        "false"
+    );
+    assert_eq!(
+        evaluator.get_variable("result5").unwrap().to_string(),
+        "false"
+    );
+    assert_eq!(
+        evaluator.get_variable("result6").unwrap().to_string(),
+        "false"
+    );
 }
 
 #[test]
@@ -117,12 +189,30 @@ fn test_is_object() {
 
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("result1").unwrap().to_string(), "true");
-    assert_eq!(evaluator.get_variable("result2").unwrap().to_string(), "true");
-    assert_eq!(evaluator.get_variable("result3").unwrap().to_string(), "false");
-    assert_eq!(evaluator.get_variable("result4").unwrap().to_string(), "false");
-    assert_eq!(evaluator.get_variable("result5").unwrap().to_string(), "false");
-    assert_eq!(evaluator.get_variable("result6").unwrap().to_string(), "false");
+    assert_eq!(
+        evaluator.get_variable("result1").unwrap().to_string(),
+        "true"
+    );
+    assert_eq!(
+        evaluator.get_variable("result2").unwrap().to_string(),
+        "true"
+    );
+    assert_eq!(
+        evaluator.get_variable("result3").unwrap().to_string(),
+        "false"
+    );
+    assert_eq!(
+        evaluator.get_variable("result4").unwrap().to_string(),
+        "false"
+    );
+    assert_eq!(
+        evaluator.get_variable("result5").unwrap().to_string(),
+        "false"
+    );
+    assert_eq!(
+        evaluator.get_variable("result6").unwrap().to_string(),
+        "false"
+    );
 }
 
 #[test]
@@ -144,14 +234,38 @@ fn test_is_empty() {
 
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("result1").unwrap().to_string(), "true");
-    assert_eq!(evaluator.get_variable("result2").unwrap().to_string(), "true");
-    assert_eq!(evaluator.get_variable("result3").unwrap().to_string(), "true");
-    assert_eq!(evaluator.get_variable("result4").unwrap().to_string(), "false");
-    assert_eq!(evaluator.get_variable("result5").unwrap().to_string(), "false");
-    assert_eq!(evaluator.get_variable("result6").unwrap().to_string(), "false");
-    assert_eq!(evaluator.get_variable("result7").unwrap().to_string(), "false");
-    assert_eq!(evaluator.get_variable("result8").unwrap().to_string(), "false");
+    assert_eq!(
+        evaluator.get_variable("result1").unwrap().to_string(),
+        "true"
+    );
+    assert_eq!(
+        evaluator.get_variable("result2").unwrap().to_string(),
+        "true"
+    );
+    assert_eq!(
+        evaluator.get_variable("result3").unwrap().to_string(),
+        "true"
+    );
+    assert_eq!(
+        evaluator.get_variable("result4").unwrap().to_string(),
+        "false"
+    );
+    assert_eq!(
+        evaluator.get_variable("result5").unwrap().to_string(),
+        "false"
+    );
+    assert_eq!(
+        evaluator.get_variable("result6").unwrap().to_string(),
+        "false"
+    );
+    assert_eq!(
+        evaluator.get_variable("result7").unwrap().to_string(),
+        "false"
+    );
+    assert_eq!(
+        evaluator.get_variable("result8").unwrap().to_string(),
+        "false"
+    );
 }
 
 #[test]
@@ -172,10 +286,28 @@ fn test_is_defined() {
 
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("result1").unwrap().to_string(), "true");
-    assert_eq!(evaluator.get_variable("result2").unwrap().to_string(), "false");
-    assert_eq!(evaluator.get_variable("result3").unwrap().to_string(), "true");
-    assert_eq!(evaluator.get_variable("result4").unwrap().to_string(), "true");
-    assert_eq!(evaluator.get_variable("result5").unwrap().to_string(), "true");
-    assert_eq!(evaluator.get_variable("result6").unwrap().to_string(), "true");
+    assert_eq!(
+        evaluator.get_variable("result1").unwrap().to_string(),
+        "true"
+    );
+    assert_eq!(
+        evaluator.get_variable("result2").unwrap().to_string(),
+        "false"
+    );
+    assert_eq!(
+        evaluator.get_variable("result3").unwrap().to_string(),
+        "true"
+    );
+    assert_eq!(
+        evaluator.get_variable("result4").unwrap().to_string(),
+        "true"
+    );
+    assert_eq!(
+        evaluator.get_variable("result5").unwrap().to_string(),
+        "true"
+    );
+    assert_eq!(
+        evaluator.get_variable("result6").unwrap().to_string(),
+        "true"
+    );
 }

@@ -11,13 +11,16 @@ fn test_write_simple_file() {
     let content = "Hello, World!";
     cleanup_test_file(filename);
 
-    let input = format!(r#"
+    let input = format!(
+        r#"
         ~result is write "{}" "{}"
         ~success is ~result.success
         ~path is ~result.path
         ~bytes_written is ~result.bytes_written
         ~error is ~result.error
-    "#, filename, content);
+    "#,
+        filename, content
+    );
 
     let mut parser = Parser::new(&input);
     let program = parser.parse().unwrap();
@@ -25,9 +28,18 @@ fn test_write_simple_file() {
     let mut evaluator = Evaluator::new();
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("success"), Some(&Value::Boolean(true)));
-    assert_eq!(evaluator.get_variable("path"), Some(&Value::String(filename.to_string())));
-    assert_eq!(evaluator.get_variable("bytes_written"), Some(&Value::Number(13.0)));
+    assert_eq!(
+        evaluator.get_variable("success"),
+        Some(&Value::Boolean(true))
+    );
+    assert_eq!(
+        evaluator.get_variable("path"),
+        Some(&Value::String(filename.to_string()))
+    );
+    assert_eq!(
+        evaluator.get_variable("bytes_written"),
+        Some(&Value::Number(13.0))
+    );
     assert_eq!(evaluator.get_variable("error"), Some(&Value::Null));
 
     // Verify file was actually written
@@ -42,11 +54,14 @@ fn test_write_number_content() {
     let filename = "test_write_number.txt";
     cleanup_test_file(filename);
 
-    let input = format!(r#"
+    let input = format!(
+        r#"
         ~result is write "{}" 42.5
         ~success is ~result.success
         ~bytes_written is ~result.bytes_written
-    "#, filename);
+    "#,
+        filename
+    );
 
     let mut parser = Parser::new(&input);
     let program = parser.parse().unwrap();
@@ -54,8 +69,14 @@ fn test_write_number_content() {
     let mut evaluator = Evaluator::new();
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("success"), Some(&Value::Boolean(true)));
-    assert_eq!(evaluator.get_variable("bytes_written"), Some(&Value::Number(4.0))); // "42.5"
+    assert_eq!(
+        evaluator.get_variable("success"),
+        Some(&Value::Boolean(true))
+    );
+    assert_eq!(
+        evaluator.get_variable("bytes_written"),
+        Some(&Value::Number(4.0))
+    ); // "42.5"
 
     // Verify file content
     let written_content = fs::read_to_string(filename).unwrap();
@@ -69,10 +90,13 @@ fn test_write_boolean_content() {
     let filename = "test_write_boolean.txt";
     cleanup_test_file(filename);
 
-    let input = format!(r#"
+    let input = format!(
+        r#"
         ~result is write "{}" true
         ~success is ~result.success
-    "#, filename);
+    "#,
+        filename
+    );
 
     let mut parser = Parser::new(&input);
     let program = parser.parse().unwrap();
@@ -80,7 +104,10 @@ fn test_write_boolean_content() {
     let mut evaluator = Evaluator::new();
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("success"), Some(&Value::Boolean(true)));
+    assert_eq!(
+        evaluator.get_variable("success"),
+        Some(&Value::Boolean(true))
+    );
 
     let written_content = fs::read_to_string(filename).unwrap();
     assert_eq!(written_content, "true");
@@ -94,12 +121,15 @@ fn test_write_with_variables() {
     let content = "Variable content";
     cleanup_test_file(filename);
 
-    let input = format!(r#"
+    let input = format!(
+        r#"
         ~filepath is "{}"
         ~text is "{}"
         ~result is write ~filepath ~text
         ~success is ~result.success
-    "#, filename, content);
+    "#,
+        filename, content
+    );
 
     let mut parser = Parser::new(&input);
     let program = parser.parse().unwrap();
@@ -107,7 +137,10 @@ fn test_write_with_variables() {
     let mut evaluator = Evaluator::new();
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("success"), Some(&Value::Boolean(true)));
+    assert_eq!(
+        evaluator.get_variable("success"),
+        Some(&Value::Boolean(true))
+    );
 
     let written_content = fs::read_to_string(filename).unwrap();
     assert_eq!(written_content, content);
@@ -123,11 +156,14 @@ fn test_write_overwrite_existing() {
     // Create initial file
     fs::write(filename, "original content").unwrap();
 
-    let input = format!(r#"
+    let input = format!(
+        r#"
         ~result is write "{}" "new content"
         ~success is ~result.success
         ~bytes_written is ~result.bytes_written
-    "#, filename);
+    "#,
+        filename
+    );
 
     let mut parser = Parser::new(&input);
     let program = parser.parse().unwrap();
@@ -135,8 +171,14 @@ fn test_write_overwrite_existing() {
     let mut evaluator = Evaluator::new();
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("success"), Some(&Value::Boolean(true)));
-    assert_eq!(evaluator.get_variable("bytes_written"), Some(&Value::Number(11.0)));
+    assert_eq!(
+        evaluator.get_variable("success"),
+        Some(&Value::Boolean(true))
+    );
+    assert_eq!(
+        evaluator.get_variable("bytes_written"),
+        Some(&Value::Number(11.0))
+    );
 
     // Verify content was overwritten
     let written_content = fs::read_to_string(filename).unwrap();
@@ -149,12 +191,15 @@ fn test_write_overwrite_existing() {
 fn test_write_invalid_path() {
     let invalid_path = "/invalid/nonexistent/directory/file.txt";
 
-    let input = format!(r#"
+    let input = format!(
+        r#"
         ~result is write "{}" "content"
         ~success is ~result.success
         ~bytes_written is ~result.bytes_written
         ~error is ~result.error
-    "#, invalid_path);
+    "#,
+        invalid_path
+    );
 
     let mut parser = Parser::new(&input);
     let program = parser.parse().unwrap();
@@ -162,8 +207,14 @@ fn test_write_invalid_path() {
     let mut evaluator = Evaluator::new();
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("success"), Some(&Value::Boolean(false)));
-    assert_eq!(evaluator.get_variable("bytes_written"), Some(&Value::Number(0.0)));
+    assert_eq!(
+        evaluator.get_variable("success"),
+        Some(&Value::Boolean(false))
+    );
+    assert_eq!(
+        evaluator.get_variable("bytes_written"),
+        Some(&Value::Number(0.0))
+    );
     assert_ne!(evaluator.get_variable("error"), Some(&Value::Null));
 }
 
@@ -172,7 +223,8 @@ fn test_write_in_conditional() {
     let filename = "test_write_conditional.txt";
     cleanup_test_file(filename);
 
-    let input = format!(r#"
+    let input = format!(
+        r#"
         ~should_write is true
         ~message is ""
 
@@ -186,7 +238,9 @@ fn test_write_in_conditional() {
         ) else (
             ~message is "Skipped write"
         )
-    "#, filename);
+    "#,
+        filename
+    );
 
     let mut parser = Parser::new(&input);
     let program = parser.parse().unwrap();
@@ -215,12 +269,15 @@ fn test_write_multiple_files() {
     cleanup_test_file(file1);
     cleanup_test_file(file2);
 
-    let input = format!(r#"
+    let input = format!(
+        r#"
         ~result1 is write "{}" "{}"
         ~result2 is write "{}" "{}"
         ~both_success is ~result1.success and ~result2.success
         ~total_bytes is ~result1.bytes_written + ~result2.bytes_written
-    "#, file1, content1, file2, content2);
+    "#,
+        file1, content1, file2, content2
+    );
 
     let mut parser = Parser::new(&input);
     let program = parser.parse().unwrap();
@@ -228,8 +285,14 @@ fn test_write_multiple_files() {
     let mut evaluator = Evaluator::new();
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("both_success"), Some(&Value::Boolean(true)));
-    assert_eq!(evaluator.get_variable("total_bytes"), Some(&Value::Number(18.0))); // 9 + 9
+    assert_eq!(
+        evaluator.get_variable("both_success"),
+        Some(&Value::Boolean(true))
+    );
+    assert_eq!(
+        evaluator.get_variable("total_bytes"),
+        Some(&Value::Number(18.0))
+    ); // 9 + 9
 
     // Verify both files were written
     let content1_actual = fs::read_to_string(file1).unwrap();
@@ -275,7 +338,10 @@ fn test_write_in_loop() {
     let mut evaluator = Evaluator::new();
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("total_bytes"), Some(&Value::Number(6.0))); // 1 + 2 + 3
+    assert_eq!(
+        evaluator.get_variable("total_bytes"),
+        Some(&Value::Number(6.0))
+    ); // 1 + 2 + 3
 
     // Verify all files were written correctly
     for (i, file) in files.iter().enumerate() {
@@ -290,10 +356,13 @@ fn test_write_statement_form() {
     let filename = "test_write_statement.txt";
     cleanup_test_file(filename);
 
-    let input = format!(r#"
+    let input = format!(
+        r#"
         write "{}" "Statement test"
         ~message is "Write operation completed"
-    "#, filename);
+    "#,
+        filename
+    );
 
     let mut parser = Parser::new(&input);
     let program = parser.parse().unwrap();
@@ -351,11 +420,14 @@ fn test_write_with_object_content() {
     let filename = "test_write_object.txt";
     cleanup_test_file(filename);
 
-    let input = format!(r#"
+    let input = format!(
+        r#"
         ~data is {{"name": "Alice", "age": 30}}
         ~result is write "{}" ~data
         ~success is ~result.success
-    "#, filename);
+    "#,
+        filename
+    );
 
     let mut parser = Parser::new(&input);
     let program = parser.parse().unwrap();
@@ -363,7 +435,10 @@ fn test_write_with_object_content() {
     let mut evaluator = Evaluator::new();
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("success"), Some(&Value::Boolean(true)));
+    assert_eq!(
+        evaluator.get_variable("success"),
+        Some(&Value::Boolean(true))
+    );
 
     // Object should be written as its string representation
     let written_content = fs::read_to_string(filename).unwrap();
@@ -378,7 +453,8 @@ fn test_write_with_function() {
     let filename = "test_write_function.txt";
     cleanup_test_file(filename);
 
-    let input = format!(r#"
+    let input = format!(
+        r#"
         function write-data ~file ~content (
             ~result is write ~file ~content
             give ~result
@@ -386,7 +462,9 @@ fn test_write_with_function() {
 
         ~result is *write-data "{}" "Action test"
         ~success is ~result.success
-    "#, filename);
+    "#,
+        filename
+    );
 
     let mut parser = Parser::new(&input);
     let program = parser.parse().unwrap();
@@ -394,7 +472,10 @@ fn test_write_with_function() {
     let mut evaluator = Evaluator::new();
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("success"), Some(&Value::Boolean(true)));
+    assert_eq!(
+        evaluator.get_variable("success"),
+        Some(&Value::Boolean(true))
+    );
 
     let written_content = fs::read_to_string(filename).unwrap();
     assert_eq!(written_content, "Action test");

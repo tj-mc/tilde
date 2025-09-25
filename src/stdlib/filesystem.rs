@@ -53,4 +53,3 @@ pub fn eval_file_size(args: Vec<Expression>, evaluator: &mut Evaluator) -> Resul
         Err(e) => Err(format!("Error getting file size: {}", e)),
     }
 }
-

@@ -1,4 +1,4 @@
-use tilde::{parser::Parser, evaluator::Evaluator};
+use tilde::{evaluator::Evaluator, parser::Parser};
 
 #[test]
 fn test_sha256_basic() {
@@ -14,7 +14,10 @@ fn test_sha256_basic() {
     evaluator.eval_program(program).unwrap();
 
     // Expected SHA256 hash of "Hello, World!"
-    assert_eq!(evaluator.get_variable("hash").unwrap().to_string(), "dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f");
+    assert_eq!(
+        evaluator.get_variable("hash").unwrap().to_string(),
+        "dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f"
+    );
 }
 
 #[test]
@@ -31,7 +34,10 @@ fn test_sha256_empty_string() {
     evaluator.eval_program(program).unwrap();
 
     // Expected SHA256 hash of empty string
-    assert_eq!(evaluator.get_variable("hash").unwrap().to_string(), "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+    assert_eq!(
+        evaluator.get_variable("hash").unwrap().to_string(),
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    );
 }
 
 #[test]
@@ -49,7 +55,10 @@ fn test_hmac_sha256_basic() {
     evaluator.eval_program(program).unwrap();
 
     // Expected HMAC-SHA256 of "Hello, World!" with key "secret"
-    assert_eq!(evaluator.get_variable("hmac").unwrap().to_string(), "fcfaffa7fef86515c7beb6b62d779fa4ccf092f2e61c164376054271252821ff");
+    assert_eq!(
+        evaluator.get_variable("hmac").unwrap().to_string(),
+        "fcfaffa7fef86515c7beb6b62d779fa4ccf092f2e61c164376054271252821ff"
+    );
 }
 
 #[test]
@@ -85,7 +94,10 @@ fn test_md5_basic() {
     evaluator.eval_program(program).unwrap();
 
     // Expected MD5 hash of "Hello, World!"
-    assert_eq!(evaluator.get_variable("hash").unwrap().to_string(), "65a8e27d8879283831b664bd8b7f0ad4");
+    assert_eq!(
+        evaluator.get_variable("hash").unwrap().to_string(),
+        "65a8e27d8879283831b664bd8b7f0ad4"
+    );
 }
 
 #[test]
@@ -104,7 +116,10 @@ fn test_crypto_roundtrip() {
     evaluator.eval_program(program).unwrap();
 
     // The decoded hash should match the original hash
-    assert_eq!(evaluator.get_variable("decoded").unwrap().to_string(), evaluator.get_variable("hash").unwrap().to_string());
+    assert_eq!(
+        evaluator.get_variable("decoded").unwrap().to_string(),
+        evaluator.get_variable("hash").unwrap().to_string()
+    );
 }
 
 #[test]

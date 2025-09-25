@@ -147,6 +147,7 @@ impl Parser {
                 self.advance();
                 Ok(Expression::String(s))
             }
+            Token::Pipe => self.parse_anonymous_function(),
             Token::InterpolatedString(parts) => {
                 self.advance();
                 Ok(Expression::InterpolatedString(parts))
@@ -173,6 +174,7 @@ impl Parser {
                                 n.to_string()
                             }
                         }
+                        Token::Boolean(b) => b.to_string(),
                         _ => return Err("Expected property name or number after '.'".to_string()),
                     };
                     self.advance();
@@ -195,7 +197,10 @@ impl Parser {
 
                     // Parse arguments like any stdlib function
                     let mut args = Vec::new();
-                    while !self.is_expression_terminator() && !matches!(self.current_token(), Token::Is) && !self.is_binary_operator(self.current_token()) {
+                    while !self.is_expression_terminator()
+                        && !matches!(self.current_token(), Token::Is)
+                        && !self.is_binary_operator(self.current_token())
+                    {
                         // Check if we're at a parenthesized expression
                         if *self.current_token() == Token::LeftParen {
                             let arg = self.parse_primary()?;
@@ -227,7 +232,10 @@ impl Parser {
                     let mut args = Vec::new();
 
                     // Parse arguments until we hit a terminator
-                    while !self.is_expression_terminator() && !matches!(self.current_token(), Token::Is) && !self.is_binary_operator(self.current_token()) {
+                    while !self.is_expression_terminator()
+                        && !matches!(self.current_token(), Token::Is)
+                        && !self.is_binary_operator(self.current_token())
+                    {
                         // Check if we're at a parenthesized expression that might be part of a calculation
                         if *self.current_token() == Token::LeftParen {
                             // Save position to potentially backtrack
@@ -252,14 +260,18 @@ impl Parser {
                 } else {
                     // Check if this is a built-in function that can take arguments without parentheses
                     let is_builtin = [].contains(&name.as_str()); // All functions are now in stdlib
-                    let is_stdlib = crate::stdlib::get_stdlib_function_names().contains(&name.as_str());
+                    let is_stdlib =
+                        crate::stdlib::get_stdlib_function_names().contains(&name.as_str());
 
                     if is_builtin || is_stdlib {
                         // Parse arguments like function calls (space-separated until terminator)
                         let mut args = Vec::new();
 
                         // Parse arguments until we hit a terminator
-                        while !self.is_expression_terminator() && !matches!(self.current_token(), Token::Is) && !self.is_binary_operator(self.current_token()) {
+                        while !self.is_expression_terminator()
+                            && !matches!(self.current_token(), Token::Is)
+                            && !self.is_binary_operator(self.current_token())
+                        {
                             // Check if we're at a parenthesized expression
                             if *self.current_token() == Token::LeftParen {
                                 let arg = self.parse_primary()?;
@@ -404,7 +416,9 @@ impl Parser {
                         self.advance();
                         Ok(Expression::Variable(format!(".{}", name)))
                     }
-                    _ => Err("Expected identifier after '.' for stdlib function reference".to_string()),
+                    _ => Err(
+                        "Expected identifier after '.' for stdlib function reference".to_string(),
+                    ),
                 }
             }
             _ => Err(format!("Unexpected token: {:?}", self.current_token())),
@@ -459,6 +473,10 @@ impl Parser {
                 self.advance();
                 Ok(Expression::Boolean(b))
             }
+            Token::Pipe => {
+                // Parse anonymous function
+                self.parse_anonymous_function()
+            }
             Token::Variable(name) => {
                 self.advance();
                 let mut expr = Expression::Variable(name);
@@ -477,6 +495,7 @@ impl Parser {
                                 n.to_string()
                             }
                         }
+                        Token::Boolean(b) => b.to_string(),
                         _ => return Err("Expected property name or number after '.'".to_string()),
                     };
                     self.advance();
@@ -522,7 +541,9 @@ impl Parser {
                         self.advance();
                         Ok(Expression::Variable(format!(".{}", name)))
                     }
-                    _ => Err("Expected identifier after '.' for stdlib function reference".to_string()),
+                    _ => Err(
+                        "Expected identifier after '.' for stdlib function reference".to_string(),
+                    ),
                 }
             }
             Token::LeftParen => {
@@ -533,7 +554,50 @@ impl Parser {
             }
             Token::LeftBrace => self.parse_object_literal(),
             Token::LeftBracket => self.parse_list_literal(),
-            _ => Err(format!("Unexpected token in function argument: {:?}", self.current_token())),
+            _ => Err(format!(
+                "Unexpected token in function argument: {:?}",
+                self.current_token()
+            )),
         }
+    }
+
+    /// Parse an anonymous function: |~param1 ~param2 (body)|
+    fn parse_anonymous_function(&mut self) -> Result<Expression, String> {
+        // Expect opening pipe
+        self.expect(Token::Pipe)?;
+
+        // Parse parameters
+        let mut params = Vec::new();
+
+        // Parameters are variables before the opening parenthesis
+        while *self.current_token() != Token::LeftParen {
+            match self.current_token() {
+                Token::Variable(name) => {
+                    params.push(name.clone());
+                    self.advance();
+                }
+                _ => {
+                    return Err(format!(
+                        "Expected parameter variable in anonymous function, got: {:?}",
+                        self.current_token()
+                    ));
+                }
+            }
+        }
+
+        // Must have at least one parameter
+        if params.is_empty() {
+            return Err("Anonymous function must have at least one parameter".to_string());
+        }
+
+        // Parse body between parentheses
+        self.expect(Token::LeftParen)?;
+        let body = Box::new(self.parse_expression()?);
+        self.expect(Token::RightParen)?;
+
+        // Expect closing pipe
+        self.expect(Token::Pipe)?;
+
+        Ok(Expression::AnonymousFunction { params, body })
     }
 }

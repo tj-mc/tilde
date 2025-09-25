@@ -1,7 +1,7 @@
+use super::utils::*;
 use crate::ast::Expression;
 use crate::evaluator::Evaluator;
 use crate::value::Value;
-use super::utils::*;
 
 pub fn eval_split(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
     let (string, delimiter) = extract_string_string_args(&args, evaluator, "split")?;
@@ -166,5 +166,3 @@ pub fn eval_pad_right(args: Vec<Expression>, evaluator: &mut Evaluator) -> Resul
         Ok(Value::String(format!("{}{}", string, padding)))
     }
 }
-
-

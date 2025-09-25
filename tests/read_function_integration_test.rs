@@ -15,13 +15,16 @@ fn test_read_simple_file() {
     let content = "Hello, World!";
     create_test_file(filename, content);
 
-    let input = format!(r#"
+    let input = format!(
+        r#"
         ~file is read "{}"
         ~content is ~file.content
         ~size is ~file.size
         ~exists is ~file.exists
         ~error is ~file.error
-    "#, filename);
+    "#,
+        filename
+    );
 
     let mut parser = Parser::new(&input);
     let program = parser.parse().unwrap();
@@ -34,7 +37,10 @@ fn test_read_simple_file() {
         Some(&Value::String(content.to_string()))
     );
     assert_eq!(evaluator.get_variable("size"), Some(&Value::Number(13.0)));
-    assert_eq!(evaluator.get_variable("exists"), Some(&Value::Boolean(true)));
+    assert_eq!(
+        evaluator.get_variable("exists"),
+        Some(&Value::Boolean(true))
+    );
     assert_eq!(evaluator.get_variable("error"), Some(&Value::Null));
 
     cleanup_test_file(filename);
@@ -59,7 +65,10 @@ fn test_read_nonexistent_file() {
         evaluator.get_variable("content"),
         Some(&Value::String("".to_string()))
     );
-    assert_eq!(evaluator.get_variable("exists"), Some(&Value::Boolean(false)));
+    assert_eq!(
+        evaluator.get_variable("exists"),
+        Some(&Value::Boolean(false))
+    );
     assert_ne!(evaluator.get_variable("error"), Some(&Value::Null));
 }
 
@@ -68,12 +77,15 @@ fn test_read_empty_file() {
     let filename = "test_empty.txt";
     create_test_file(filename, "");
 
-    let input = format!(r#"
+    let input = format!(
+        r#"
         ~file is read "{}"
         ~content is ~file.content
         ~size is ~file.size
         ~exists is ~file.exists
-    "#, filename);
+    "#,
+        filename
+    );
 
     let mut parser = Parser::new(&input);
     let program = parser.parse().unwrap();
@@ -86,7 +98,10 @@ fn test_read_empty_file() {
         Some(&Value::String("".to_string()))
     );
     assert_eq!(evaluator.get_variable("size"), Some(&Value::Number(0.0)));
-    assert_eq!(evaluator.get_variable("exists"), Some(&Value::Boolean(true)));
+    assert_eq!(
+        evaluator.get_variable("exists"),
+        Some(&Value::Boolean(true))
+    );
 
     cleanup_test_file(filename);
 }
@@ -97,11 +112,14 @@ fn test_read_multiline_file() {
     let content = "Line 1\nLine 2\nLine 3";
     create_test_file(filename, content);
 
-    let input = format!(r#"
+    let input = format!(
+        r#"
         ~file is read "{}"
         ~content is ~file.content
         ~size is ~file.size
-    "#, filename);
+    "#,
+        filename
+    );
 
     let mut parser = Parser::new(&input);
     let program = parser.parse().unwrap();
@@ -124,11 +142,14 @@ fn test_read_with_variables() {
     let content = "Variable content";
     create_test_file(filename, content);
 
-    let input = format!(r#"
+    let input = format!(
+        r#"
         ~filename is "{}"
         ~file is read ~filename
         ~content is ~file.content
-    "#, filename);
+    "#,
+        filename
+    );
 
     let mut parser = Parser::new(&input);
     let program = parser.parse().unwrap();
@@ -150,7 +171,8 @@ fn test_read_in_conditional() {
     let content = "Conditional test";
     create_test_file(filename, content);
 
-    let input = format!(r#"
+    let input = format!(
+        r#"
         ~file is read "{}"
         ~message is ""
 
@@ -163,7 +185,9 @@ fn test_read_in_conditional() {
         ) else (
             ~message is "File does not exist"
         )
-    "#, filename);
+    "#,
+        filename
+    );
 
     let mut parser = Parser::new(&input);
     let program = parser.parse().unwrap();
@@ -189,12 +213,15 @@ fn test_read_multiple_files() {
     create_test_file(file1, content1);
     create_test_file(file2, content2);
 
-    let input = format!(r#"
+    let input = format!(
+        r#"
         ~file1 is read "{}"
         ~file2 is read "{}"
         ~total_size is ~file1.size + ~file2.size
         ~both_exist is ~file1.exists and ~file2.exists
-    "#, file1, file2);
+    "#,
+        file1, file2
+    );
 
     let mut parser = Parser::new(&input);
     let program = parser.parse().unwrap();
@@ -202,8 +229,14 @@ fn test_read_multiple_files() {
     let mut evaluator = Evaluator::new();
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("total_size"), Some(&Value::Number(18.0))); // 9 + 9
-    assert_eq!(evaluator.get_variable("both_exist"), Some(&Value::Boolean(true)));
+    assert_eq!(
+        evaluator.get_variable("total_size"),
+        Some(&Value::Number(18.0))
+    ); // 9 + 9
+    assert_eq!(
+        evaluator.get_variable("both_exist"),
+        Some(&Value::Boolean(true))
+    );
 
     cleanup_test_file(file1);
     cleanup_test_file(file2);
@@ -241,7 +274,10 @@ fn test_read_in_loop() {
     let mut evaluator = Evaluator::new();
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("total_size"), Some(&Value::Number(6.0))); // 1 + 2 + 3
+    assert_eq!(
+        evaluator.get_variable("total_size"),
+        Some(&Value::Number(6.0))
+    ); // 1 + 2 + 3
 
     for file in &files {
         cleanup_test_file(file);
@@ -254,10 +290,13 @@ fn test_read_statement_form() {
     let content = "Statement test";
     create_test_file(filename, content);
 
-    let input = format!(r#"
+    let input = format!(
+        r#"
         read "{}"
         ~message is "Read operation completed"
-    "#, filename);
+    "#,
+        filename
+    );
 
     let mut parser = Parser::new(&input);
     let program = parser.parse().unwrap();
@@ -312,7 +351,8 @@ fn test_read_with_object_access() {
     let content = "Object access test";
     create_test_file(filename, content);
 
-    let input = format!(r#"
+    let input = format!(
+        r#"
         ~file is read "{}"
 
         function get-file-info ~file_obj (
@@ -326,7 +366,9 @@ fn test_read_with_object_access() {
         ~info is *get-file-info ~file
         ~has_content is ~info.has_content
         ~is_valid is ~info.is_valid
-    "#, filename);
+    "#,
+        filename
+    );
 
     let mut parser = Parser::new(&input);
     let program = parser.parse().unwrap();
@@ -334,8 +376,14 @@ fn test_read_with_object_access() {
     let mut evaluator = Evaluator::new();
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("has_content"), Some(&Value::Boolean(true)));
-    assert_eq!(evaluator.get_variable("is_valid"), Some(&Value::Boolean(true)));
+    assert_eq!(
+        evaluator.get_variable("has_content"),
+        Some(&Value::Boolean(true))
+    );
+    assert_eq!(
+        evaluator.get_variable("is_valid"),
+        Some(&Value::Boolean(true))
+    );
 
     cleanup_test_file(filename);
 }

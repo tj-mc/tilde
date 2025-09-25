@@ -1,7 +1,7 @@
+use super::utils::*;
 use crate::ast::Expression;
 use crate::evaluator::Evaluator;
 use crate::value::Value;
-use super::utils::*;
 
 /// Fast iterative Fibonacci implementation
 fn fibonacci_iterative(n: u32) -> f64 {
@@ -40,13 +40,44 @@ macro_rules! native_reduce {
     };
 }
 
+/// Generic helper that works with both named functions and anonymous functions
+fn eval_function_expression_on_item(
+    func_expr: &Expression,
+    item: &Value,
+    evaluator: &mut Evaluator,
+) -> Result<Value, String> {
+    match func_expr {
+        Expression::AnonymousFunction { params, body } => {
+            if params.len() != 1 {
+                return Err("Function must take exactly 1 parameter".to_string());
+            }
+            evaluator.push_scope();
+            evaluator.set_local_variable(&params[0], item.clone());
+            let result = evaluator.eval_expression(*body.clone())?;
+            evaluator.pop_scope();
+            Ok(result)
+        }
+        Expression::Variable(name) => eval_function_on_item(name, item, evaluator),
+        Expression::FunctionCall { name, args } if args.is_empty() => eval_function_on_item(name, item, evaluator),
+        _ => Err("Expected function name or anonymous function".to_string()),
+    }
+}
+
 /// Helper function to evaluate a predicate function (either user function or stdlib function)
-fn eval_predicate(function_name: &str, item: &Value, evaluator: &mut Evaluator) -> Result<Value, String> {
+fn eval_predicate(
+    function_name: &str,
+    item: &Value,
+    evaluator: &mut Evaluator,
+) -> Result<Value, String> {
     eval_function_on_item(function_name, item, evaluator)
 }
 
 /// Helper function to evaluate any function (transformer or predicate) on an item
-fn eval_function_on_item(function_name: &str, item: &Value, evaluator: &mut Evaluator) -> Result<Value, String> {
+fn eval_function_on_item(
+    function_name: &str,
+    item: &Value,
+    evaluator: &mut Evaluator,
+) -> Result<Value, String> {
     // Check for block syntax first (e.g., :core:is-even)
     if function_name.starts_with(':') && function_name.contains(':') {
         let parts: Vec<&str> = function_name[1..].split(':').collect();
@@ -65,14 +96,19 @@ fn eval_function_on_item(function_name: &str, item: &Value, evaluator: &mut Eval
                             Value::String(s) => Expression::String(s.clone()),
                             Value::Boolean(b) => Expression::Boolean(*b),
                             // For complex types, stdlib functions should handle them appropriately
-                            _ => return Err(format!("Core function {} cannot be used in higher-order functions with complex values", func_name)),
+                            _ => {
+                                return Err(format!(
+                                    "Core function {} cannot be used in higher-order functions with complex values",
+                                    func_name
+                                ));
+                            }
                         };
                         return stdlib_func(vec![item_expr], evaluator);
                     } else {
                         return Err(format!("Unknown core function: {}", func_name));
                     }
                 }
-                _ => return Err(format!("Unknown block: {}", block_name))
+                _ => return Err(format!("Unknown block: {}", block_name)),
             }
         } else {
             return Err(format!("Invalid block syntax: {}", function_name));
@@ -80,10 +116,13 @@ fn eval_function_on_item(function_name: &str, item: &Value, evaluator: &mut Eval
     }
 
     // First try user functions
-    if let Some(function) =evaluator.functions.get(function_name) {
-        let function =function.clone();
+    if let Some(function) = evaluator.functions.get(function_name) {
+        let function = function.clone();
         if function.params.len() != 1 {
-            return Err(format!("Function {} must take exactly one parameter", function_name));
+            return Err(format!(
+                "Function {} must take exactly one parameter",
+                function_name
+            ));
         }
 
         let arg_expr = Expression::Variable(function.params[0].clone());
@@ -99,7 +138,12 @@ fn eval_function_on_item(function_name: &str, item: &Value, evaluator: &mut Eval
             Value::String(s) => Expression::String(s.clone()),
             Value::Boolean(b) => Expression::Boolean(*b),
             // For complex types, only allow if the function can handle them
-            _ => return Err(format!("Stdlib function {} cannot be used in higher-order functions with complex values", function_name)),
+            _ => {
+                return Err(format!(
+                    "Stdlib function {} cannot be used in higher-order functions with complex values",
+                    function_name
+                ));
+            }
         };
         return stdlib_func(vec![item_expr], evaluator);
     }
@@ -132,54 +176,77 @@ pub fn eval_map(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Valu
         _ => return Err("map first argument must be a list".to_string()),
     };
 
+    // Check if second argument is an anonymous function
+    if let Expression::AnonymousFunction { params, body } = &args[1] {
+        // Handle anonymous function
+        if params.len() != 1 {
+            return Err("map anonymous function must take exactly 1 parameter".to_string());
+        }
+
+        let mut result = Vec::new();
+        for item in list {
+            // Push new scope with parameter binding
+            evaluator.push_scope();
+            evaluator.set_local_variable(&params[0], item);
+            let mapped = evaluator.eval_expression(*body.clone())?;
+            evaluator.pop_scope();
+            result.push(mapped);
+        }
+        return Ok(Value::List(result));
+    }
+
     // Get function name for the transformation
     let function_name = match &args[1] {
         Expression::Variable(name) => name.clone(),
         Expression::FunctionCall { name, args } if args.is_empty() => name.clone(),
-        _ => return Err("map second argument must be a function name".to_string()),
+        _ => {
+            return Err(
+                "map second argument must be a function name or anonymous function".to_string(),
+            );
+        }
     };
 
     // Native fast paths for common stdlib functions
     match function_name.as_str() {
         "double" => native_map!(list, |v| match v {
             Value::Number(n) => Value::Number(n * 2.0),
-            _ => v
+            _ => v,
         }),
         "square" => native_map!(list, |v| match v {
             Value::Number(n) => Value::Number(n * n),
-            _ => v
+            _ => v,
         }),
         "triple" => native_map!(list, |v| match v {
             Value::Number(n) => Value::Number(n * 3.0),
-            _ => v
+            _ => v,
         }),
         "quadruple" => native_map!(list, |v| match v {
             Value::Number(n) => Value::Number(n * 4.0),
-            _ => v
+            _ => v,
         }),
         "half" => native_map!(list, |v| match v {
             Value::Number(n) => Value::Number(n / 2.0),
-            _ => v
+            _ => v,
         }),
         "increment" => native_map!(list, |v| match v {
             Value::Number(n) => Value::Number(n + 1.0),
-            _ => v
+            _ => v,
         }),
         "decrement" => native_map!(list, |v| match v {
             Value::Number(n) => Value::Number(n - 1.0),
-            _ => v
+            _ => v,
         }),
         "uppercase" => native_map!(list, |v| match v {
             Value::String(s) => Value::String(s.to_uppercase()),
-            _ => v
+            _ => v,
         }),
         "lowercase" => native_map!(list, |v| match v {
             Value::String(s) => Value::String(s.to_lowercase()),
-            _ => v
+            _ => v,
         }),
         "absolute" => native_map!(list, |v| match v {
             Value::Number(n) => Value::Number(n.abs()),
-            _ => v
+            _ => v,
         }),
         "square-root" => native_map!(list, |v| match v {
             Value::Number(n) => {
@@ -188,22 +255,23 @@ pub fn eval_map(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Valu
                 } else {
                     v // Keep original for negative numbers
                 }
-            },
-            _ => v
+            }
+            _ => v,
         }),
         "trim" => native_map!(list, |v| match v {
             Value::String(s) => Value::String(s.trim().to_string()),
-            _ => v
+            _ => v,
         }),
         "fibonacci" => native_map!(list, |v| match v {
             Value::Number(n) => {
-                if n >= 0.0 && n <= 1476.0 { // Max safe fibonacci in f64
+                if n >= 0.0 && n <= 1476.0 {
+                    // Max safe fibonacci in f64
                     Value::Number(fibonacci_iterative(n as u32))
                 } else {
                     v // Keep original for out-of-range values
                 }
-            },
-            _ => v
+            }
+            _ => v,
         }),
         _ => {
             // Slow path: Use the helper function to evaluate the function on each item
@@ -241,33 +309,60 @@ pub fn eval_filter(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<V
         _ => return Err("filter first argument must be a list".to_string()),
     };
 
+    // Check if second argument is an anonymous function
+    if let Expression::AnonymousFunction { params, body } = &args[1] {
+        // Handle anonymous function
+        if params.len() != 1 {
+            return Err("filter anonymous function must take exactly 1 parameter".to_string());
+        }
+
+        let mut result = Vec::new();
+        for item in list {
+            // Push new scope with parameter binding
+            evaluator.push_scope();
+            evaluator.set_local_variable(&params[0], item.clone());
+            let predicate_result = evaluator.eval_expression(*body.clone())?;
+            evaluator.pop_scope();
+
+            // Check if the predicate is truthy
+            if evaluator.is_truthy(&predicate_result) {
+                result.push(item);
+            }
+        }
+        return Ok(Value::List(result));
+    }
+
     let function_name = match &args[1] {
         Expression::Variable(name) => name.clone(),
         Expression::FunctionCall { name, args } if args.is_empty() => name.clone(),
-        _ => return Err("filter second argument must be a function name (like 'is_even' or '.is-even' for stdlib)".to_string()),
+        _ => {
+            return Err(
+                "filter second argument must be a function name or anonymous function".to_string(),
+            );
+        }
     };
 
     // Native fast paths for common stdlib predicates
     match function_name.as_str() {
         "is-even" => native_filter!(list, |v| match v {
             Value::Number(n) => (*n as i64) % 2 == 0,
-            _ => false
+            _ => false,
         }),
         "is-odd" => native_filter!(list, |v| match v {
             Value::Number(n) => (*n as i64) % 2 != 0,
-            _ => false
+            _ => false,
         }),
         "is-positive" => native_filter!(list, |v| match v {
             Value::Number(n) => *n > 0.0,
-            _ => false
+            _ => false,
         }),
         "is-negative" => native_filter!(list, |v| match v {
             Value::Number(n) => *n < 0.0,
-            _ => false
+            _ => false,
         }),
         "is-zero" => native_filter!(list, |v| match v {
             Value::Number(n) => *n == 0.0,
-            _ => false
+            _ => false,
         }),
         _ => {
             // Slow path: Use the helper function to evaluate the predicate on each item
@@ -285,7 +380,9 @@ pub fn eval_filter(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<V
 
 pub fn eval_reduce(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
     if args.len() != 3 {
-        return Err("reduce requires exactly 3 arguments (list, function_name, initial_value)".to_string());
+        return Err(
+            "reduce requires exactly 3 arguments (list, function_name, initial_value)".to_string(),
+        );
     }
 
     let list_val = evaluator.eval_expression(args[0].clone())?;
@@ -294,10 +391,35 @@ pub fn eval_reduce(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<V
         _ => return Err("reduce first argument must be a list".to_string()),
     };
 
+    // Check if second argument is an anonymous function
+    if let Expression::AnonymousFunction { params, body } = &args[1] {
+        // Handle anonymous function
+        if params.len() != 2 {
+            return Err("reduce anonymous function must take exactly 2 parameters".to_string());
+        }
+
+        let mut accumulator = evaluator.eval_expression(args[2].clone())?;
+
+        for item in list {
+            // Push new scope with parameters
+            evaluator.push_scope();
+            evaluator.set_local_variable(&params[0], accumulator);
+            evaluator.set_local_variable(&params[1], item);
+            accumulator = evaluator.eval_expression(*body.clone())?;
+            evaluator.pop_scope();
+        }
+
+        return Ok(accumulator);
+    }
+
     let function_name = match &args[1] {
         Expression::Variable(name) => name.clone(),
         Expression::FunctionCall { name, args } if args.is_empty() => name.clone(),
-        _ => return Err("reduce second argument must be a function name (like 'add' or '.add' for stdlib)".to_string()),
+        _ => {
+            return Err(
+                "reduce second argument must be a function name or anonymous function".to_string(),
+            );
+        }
     };
 
     let accumulator = evaluator.eval_expression(args[2].clone())?;
@@ -307,56 +429,68 @@ pub fn eval_reduce(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<V
         "add" => {
             let result = native_reduce!(list, accumulator, |acc, item| match (acc, item) {
                 (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a + b)),
-                _ => Err("add requires numbers".to_string())
+                _ => Err("add requires numbers".to_string()),
             })?;
             return Ok(result);
-        },
+        }
         "multiply" => {
             let result = native_reduce!(list, accumulator, |acc, item| match (acc, item) {
                 (Value::Number(a), Value::Number(b)) => Ok(Value::Number(a * b)),
-                _ => Err("multiply requires numbers".to_string())
+                _ => Err("multiply requires numbers".to_string()),
             })?;
             return Ok(result);
-        },
+        }
         "max" => {
             let result = native_reduce!(list, accumulator, |acc, item| match (acc, item) {
-                (Value::Number(a), Value::Number(b)) => Ok(Value::Number(if *b > a { *b } else { a })),
-                _ => Err("max requires numbers".to_string())
+                (Value::Number(a), Value::Number(b)) =>
+                    Ok(Value::Number(if *b > a { *b } else { a })),
+                _ => Err("max requires numbers".to_string()),
             })?;
             return Ok(result);
-        },
+        }
         "min" => {
             let result = native_reduce!(list, accumulator, |acc, item| match (acc, item) {
-                (Value::Number(a), Value::Number(b)) => Ok(Value::Number(if *b < a { *b } else { a })),
-                _ => Err("min requires numbers".to_string())
+                (Value::Number(a), Value::Number(b)) =>
+                    Ok(Value::Number(if *b < a { *b } else { a })),
+                _ => Err("min requires numbers".to_string()),
             })?;
             return Ok(result);
-        },
+        }
         _ => {}
     }
 
     // Check if it's a stdlib function first
     if let Some(stdlib_func) = crate::stdlib::get_stdlib_function(&function_name) {
         let mut accumulator = accumulator;
-            for item in list {
-                // Create arguments for the accumulator and current item
-                let acc_expr = match &accumulator {
-                    Value::Number(n) => Expression::Number(*n, false),
-                    Value::String(s) => Expression::String(s.clone()),
-                    Value::Boolean(b) => Expression::Boolean(*b),
-                    _ => return Err("reduce can only work with numbers, strings, and booleans for now".to_string()),
-                };
+        for item in list {
+            // Create arguments for the accumulator and current item
+            let acc_expr = match &accumulator {
+                Value::Number(n) => Expression::Number(*n, false),
+                Value::String(s) => Expression::String(s.clone()),
+                Value::Boolean(b) => Expression::Boolean(*b),
+                _ => {
+                    return Err(
+                        "reduce can only work with numbers, strings, and booleans for now"
+                            .to_string(),
+                    );
+                }
+            };
 
-                let item_expr = match &item {
-                    Value::Number(n) => Expression::Number(*n, false),
-                    Value::String(s) => Expression::String(s.clone()),
-                    Value::Boolean(b) => Expression::Boolean(*b),
-                    _ => return Err("reduce can only work with numbers, strings, and booleans for now".to_string()),
-                };
+            let item_expr = match &item {
+                Value::Number(n) => Expression::Number(*n, false),
+                Value::String(s) => Expression::String(s.clone()),
+                Value::Boolean(b) => Expression::Boolean(*b),
+                _ => {
+                    return Err(
+                        "reduce can only work with numbers, strings, and booleans for now"
+                            .to_string(),
+                    );
+                }
+            };
 
-                accumulator = stdlib_func(vec![acc_expr, item_expr], evaluator)?;
-            }
-            return Ok(accumulator);
+            accumulator = stdlib_func(vec![acc_expr, item_expr], evaluator)?;
+        }
+        return Ok(accumulator);
     }
 
     // Check if the function exists (user-defined function)
@@ -364,11 +498,14 @@ pub fn eval_reduce(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<V
         return Err(format!("Function '{}' not found", function_name));
     }
 
-    let function =evaluator.functions.get(&function_name).unwrap().clone();
+    let function = evaluator.functions.get(&function_name).unwrap().clone();
 
     // Check that the function takes exactly two params
     if function.params.len() != 2 {
-        return Err(format!("Function '{}' must take exactly two parameters for reduce", function_name));
+        return Err(format!(
+            "Function '{}' must take exactly two parameters for reduce",
+            function_name
+        ));
     }
 
     let mut accumulator = evaluator.eval_expression(args[2].clone())?;
@@ -379,14 +516,22 @@ pub fn eval_reduce(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<V
             Value::Number(n) => Expression::Number(*n, false),
             Value::String(s) => Expression::String(s.clone()),
             Value::Boolean(b) => Expression::Boolean(*b),
-            _ => return Err("reduce can only work with numbers, strings, and booleans for now".to_string()),
+            _ => {
+                return Err(
+                    "reduce can only work with numbers, strings, and booleans for now".to_string(),
+                );
+            }
         };
 
         let item_expr = match &item {
             Value::Number(n) => Expression::Number(*n, false),
             Value::String(s) => Expression::String(s.clone()),
             Value::Boolean(b) => Expression::Boolean(*b),
-            _ => return Err("reduce can only work with numbers, strings, and booleans for now".to_string()),
+            _ => {
+                return Err(
+                    "reduce can only work with numbers, strings, and booleans for now".to_string(),
+                );
+            }
         };
 
         accumulator = evaluator.eval_function(function.clone(), vec![acc_expr, item_expr])?;
@@ -402,13 +547,13 @@ pub fn eval_sort(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Val
     let mut list = extract_list_arg(&args, evaluator, "sort")?;
 
     // Sort based on value type
-    list.sort_by(|a, b| {
-        match (a, b) {
-            (Value::Number(a), Value::Number(b)) => a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal),
-            (Value::String(a), Value::String(b)) => a.cmp(b),
-            (Value::Boolean(a), Value::Boolean(b)) => a.cmp(b),
-            _ => std::cmp::Ordering::Equal,
+    list.sort_by(|a, b| match (a, b) {
+        (Value::Number(a), Value::Number(b)) => {
+            a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal)
         }
+        (Value::String(a), Value::String(b)) => a.cmp(b),
+        (Value::Boolean(a), Value::Boolean(b)) => a.cmp(b),
+        _ => std::cmp::Ordering::Equal,
     });
 
     Ok(Value::List(list))
@@ -436,14 +581,8 @@ pub fn eval_find(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Val
         _ => return Err("find can only be used on lists".to_string()),
     };
 
-    let function_name = match &args[1] {
-        Expression::Variable(name) => name.clone(),
-        Expression::FunctionCall { name, args: fn_args } if fn_args.is_empty() => name.clone(),
-        _ => return Err("find requires a function name as the second argument".to_string()),
-    };
-
     for item in list {
-        let predicate_result = eval_predicate(&function_name, &item, evaluator)?;
+        let predicate_result = eval_function_expression_on_item(&args[1], &item, evaluator)?;
 
         if predicate_result.is_truthy() {
             return Ok(item);
@@ -468,7 +607,10 @@ pub fn eval_find_index(args: Vec<Expression>, evaluator: &mut Evaluator) -> Resu
 
     let function_name = match &args[1] {
         Expression::Variable(name) => name.clone(),
-        Expression::FunctionCall { name, args: fn_args } if fn_args.is_empty() => name.clone(),
+        Expression::FunctionCall {
+            name,
+            args: fn_args,
+        } if fn_args.is_empty() => name.clone(),
         _ => return Err("find-index requires a function name as the second argument".to_string()),
     };
 
@@ -498,7 +640,10 @@ pub fn eval_find_last(args: Vec<Expression>, evaluator: &mut Evaluator) -> Resul
 
     let function_name = match &args[1] {
         Expression::Variable(name) => name.clone(),
-        Expression::FunctionCall { name, args: fn_args } if fn_args.is_empty() => name.clone(),
+        Expression::FunctionCall {
+            name,
+            args: fn_args,
+        } if fn_args.is_empty() => name.clone(),
         _ => return Err("find-last requires a function name as the second argument".to_string()),
     };
 
@@ -528,14 +673,8 @@ pub fn eval_every(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Va
         _ => return Err("every can only be used on lists".to_string()),
     };
 
-    let function_name = match &args[1] {
-        Expression::Variable(name) => name.clone(),
-        Expression::FunctionCall { name, args: fn_args } if fn_args.is_empty() => name.clone(),
-        _ => return Err("every requires a function name as the second argument".to_string()),
-    };
-
     for item in list {
-        let predicate_result = eval_predicate(&function_name, &item, evaluator)?;
+        let predicate_result = eval_function_expression_on_item(&args[1], &item, evaluator)?;
 
         if !predicate_result.is_truthy() {
             return Ok(Value::Boolean(false));
@@ -558,14 +697,8 @@ pub fn eval_some(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Val
         _ => return Err("some can only be used on lists".to_string()),
     };
 
-    let function_name = match &args[1] {
-        Expression::Variable(name) => name.clone(),
-        Expression::FunctionCall { name, args: fn_args } if fn_args.is_empty() => name.clone(),
-        _ => return Err("some requires a function name as the second argument".to_string()),
-    };
-
     for item in list {
-        let predicate_result = eval_predicate(&function_name, &item, evaluator)?;
+        let predicate_result = eval_function_expression_on_item(&args[1], &item, evaluator)?;
 
         if predicate_result.is_truthy() {
             return Ok(Value::Boolean(true));
@@ -590,7 +723,10 @@ pub fn eval_remove_if(args: Vec<Expression>, evaluator: &mut Evaluator) -> Resul
 
     let function_name = match &args[1] {
         Expression::Variable(name) => name.clone(),
-        Expression::FunctionCall { name, args: fn_args } if fn_args.is_empty() => name.clone(),
+        Expression::FunctionCall {
+            name,
+            args: fn_args,
+        } if fn_args.is_empty() => name.clone(),
         _ => return Err("remove-if requires a function name as the second argument".to_string()),
     };
 
@@ -622,7 +758,10 @@ pub fn eval_count_if(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result
 
     let function_name = match &args[1] {
         Expression::Variable(name) => name.clone(),
-        Expression::FunctionCall { name, args: fn_args } if fn_args.is_empty() => name.clone(),
+        Expression::FunctionCall {
+            name,
+            args: fn_args,
+        } if fn_args.is_empty() => name.clone(),
         _ => return Err("count-if requires a function name as the second argument".to_string()),
     };
 
@@ -654,7 +793,10 @@ pub fn eval_take_while(args: Vec<Expression>, evaluator: &mut Evaluator) -> Resu
 
     let function_name = match &args[1] {
         Expression::Variable(name) => name.clone(),
-        Expression::FunctionCall { name, args: fn_args } if fn_args.is_empty() => name.clone(),
+        Expression::FunctionCall {
+            name,
+            args: fn_args,
+        } if fn_args.is_empty() => name.clone(),
         _ => return Err("take-while requires a function name as the second argument".to_string()),
     };
 
@@ -688,7 +830,10 @@ pub fn eval_drop_while(args: Vec<Expression>, evaluator: &mut Evaluator) -> Resu
 
     let function_name = match &args[1] {
         Expression::Variable(name) => name.clone(),
-        Expression::FunctionCall { name, args: fn_args } if fn_args.is_empty() => name.clone(),
+        Expression::FunctionCall {
+            name,
+            args: fn_args,
+        } if fn_args.is_empty() => name.clone(),
         _ => return Err("drop-while requires a function name as the second argument".to_string()),
     };
 
@@ -719,17 +864,12 @@ pub fn eval_partition(args: Vec<Expression>, evaluator: &mut Evaluator) -> Resul
         Value::List(l) => l,
         _ => return Err("partition can only be used on lists".to_string()),
     };
-    let function_name = match &args[1] {
-        Expression::Variable(name) => name.clone(),
-        Expression::FunctionCall { name, args: fn_args } if fn_args.is_empty() => name.clone(),
-        _ => return Err("partition requires a function name as the second argument".to_string()),
-    };
 
     let mut matched = Vec::new();
     let mut unmatched = Vec::new();
 
     for item in list {
-        let predicate_result = eval_predicate(&function_name, &item, evaluator)?;
+        let predicate_result = eval_function_expression_on_item(&args[1], &item, evaluator)?;
 
         if predicate_result.is_truthy() {
             matched.push(item);
@@ -756,16 +896,11 @@ pub fn eval_group_by(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result
         Value::List(l) => l,
         _ => return Err("group-by can only be used on lists".to_string()),
     };
-    let function_name = match &args[1] {
-        Expression::Variable(name) => name.clone(),
-        Expression::FunctionCall { name, args: fn_args } if fn_args.is_empty() => name.clone(),
-        _ => return Err("group-by requires a function name as the second argument".to_string()),
-    };
 
     let mut groups = std::collections::HashMap::new();
 
     for item in list {
-        let key_result = eval_function_on_item(&function_name, &item, evaluator)?;
+        let key_result = eval_function_expression_on_item(&args[1], &item, evaluator)?;
         let key_string = match key_result {
             Value::Number(n) => {
                 if n.fract() == 0.0 {
@@ -773,10 +908,12 @@ pub fn eval_group_by(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result
                 } else {
                     n.to_string()
                 }
-            },
+            }
             Value::String(s) => s,
             Value::Boolean(b) => b.to_string(),
-            _ => return Err("group-by function must return a number, string, or boolean".to_string()),
+            _ => {
+                return Err("group-by function must return a number, string, or boolean".to_string());
+            }
         };
 
         groups.entry(key_string).or_insert_with(Vec::new).push(item);
@@ -800,27 +937,22 @@ pub fn eval_sort_by(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<
         Value::List(l) => l,
         _ => return Err("sort-by can only be used on lists".to_string()),
     };
-    let function_name = match &args[1] {
-        Expression::Variable(name) => name.clone(),
-        Expression::FunctionCall { name, args: fn_args } if fn_args.is_empty() => name.clone(),
-        _ => return Err("sort-by requires a function name as the second argument".to_string()),
-    };
 
     // Create pairs of (sort_key, original_item)
     let mut keyed_items = Vec::new();
     for item in list {
-        let sort_key = eval_function_on_item(&function_name, &item, evaluator)?;
+        let sort_key = eval_function_expression_on_item(&args[1], &item, evaluator)?;
         keyed_items.push((sort_key, item));
     }
 
     // Sort by the keys
-    keyed_items.sort_by(|(a, _), (b, _)| {
-        match (a, b) {
-            (Value::Number(n1), Value::Number(n2)) => n1.partial_cmp(n2).unwrap_or(std::cmp::Ordering::Equal),
-            (Value::String(s1), Value::String(s2)) => s1.cmp(s2),
-            (Value::Boolean(b1), Value::Boolean(b2)) => b1.cmp(b2),
-            _ => std::cmp::Ordering::Equal,
+    keyed_items.sort_by(|(a, _), (b, _)| match (a, b) {
+        (Value::Number(n1), Value::Number(n2)) => {
+            n1.partial_cmp(n2).unwrap_or(std::cmp::Ordering::Equal)
         }
+        (Value::String(s1), Value::String(s2)) => s1.cmp(s2),
+        (Value::Boolean(b1), Value::Boolean(b2)) => b1.cmp(b2),
+        _ => std::cmp::Ordering::Equal,
     });
 
     // Extract the sorted items
@@ -838,8 +970,8 @@ pub fn eval_list(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Val
     }
 
     let length_val = match &args[0] {
-        Expression::Number(n, _) => Value::Number(*n),  // Fast path for literals
-        expr => evaluator.eval_expression(expr.clone())?,  // Fallback for complex expressions
+        Expression::Number(n, _) => Value::Number(*n), // Fast path for literals
+        expr => evaluator.eval_expression(expr.clone())?, // Fallback for complex expressions
     };
     let length = match length_val {
         Value::Number(n) => {
@@ -955,7 +1087,10 @@ mod tests {
     #[test]
     fn test_list_wrong_args_error() {
         let mut evaluator = Evaluator::new();
-        let args = vec![Expression::Number(5.0, false), Expression::Number(10.0, false)];
+        let args = vec![
+            Expression::Number(5.0, false),
+            Expression::Number(10.0, false),
+        ];
 
         let result = eval_list(args, &mut evaluator);
         assert!(result.is_err());

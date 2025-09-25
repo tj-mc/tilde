@@ -1,4 +1,4 @@
-use tilde::{parser::Parser, evaluator::Evaluator};
+use tilde::{evaluator::Evaluator, parser::Parser};
 
 #[test]
 fn test_to_json() {
@@ -16,10 +16,22 @@ fn test_to_json() {
 
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("str_result").unwrap().to_string(), "\"hello\"");
-    assert_eq!(evaluator.get_variable("num_result").unwrap().to_string(), "42.0");
-    assert_eq!(evaluator.get_variable("bool_result").unwrap().to_string(), "true");
-    assert_eq!(evaluator.get_variable("list_result").unwrap().to_string(), "[1.0,2.0,\"three\"]");
+    assert_eq!(
+        evaluator.get_variable("str_result").unwrap().to_string(),
+        "\"hello\""
+    );
+    assert_eq!(
+        evaluator.get_variable("num_result").unwrap().to_string(),
+        "42.0"
+    );
+    assert_eq!(
+        evaluator.get_variable("bool_result").unwrap().to_string(),
+        "true"
+    );
+    assert_eq!(
+        evaluator.get_variable("list_result").unwrap().to_string(),
+        "[1.0,2.0,\"three\"]"
+    );
 
     let obj_json = evaluator.get_variable("obj_result").unwrap().to_string();
     // JSON object order might vary, so just check that it contains the expected keys
@@ -43,9 +55,18 @@ fn test_from_json() {
 
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("str_result").unwrap().to_string(), "hello");
-    assert_eq!(evaluator.get_variable("num_result").unwrap().to_string(), "42");
-    assert_eq!(evaluator.get_variable("bool_result").unwrap().to_string(), "true");
+    assert_eq!(
+        evaluator.get_variable("str_result").unwrap().to_string(),
+        "hello"
+    );
+    assert_eq!(
+        evaluator.get_variable("num_result").unwrap().to_string(),
+        "42"
+    );
+    assert_eq!(
+        evaluator.get_variable("bool_result").unwrap().to_string(),
+        "true"
+    );
 
     // Check list result
     if let Some(tilde::value::Value::List(list)) = evaluator.get_variable("list_result") {
@@ -82,8 +103,14 @@ fn test_json_roundtrip() {
 
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("alice_name").unwrap().to_string(), "Alice");
-    assert_eq!(evaluator.get_variable("alice_age").unwrap().to_string(), "25");
+    assert_eq!(
+        evaluator.get_variable("alice_name").unwrap().to_string(),
+        "Alice"
+    );
+    assert_eq!(
+        evaluator.get_variable("alice_age").unwrap().to_string(),
+        "25"
+    );
 }
 
 #[test]

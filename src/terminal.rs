@@ -5,7 +5,10 @@ use crate::value::Value;
 /// Terminal control operations for Tilde
 /// Handles terminal manipulation commands like clear screen
 
-pub fn eval_clear_positional(args: Vec<Expression>, _evaluator: &mut Evaluator) -> Result<Value, String> {
+pub fn eval_clear_positional(
+    args: Vec<Expression>,
+    _evaluator: &mut Evaluator,
+) -> Result<Value, String> {
     if !args.is_empty() {
         return Err("clear takes no arguments".to_string());
     }

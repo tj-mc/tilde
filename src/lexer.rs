@@ -48,6 +48,7 @@ pub enum Token {
     Down,
     Attempt,
     Rescue,
+    Pipe,
 
     // Operators
     Plus,
@@ -363,6 +364,10 @@ impl Lexer {
             Some(')') => {
                 self.advance();
                 Token::RightParen
+            }
+            Some('|') => {
+                self.advance();
+                Token::Pipe
             }
             Some('{') => {
                 self.advance();
@@ -723,7 +728,8 @@ mod tests {
 
     #[test]
     fn test_comment_with_special_characters() {
-        let mut lexer = Lexer::new("# Comment with symbols: !@#$%^&*()+={}[]|\\:;\"'<>,.?/\n~z is true");
+        let mut lexer =
+            Lexer::new("# Comment with symbols: !@#$%^&*()+={}[]|\\:;\"'<>,.?/\n~z is true");
         let tokens = lexer.tokenize();
 
         // Comment with special chars should be completely ignored
@@ -743,7 +749,9 @@ mod tests {
             assert_eq!(parts[0], InterpolationPart::Text("Hello ".to_string()));
 
             // Check that the property access expression was created correctly
-            if let InterpolationPart::Expression(Expression::PropertyAccess { object, property }) = &parts[1] {
+            if let InterpolationPart::Expression(Expression::PropertyAccess { object, property }) =
+                &parts[1]
+            {
                 if let Expression::Variable(var_name) = object.as_ref() {
                     assert_eq!(var_name, "user");
                     assert_eq!(property, "name");
@@ -770,15 +778,25 @@ mod tests {
             assert_eq!(parts[0], InterpolationPart::Text("Value: ".to_string()));
 
             // Check the nested property access: data.user.profile.name
-            if let InterpolationPart::Expression(Expression::PropertyAccess { object, property }) = &parts[1] {
+            if let InterpolationPart::Expression(Expression::PropertyAccess { object, property }) =
+                &parts[1]
+            {
                 assert_eq!(property, "name");
 
                 // Should be data.user.profile
-                if let Expression::PropertyAccess { object: nested_obj, property: nested_prop } = object.as_ref() {
+                if let Expression::PropertyAccess {
+                    object: nested_obj,
+                    property: nested_prop,
+                } = object.as_ref()
+                {
                     assert_eq!(nested_prop, "profile");
 
                     // Should be data.user
-                    if let Expression::PropertyAccess { object: deep_obj, property: deep_prop } = nested_obj.as_ref() {
+                    if let Expression::PropertyAccess {
+                        object: deep_obj,
+                        property: deep_prop,
+                    } = nested_obj.as_ref()
+                    {
                         assert_eq!(deep_prop, "user");
 
                         // Should be data variable
@@ -813,7 +831,9 @@ mod tests {
             assert_eq!(parts[2], InterpolationPart::Text(", age ".to_string()));
 
             // Check property access for user.age
-            if let InterpolationPart::Expression(Expression::PropertyAccess { object, property }) = &parts[3] {
+            if let InterpolationPart::Expression(Expression::PropertyAccess { object, property }) =
+                &parts[3]
+            {
                 if let Expression::Variable(var_name) = object.as_ref() {
                     assert_eq!(var_name, "user");
                     assert_eq!(property, "age");

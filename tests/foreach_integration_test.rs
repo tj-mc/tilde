@@ -1,4 +1,4 @@
-use tilde::{parser::Parser, evaluator::Evaluator};
+use tilde::{evaluator::Evaluator, parser::Parser};
 
 #[test]
 fn test_foreach_list_single_variable() {
@@ -187,7 +187,11 @@ fn test_foreach_invalid_iterable() {
 
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("for-each can only iterate over lists and objects"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("for-each can only iterate over lists and objects")
+    );
 }
 
 #[test]
@@ -202,7 +206,11 @@ fn test_foreach_too_many_variables() {
     let mut parser = Parser::new(input);
     let result = parser.parse();
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("for-each expects at most 2 variables"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("for-each expects at most 2 variables")
+    );
 }
 
 #[test]
@@ -212,7 +220,11 @@ fn test_foreach_parser_errors() {
     let mut parser1 = Parser::new(input1);
     let result1 = parser1.parse();
     assert!(result1.is_err());
-    assert!(result1.unwrap_err().contains("Expected variable after 'for-each'"));
+    assert!(
+        result1
+            .unwrap_err()
+            .contains("Expected variable after 'for-each'")
+    );
 
     // Missing 'in' keyword
     let input2 = "for-each ~item ~items ( say ~item )";

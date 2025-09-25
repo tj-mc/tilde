@@ -145,5 +145,9 @@ fn test_date_arithmetic_error_handling() {
 
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("date-add first argument must be a date"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("date-add first argument must be a date")
+    );
 }

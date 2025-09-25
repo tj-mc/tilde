@@ -43,16 +43,14 @@ pub fn eval_from_json(args: Vec<Expression>, evaluator: &mut Evaluator) -> Resul
 fn tilde_value_to_json_value(value: &Value) -> Result<serde_json::Value, String> {
     match value {
         Value::Number(n) => Ok(serde_json::Value::Number(
-            serde_json::Number::from_f64(*n).ok_or("Invalid number for JSON")?
+            serde_json::Number::from_f64(*n).ok_or("Invalid number for JSON")?,
         )),
         Value::String(s) => Ok(serde_json::Value::String(s.clone())),
         Value::Boolean(b) => Ok(serde_json::Value::Bool(*b)),
         Value::Null => Ok(serde_json::Value::Null),
         Value::List(items) => {
-            let json_items: Result<Vec<serde_json::Value>, String> = items
-                .iter()
-                .map(tilde_value_to_json_value)
-                .collect();
+            let json_items: Result<Vec<serde_json::Value>, String> =
+                items.iter().map(tilde_value_to_json_value).collect();
             Ok(serde_json::Value::Array(json_items?))
         }
         Value::Object(map) => {
@@ -64,16 +62,24 @@ fn tilde_value_to_json_value(value: &Value) -> Result<serde_json::Value, String>
         }
         Value::Date(dt) => {
             // Convert date to ISO 8601 string
-            Ok(serde_json::Value::String(dt.format("%Y-%m-%dT%H:%M:%SZ").to_string()))
+            Ok(serde_json::Value::String(
+                dt.format("%Y-%m-%dT%H:%M:%SZ").to_string(),
+            ))
         }
         Value::Error(err) => {
             // Convert error to a JSON object
             let mut error_obj = serde_json::Map::new();
-            error_obj.insert("message".to_string(), serde_json::Value::String(err.message.clone()));
-            error_obj.insert("code".to_string(), match &err.code {
-                Some(code) => serde_json::Value::String(code.clone()),
-                None => serde_json::Value::Null,
-            });
+            error_obj.insert(
+                "message".to_string(),
+                serde_json::Value::String(err.message.clone()),
+            );
+            error_obj.insert(
+                "code".to_string(),
+                match &err.code {
+                    Some(code) => serde_json::Value::String(code.clone()),
+                    None => serde_json::Value::Null,
+                },
+            );
             Ok(serde_json::Value::Object(error_obj))
         }
     }
@@ -93,10 +99,8 @@ fn json_value_to_tilde_value(json_value: serde_json::Value) -> Result<Value, Str
         }
         serde_json::Value::String(s) => Ok(Value::String(s)),
         serde_json::Value::Array(arr) => {
-            let tilde_items: Result<Vec<Value>, String> = arr
-                .into_iter()
-                .map(json_value_to_tilde_value)
-                .collect();
+            let tilde_items: Result<Vec<Value>, String> =
+                arr.into_iter().map(json_value_to_tilde_value).collect();
             Ok(Value::List(tilde_items?))
         }
         serde_json::Value::Object(obj) => {

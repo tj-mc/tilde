@@ -1,7 +1,7 @@
+use super::utils::*;
 use crate::ast::Expression;
 use crate::evaluator::Evaluator;
 use crate::value::Value;
-use super::utils::*;
 
 /// Get environment variable by name
 /// Returns the environment variable value as a string, or null if not found

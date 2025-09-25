@@ -471,7 +471,11 @@ fn test_helper_function_errors() {
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("double requires exactly 1 argument"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("double requires exactly 1 argument")
+    );
 
     // Test wrong argument type
     let mut evaluator = Evaluator::new();
@@ -480,7 +484,11 @@ fn test_helper_function_errors() {
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("is-even argument must be a number"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("is-even argument must be a number")
+    );
 
     // Test string function with wrong type
     let mut evaluator = Evaluator::new();
@@ -489,5 +497,9 @@ fn test_helper_function_errors() {
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("uppercase argument must be a string"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("uppercase argument must be a string")
+    );
 }

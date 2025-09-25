@@ -1,5 +1,5 @@
-use wasm_bindgen::prelude::*;
 use crate::{evaluator::Evaluator, parser::Parser, value::Value};
+use wasm_bindgen::prelude::*;
 
 // Import JavaScript functions we might need
 #[wasm_bindgen]
@@ -50,30 +50,24 @@ impl WasmTildeRepl {
 
         let mut parser = Parser::new(code);
         match parser.parse() {
-            Ok(program) => {
-                match self.evaluator.eval_program(program) {
-                    Ok(value) => {
-                        let result_value = if self.evaluator.output_buffer.is_empty() && value != Value::Null {
+            Ok(program) => match self.evaluator.eval_program(program) {
+                Ok(value) => {
+                    let result_value =
+                        if self.evaluator.output_buffer.is_empty() && value != Value::Null {
                             Some(value_to_js_value(&value))
                         } else {
                             None
                         };
-                        ExecutionResult::success(result_value, self.evaluator.output_buffer.clone()).to_json()
-                    }
-                    Err(e) => {
-                        ExecutionResult::error(
-                            format!("Runtime error: {}", e),
-                            self.evaluator.output_buffer.clone()
-                        ).to_json()
-                    }
+                    ExecutionResult::success(result_value, self.evaluator.output_buffer.clone())
+                        .to_json()
                 }
-            }
-            Err(e) => {
-                ExecutionResult::error(
-                    format!("Parse error: {}", e),
-                    Vec::new()
-                ).to_json()
-            }
+                Err(e) => ExecutionResult::error(
+                    format!("Runtime error: {}", e),
+                    self.evaluator.output_buffer.clone(),
+                )
+                .to_json(),
+            },
+            Err(e) => ExecutionResult::error(format!("Parse error: {}", e), Vec::new()).to_json(),
         }
     }
 
@@ -135,9 +129,9 @@ impl ExecutionResult {
     }
 
     fn to_json(&self) -> String {
-        serde_json::to_string(self).unwrap_or_else(|_|
+        serde_json::to_string(self).unwrap_or_else(|_| {
             r#"{"success":false,"error":"Failed to serialize result"}"#.to_string()
-        )
+        })
     }
 }
 
@@ -145,7 +139,7 @@ impl ExecutionResult {
 fn value_to_js_value(value: &Value) -> serde_json::Value {
     match value {
         Value::Number(n) => serde_json::Value::Number(
-            serde_json::Number::from_f64(*n).unwrap_or_else(|| serde_json::Number::from(0))
+            serde_json::Number::from_f64(*n).unwrap_or_else(|| serde_json::Number::from(0)),
         ),
         Value::String(s) => serde_json::Value::String(s.clone()),
         Value::Boolean(b) => serde_json::Value::Bool(*b),
@@ -163,19 +157,28 @@ fn value_to_js_value(value: &Value) -> serde_json::Value {
         Value::Date(dt) => serde_json::Value::String(dt.to_rfc3339()),
         Value::Error(err) => {
             let mut error_map = serde_json::Map::new();
-            error_map.insert("error".to_string(), serde_json::Value::String(err.message.clone()));
+            error_map.insert(
+                "error".to_string(),
+                serde_json::Value::String(err.message.clone()),
+            );
             if let Some(code) = &err.code {
                 error_map.insert("code".to_string(), serde_json::Value::String(code.clone()));
             }
             if let Some(source) = &err.source {
-                error_map.insert("source".to_string(), serde_json::Value::String(source.clone()));
+                error_map.insert(
+                    "source".to_string(),
+                    serde_json::Value::String(source.clone()),
+                );
             }
             if !err.context.is_empty() {
                 let mut context_map = serde_json::Map::new();
                 for (k, v) in &err.context {
                     context_map.insert(k.clone(), value_to_js_value(v));
                 }
-                error_map.insert("context".to_string(), serde_json::Value::Object(context_map));
+                error_map.insert(
+                    "context".to_string(),
+                    serde_json::Value::Object(context_map),
+                );
             }
             serde_json::Value::Object(error_map)
         }

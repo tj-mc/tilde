@@ -1,4 +1,4 @@
-use tilde::{parser::Parser, evaluator::Evaluator};
+use tilde::{evaluator::Evaluator, parser::Parser};
 
 #[test]
 fn test_basic_increment() {
@@ -180,7 +180,11 @@ fn test_increment_undefined_variable() {
 
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("Undefined variable: undefined_var"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("Undefined variable: undefined_var")
+    );
 }
 
 #[test]
@@ -196,7 +200,11 @@ fn test_increment_non_number_variable() {
 
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("both variable and amount must be numbers"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("both variable and amount must be numbers")
+    );
 }
 
 #[test]
@@ -212,7 +220,11 @@ fn test_increment_with_non_number_amount() {
 
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("both variable and amount must be numbers"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("both variable and amount must be numbers")
+    );
 }
 
 #[test]
@@ -227,7 +239,11 @@ fn test_decrement_undefined_variable() {
 
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("Undefined variable: undefined_var"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("Undefined variable: undefined_var")
+    );
 }
 
 #[test]

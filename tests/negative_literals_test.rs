@@ -13,8 +13,14 @@ fn test_negative_integer_literal() {
     let mut evaluator = Evaluator::new();
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("negative"), Some(&Value::Number(-42.0)));
-    assert_eq!(evaluator.get_variable("positive"), Some(&Value::Number(42.0)));
+    assert_eq!(
+        evaluator.get_variable("negative"),
+        Some(&Value::Number(-42.0))
+    );
+    assert_eq!(
+        evaluator.get_variable("positive"),
+        Some(&Value::Number(42.0))
+    );
 }
 
 #[test]
@@ -30,8 +36,14 @@ fn test_negative_float_literal() {
     let mut evaluator = Evaluator::new();
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("negative_pi"), Some(&Value::Number(-3.14159)));
-    assert_eq!(evaluator.get_variable("positive_pi"), Some(&Value::Number(3.14159)));
+    assert_eq!(
+        evaluator.get_variable("negative_pi"),
+        Some(&Value::Number(-3.14159))
+    );
+    assert_eq!(
+        evaluator.get_variable("positive_pi"),
+        Some(&Value::Number(3.14159))
+    );
 }
 
 #[test]
@@ -47,8 +59,14 @@ fn test_negative_zero() {
     let mut evaluator = Evaluator::new();
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("negative_zero"), Some(&Value::Number(-0.0)));
-    assert_eq!(evaluator.get_variable("positive_zero"), Some(&Value::Number(0.0)));
+    assert_eq!(
+        evaluator.get_variable("negative_zero"),
+        Some(&Value::Number(-0.0))
+    );
+    assert_eq!(
+        evaluator.get_variable("positive_zero"),
+        Some(&Value::Number(0.0))
+    );
 }
 
 #[test]
@@ -66,7 +84,10 @@ fn test_negative_literals_in_expressions() {
     evaluator.eval_program(program).unwrap();
 
     assert_eq!(evaluator.get_variable("result1"), Some(&Value::Number(5.0)));
-    assert_eq!(evaluator.get_variable("result2"), Some(&Value::Number(-7.0)));
+    assert_eq!(
+        evaluator.get_variable("result2"),
+        Some(&Value::Number(-7.0))
+    );
     assert_eq!(evaluator.get_variable("result3"), Some(&Value::Number(5.0)));
 }
 
@@ -91,7 +112,11 @@ fn test_negative_literals_with_stdlib_functions() {
     );
     assert_eq!(
         evaluator.get_variable("negatives"),
-        Some(&Value::List(vec![Value::Number(-1.0), Value::Number(-2.0), Value::Number(-3.0)]))
+        Some(&Value::List(vec![
+            Value::Number(-1.0),
+            Value::Number(-2.0),
+            Value::Number(-3.0)
+        ]))
     );
     assert_eq!(
         evaluator.get_variable("absolute_values"),
@@ -118,8 +143,14 @@ fn test_negative_large_numbers() {
     let mut evaluator = Evaluator::new();
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("large_negative"), Some(&Value::Number(-999999999.0)));
-    assert_eq!(evaluator.get_variable("large_negative_float"), Some(&Value::Number(-999999.999999)));
+    assert_eq!(
+        evaluator.get_variable("large_negative"),
+        Some(&Value::Number(-999999999.0))
+    );
+    assert_eq!(
+        evaluator.get_variable("large_negative_float"),
+        Some(&Value::Number(-999999.999999))
+    );
 }
 
 #[test]
@@ -134,7 +165,10 @@ fn test_very_small_negative_float() {
     let mut evaluator = Evaluator::new();
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("tiny_negative"), Some(&Value::Number(-0.000001)));
+    assert_eq!(
+        evaluator.get_variable("tiny_negative"),
+        Some(&Value::Number(-0.000001))
+    );
 }
 
 #[test]
@@ -175,7 +209,16 @@ fn test_negative_literal_comparisons() {
     let mut evaluator = Evaluator::new();
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("is_less"), Some(&Value::Boolean(true)));
-    assert_eq!(evaluator.get_variable("is_greater"), Some(&Value::Boolean(true)));
-    assert_eq!(evaluator.get_variable("is_equal"), Some(&Value::Boolean(true)));
+    assert_eq!(
+        evaluator.get_variable("is_less"),
+        Some(&Value::Boolean(true))
+    );
+    assert_eq!(
+        evaluator.get_variable("is_greater"),
+        Some(&Value::Boolean(true))
+    );
+    assert_eq!(
+        evaluator.get_variable("is_equal"),
+        Some(&Value::Boolean(true))
+    );
 }

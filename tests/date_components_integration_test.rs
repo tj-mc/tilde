@@ -91,7 +91,7 @@ fn test_date_components_date_only() {
     assert_eq!(year.to_string(), "2024");
     assert_eq!(month.to_string(), "7");
     assert_eq!(day.to_string(), "4");
-    assert_eq!(hour.to_string(), "0");   // Defaults to midnight
+    assert_eq!(hour.to_string(), "0"); // Defaults to midnight
     assert_eq!(minute.to_string(), "0");
     assert_eq!(second.to_string(), "0");
 }
@@ -179,5 +179,9 @@ fn test_date_components_error_handling() {
 
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("date-year argument must be a date"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("date-year argument must be a date")
+    );
 }

@@ -3,7 +3,9 @@ use tilde::{evaluator::Evaluator, parser::Parser, value::Value};
 #[test]
 fn test_env_function_basic() {
     // Set test environment variable
-    unsafe { std::env::set_var("TILDE_TEST_VAR", "hello_world"); }
+    unsafe {
+        std::env::set_var("TILDE_TEST_VAR", "hello_world");
+    }
 
     let input = r#"~result is env "TILDE_TEST_VAR""#;
 
@@ -21,7 +23,9 @@ fn test_env_function_basic() {
 #[test]
 fn test_env_function_missing_variable() {
     // Make sure this variable doesn't exist
-    unsafe { std::env::remove_var("TILDE_NONEXISTENT_VAR"); }
+    unsafe {
+        std::env::remove_var("TILDE_NONEXISTENT_VAR");
+    }
 
     let input = r#"~result is env "TILDE_NONEXISTENT_VAR""#;
 
@@ -39,7 +43,9 @@ fn test_env_function_missing_variable() {
 #[test]
 fn test_env_function_with_or_fallback() {
     // Make sure this variable doesn't exist
-    unsafe { std::env::remove_var("TILDE_MISSING_PORT"); }
+    unsafe {
+        std::env::remove_var("TILDE_MISSING_PORT");
+    }
 
     let input = r#"~port is env "TILDE_MISSING_PORT" or 8080"#;
 
@@ -57,7 +63,9 @@ fn test_env_function_with_or_fallback() {
 #[test]
 fn test_env_function_with_or_fallback_existing() {
     // Set test environment variable
-    unsafe { std::env::set_var("TILDE_EXISTING_PORT", "3000"); }
+    unsafe {
+        std::env::set_var("TILDE_EXISTING_PORT", "3000");
+    }
 
     let input = r#"~port is env "TILDE_EXISTING_PORT" or 8080"#;
 
@@ -75,7 +83,9 @@ fn test_env_function_with_or_fallback_existing() {
 #[test]
 fn test_env_function_with_string_fallback() {
     // Make sure this variable doesn't exist
-    unsafe { std::env::remove_var("TILDE_MISSING_REGION"); }
+    unsafe {
+        std::env::remove_var("TILDE_MISSING_REGION");
+    }
 
     let input = r#"~region is env "TILDE_MISSING_REGION" or "us-east-1""#;
 
@@ -99,7 +109,11 @@ fn test_env_function_error_cases() {
     let mut evaluator = Evaluator::new();
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("env requires exactly 1 argument"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("env requires exactly 1 argument")
+    );
 
     // Test with non-string argument
     let input = r#"~result is env 123"#;
@@ -108,7 +122,11 @@ fn test_env_function_error_cases() {
     let mut evaluator = Evaluator::new();
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("env argument must be a string"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("env argument must be a string")
+    );
 }
 
 #[test]

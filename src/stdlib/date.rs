@@ -1,7 +1,7 @@
 use crate::ast::Expression;
 use crate::evaluator::Evaluator;
 use crate::value::Value;
-use chrono::{DateTime, Utc, NaiveDate, NaiveDateTime, TimeZone, Duration, Datelike, Timelike};
+use chrono::{DateTime, Datelike, Duration, NaiveDate, NaiveDateTime, TimeZone, Timelike, Utc};
 
 /// Returns the current UTC datetime
 /// Usage: now
@@ -38,7 +38,10 @@ pub fn eval_date(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Val
         return Ok(Value::Date(datetime));
     }
 
-    Err(format!("Invalid date format '{}'. Expected YYYY-MM-DD or ISO 8601 format", date_str))
+    Err(format!(
+        "Invalid date format '{}'. Expected YYYY-MM-DD or ISO 8601 format",
+        date_str
+    ))
 }
 
 /// Adds a specified number of days to a date
@@ -69,7 +72,10 @@ pub fn eval_date_add(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result
 
 /// Subtracts a specified number of days from a date
 /// Usage: date-subtract date days
-pub fn eval_date_subtract(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
+pub fn eval_date_subtract(
+    args: Vec<Expression>,
+    evaluator: &mut Evaluator,
+) -> Result<Value, String> {
     if args.len() != 2 {
         return Err("date-subtract requires exactly 2 arguments (date, days)".to_string());
     }
@@ -103,9 +109,18 @@ pub fn eval_date_diff(args: Vec<Expression>, evaluator: &mut Evaluator) -> Resul
     let mut result = std::collections::HashMap::new();
     result.insert("days".to_string(), Value::Number(diff.num_days() as f64));
     result.insert("hours".to_string(), Value::Number(diff.num_hours() as f64));
-    result.insert("minutes".to_string(), Value::Number(diff.num_minutes() as f64));
-    result.insert("seconds".to_string(), Value::Number(diff.num_seconds() as f64));
-    result.insert("milliseconds".to_string(), Value::Number(diff.num_milliseconds() as f64));
+    result.insert(
+        "minutes".to_string(),
+        Value::Number(diff.num_minutes() as f64),
+    );
+    result.insert(
+        "seconds".to_string(),
+        Value::Number(diff.num_seconds() as f64),
+    );
+    result.insert(
+        "milliseconds".to_string(),
+        Value::Number(diff.num_milliseconds() as f64),
+    );
 
     Ok(Value::Object(result))
 }
@@ -171,7 +186,10 @@ pub fn eval_date_parse(args: Vec<Expression>, evaluator: &mut Evaluator) -> Resu
         return Ok(Value::Date(datetime));
     }
 
-    Err(format!("Failed to parse '{}' using format '{}'", date_str, format_str))
+    Err(format!(
+        "Failed to parse '{}' using format '{}'",
+        date_str, format_str
+    ))
 }
 
 /// Helper function for date component extraction
@@ -179,13 +197,16 @@ fn extract_date_component<F>(
     args: Vec<Expression>,
     evaluator: &mut Evaluator,
     function_name: &str,
-    extractor: F
+    extractor: F,
 ) -> Result<Value, String>
 where
     F: FnOnce(DateTime<Utc>) -> f64,
 {
     if args.len() != 1 {
-        return Err(format!("{} requires exactly 1 argument (date)", function_name));
+        return Err(format!(
+            "{} requires exactly 1 argument (date)",
+            function_name
+        ));
     }
 
     let date_val = evaluator.eval_expression(args[0].clone())?;
@@ -235,7 +256,10 @@ pub fn eval_date_second(args: Vec<Expression>, evaluator: &mut Evaluator) -> Res
 
 /// Extracts the weekday from a date (0=Sunday, 1=Monday, ..., 6=Saturday)
 /// Usage: date-weekday date
-pub fn eval_date_weekday(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
+pub fn eval_date_weekday(
+    args: Vec<Expression>,
+    evaluator: &mut Evaluator,
+) -> Result<Value, String> {
     extract_date_component(args, evaluator, "date-weekday", |d| {
         // Convert chrono weekday to common convention: Sunday=0, Monday=1, ..., Saturday=6
         match d.weekday().num_days_from_monday() {
@@ -276,10 +300,13 @@ pub fn eval_date_equal(args: Vec<Expression>, evaluator: &mut Evaluator) -> Resu
 fn extract_two_dates(
     args: Vec<Expression>,
     evaluator: &mut Evaluator,
-    function_name: &str
+    function_name: &str,
 ) -> Result<(DateTime<Utc>, DateTime<Utc>), String> {
     if args.len() != 2 {
-        return Err(format!("{} requires exactly 2 arguments (date1, date2)", function_name));
+        return Err(format!(
+            "{} requires exactly 2 arguments (date1, date2)",
+            function_name
+        ));
     }
 
     let date1_val = evaluator.eval_expression(args[0].clone())?;
@@ -303,7 +330,7 @@ mod tests {
     use super::*;
     use crate::ast::Expression;
     use crate::evaluator::Evaluator;
-    use chrono::{Utc, Datelike};
+    use chrono::{Datelike, Utc};
 
     // === NOW FUNCTION TESTS ===
 
@@ -325,7 +352,7 @@ mod tests {
 
                 // Verify it's a reasonable year (sanity check)
                 assert!(dt.year() >= 2024, "Should be current year or later");
-            },
+            }
             _ => panic!("Expected Date value"),
         }
     }
@@ -357,7 +384,7 @@ mod tests {
                 // Should be very close (within 1 second)
                 let diff = dt2.signed_duration_since(dt1);
                 assert!(diff.num_seconds() < 1, "Calls should be very close in time");
-            },
+            }
             _ => panic!("Both results should be Date values"),
         }
     }
@@ -374,7 +401,7 @@ mod tests {
             Value::Date(dt) => {
                 assert_eq!(dt.format("%Y-%m-%d").to_string(), "2024-03-15");
                 assert_eq!(dt.format("%H:%M:%S").to_string(), "00:00:00");
-            },
+            }
             _ => panic!("Expected Date value"),
         }
     }
@@ -387,8 +414,11 @@ mod tests {
         let result = eval_date(args, &mut evaluator).unwrap();
         match result {
             Value::Date(dt) => {
-                assert_eq!(dt.format("%Y-%m-%dT%H:%M:%SZ").to_string(), "2024-03-15T14:30:45Z");
-            },
+                assert_eq!(
+                    dt.format("%Y-%m-%dT%H:%M:%SZ").to_string(),
+                    "2024-03-15T14:30:45Z"
+                );
+            }
             _ => panic!("Expected Date value"),
         }
     }
@@ -402,8 +432,11 @@ mod tests {
         match result {
             Value::Date(dt) => {
                 // Should be converted to UTC (14:30 + 2:00 offset = 12:30 UTC)
-                assert_eq!(dt.format("%Y-%m-%dT%H:%M:%SZ").to_string(), "2024-03-15T12:30:00Z");
-            },
+                assert_eq!(
+                    dt.format("%Y-%m-%dT%H:%M:%SZ").to_string(),
+                    "2024-03-15T12:30:00Z"
+                );
+            }
             _ => panic!("Expected Date value"),
         }
     }
@@ -417,7 +450,7 @@ mod tests {
         match result {
             Value::Date(dt) => {
                 assert_eq!(dt.format("%Y-%m-%d").to_string(), "2024-02-29");
-            },
+            }
             _ => panic!("Expected Date value"),
         }
     }
@@ -446,16 +479,23 @@ mod tests {
             "",
             "not-a-date",
             "2024-03-15T25:00:00Z", // Invalid hour
-            "2024-03-32",  // Invalid day
-            "2024-00-15",  // Invalid month (zero)
+            "2024-03-32",           // Invalid day
+            "2024-00-15",           // Invalid month (zero)
         ];
 
         for invalid_date in invalid_dates {
             let args = vec![Expression::String(invalid_date.to_string())];
             let result = eval_date(args, &mut evaluator);
-            assert!(result.is_err(), "Should fail for invalid date: {}", invalid_date);
-            assert!(result.unwrap_err().contains("Invalid date format"),
-                   "Error should mention format for: {}", invalid_date);
+            assert!(
+                result.is_err(),
+                "Should fail for invalid date: {}",
+                invalid_date
+            );
+            assert!(
+                result.unwrap_err().contains("Invalid date format"),
+                "Error should mention format for: {}",
+                invalid_date
+            );
         }
     }
 
@@ -472,7 +512,7 @@ mod tests {
         // Too many arguments
         let args = vec![
             Expression::String("2024-03-15".to_string()),
-            Expression::String("extra".to_string())
+            Expression::String("extra".to_string()),
         ];
         let result = eval_date(args, &mut evaluator);
         assert!(result.is_err());
@@ -507,7 +547,7 @@ mod tests {
             match result {
                 Value::Date(dt) => {
                     assert_eq!(dt.format("%Y-%m-%dT%H:%M:%SZ").to_string(), expected);
-                },
+                }
                 _ => panic!("Expected Date value for input: {}", input),
             }
         }

@@ -1,7 +1,7 @@
 use crate::ast::Expression;
 use crate::evaluator::Evaluator;
-use crate::value::Value;
 use crate::stdlib::utils::evaluate_args;
+use crate::value::Value;
 
 /// Remove first occurrence of a value from a list
 /// Usage: remove list value
@@ -64,7 +64,11 @@ pub fn eval_remove_at(args: Vec<Expression>, evaluator: &mut Evaluator) -> Resul
     };
 
     if index >= list.len() {
-        return Err(format!("remove-at: index {} out of bounds for list of length {}", index, list.len()));
+        return Err(format!(
+            "remove-at: index {} out of bounds for list of length {}",
+            index,
+            list.len()
+        ));
     }
 
     let mut result = Vec::new();
@@ -86,7 +90,9 @@ pub fn eval_insert(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<V
     }
 
     let (list, index, value) = match &evaluate_args(args, evaluator)?[..] {
-        [list_val, index_val, value_val] => (list_val.clone(), index_val.clone(), value_val.clone()),
+        [list_val, index_val, value_val] => {
+            (list_val.clone(), index_val.clone(), value_val.clone())
+        }
         _ => return Err("insert: invalid arguments".to_string()),
     };
 
@@ -110,8 +116,12 @@ pub fn eval_insert(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<V
     };
 
     if index > list.len() {
-        return Err(format!("insert: index {} out of bounds for list of length {} (max insertable index is {})",
-                          index, list.len(), list.len()));
+        return Err(format!(
+            "insert: index {} out of bounds for list of length {} (max insertable index is {})",
+            index,
+            list.len(),
+            list.len()
+        ));
     }
 
     let mut result = list;
@@ -129,7 +139,9 @@ pub fn eval_set_at(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<V
     }
 
     let (list, index, value) = match &evaluate_args(args, evaluator)?[..] {
-        [list_val, index_val, value_val] => (list_val.clone(), index_val.clone(), value_val.clone()),
+        [list_val, index_val, value_val] => {
+            (list_val.clone(), index_val.clone(), value_val.clone())
+        }
         _ => return Err("set-at: invalid arguments".to_string()),
     };
 
@@ -149,7 +161,11 @@ pub fn eval_set_at(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<V
     };
 
     if index >= list.len() {
-        return Err(format!("set-at: index {} out of bounds for list of length {}", index, list.len()));
+        return Err(format!(
+            "set-at: index {} out of bounds for list of length {}",
+            index,
+            list.len()
+        ));
     }
 
     let mut result = list;
@@ -242,4 +258,3 @@ pub fn eval_unshift(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<
 
     Ok(Value::List(list))
 }
-

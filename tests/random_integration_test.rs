@@ -122,7 +122,11 @@ fn test_random_error_conditions() {
     let mut evaluator = Evaluator::new();
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("minimum value cannot be greater"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("minimum value cannot be greater")
+    );
 }
 
 #[test]

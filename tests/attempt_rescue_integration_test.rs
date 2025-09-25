@@ -71,7 +71,10 @@ fn test_attempt_rescue_error_variable_access() {
     if let Value::Error(error_value) = error_var {
         assert!(error_value.message.contains("Division by zero"));
     } else {
-        panic!("Expected error_message to be an Error value, got: {:?}", error_var);
+        panic!(
+            "Expected error_message to be an Error value, got: {:?}",
+            error_var
+        );
     }
 }
 
@@ -164,7 +167,10 @@ fn test_attempt_rescue_with_function_call_error() {
     assert!(result.is_ok());
 
     let result_value = evaluator.get_variable("result").unwrap();
-    assert_eq!(result_value, &Value::String("function error caught".to_string()));
+    assert_eq!(
+        result_value,
+        &Value::String("function error caught".to_string())
+    );
 }
 
 #[test]

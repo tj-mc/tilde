@@ -1,4 +1,4 @@
-use tilde::{parser::Parser, evaluator::Evaluator};
+use tilde::{evaluator::Evaluator, parser::Parser};
 
 #[test]
 fn test_base64_encoding() {
@@ -14,8 +14,14 @@ fn test_base64_encoding() {
 
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("encoded").unwrap().to_string(), "SGVsbG8sIFdvcmxkIQ==");
-    assert_eq!(evaluator.get_variable("decoded").unwrap().to_string(), "Hello, World!");
+    assert_eq!(
+        evaluator.get_variable("encoded").unwrap().to_string(),
+        "SGVsbG8sIFdvcmxkIQ=="
+    );
+    assert_eq!(
+        evaluator.get_variable("decoded").unwrap().to_string(),
+        "Hello, World!"
+    );
 }
 
 #[test]
@@ -50,8 +56,14 @@ fn test_url_encoding() {
 
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("encoded").unwrap().to_string(), "Hello%20World%20%26%20Special%20Characters%21");
-    assert_eq!(evaluator.get_variable("decoded").unwrap().to_string(), "Hello World & Special Characters!");
+    assert_eq!(
+        evaluator.get_variable("encoded").unwrap().to_string(),
+        "Hello%20World%20%26%20Special%20Characters%21"
+    );
+    assert_eq!(
+        evaluator.get_variable("decoded").unwrap().to_string(),
+        "Hello World & Special Characters!"
+    );
 }
 
 #[test]
@@ -67,7 +79,10 @@ fn test_url_encoding_aws_style() {
 
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("encoded").unwrap().to_string(), "%2Fmy-bucket%2Fmy%20key.txt");
+    assert_eq!(
+        evaluator.get_variable("encoded").unwrap().to_string(),
+        "%2Fmy-bucket%2Fmy%20key.txt"
+    );
 }
 
 #[test]

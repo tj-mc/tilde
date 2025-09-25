@@ -1,7 +1,7 @@
 use crate::ast::Expression;
 use crate::evaluator::Evaluator;
-use crate::value::Value;
 use crate::stdlib::utils::evaluate_args;
+use crate::value::Value;
 
 /// Flatten a nested list structure into a single list
 /// Usage: flatten list [depth]
@@ -36,7 +36,11 @@ pub fn eval_flatten(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<
         None
     };
 
-    fn flatten_recursive(list: &[Value], max_depth: Option<usize>, current_depth: usize) -> Vec<Value> {
+    fn flatten_recursive(
+        list: &[Value],
+        max_depth: Option<usize>,
+        current_depth: usize,
+    ) -> Vec<Value> {
         let mut result = Vec::new();
 
         for item in list {
@@ -241,4 +245,3 @@ pub fn eval_transpose(args: Vec<Expression>, evaluator: &mut Evaluator) -> Resul
 
     Ok(Value::List(result))
 }
-

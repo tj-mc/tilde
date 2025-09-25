@@ -1,6 +1,6 @@
 use crate::ast::*;
-use crate::value::Value;
 use crate::http::{HttpClient, HttpRequest, parse_http_options};
+use crate::value::Value;
 use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
@@ -46,14 +46,14 @@ impl Evaluator {
         }
     }
 
-    fn is_truthy(&self, value: &Value) -> bool {
+    pub fn is_truthy(&self, value: &Value) -> bool {
         match value {
             Value::Boolean(b) => *b,
             Value::Number(n) => *n != 0.0,
             Value::String(s) => !s.is_empty(),
             Value::List(l) => !l.is_empty(),
             Value::Object(o) => !o.is_empty(),
-            Value::Date(_) => true, // Dates are always truthy
+            Value::Date(_) => true,   // Dates are always truthy
             Value::Error(_) => false, // Errors are falsy
             Value::Null => false,
         }
@@ -63,8 +63,27 @@ impl Evaluator {
         self.variables.insert(name, value);
     }
 
+    // Scope management helpers for anonymous functions
+    pub fn push_scope(&mut self) {
+        self.scope_stack.push(HashMap::new());
+    }
+
+    pub fn pop_scope(&mut self) {
+        self.scope_stack.pop();
+    }
+
+    pub fn set_local_variable(&mut self, name: &str, value: Value) {
+        if let Some(scope) = self.scope_stack.last_mut() {
+            scope.insert(name.to_string(), value);
+        }
+    }
+
     // Helper function to call positional evaluation functions
-    fn eval_positional_function(&mut self, name: &str, args: Vec<Expression>) -> Result<Value, String> {
+    fn eval_positional_function(
+        &mut self,
+        name: &str,
+        args: Vec<Expression>,
+    ) -> Result<Value, String> {
         match name {
             "get" => self.eval_http_get(args),
             "post" => self.eval_http_post(args),
@@ -146,7 +165,7 @@ impl Evaluator {
                             _ => Err(format!(
                                 "Cannot set property '{}' on non-object/non-list value",
                                 property
-                            ))
+                            )),
                         }
                     } else {
                         // Create a new object or list if variable doesn't exist
@@ -220,16 +239,21 @@ impl Evaluator {
                     }
                 }
             },
-            Statement::ForEach { variables, iterable, body } => {
+            Statement::ForEach {
+                variables,
+                iterable,
+                body,
+            } => {
                 let iterable_value = self.eval_expression(iterable)?;
 
                 match iterable_value {
                     Value::List(items) => {
                         for (index, item) in items.iter().enumerate() {
                             // Create a new scope for loop variables
-                            let saved_vars = variables.iter().map(|var| {
-                                (var.clone(), self.variables.get(var).cloned())
-                            }).collect::<Vec<_>>();
+                            let saved_vars = variables
+                                .iter()
+                                .map(|var| (var.clone(), self.variables.get(var).cloned()))
+                                .collect::<Vec<_>>();
 
                             // Set loop variables based on count
                             match variables.len() {
@@ -240,14 +264,16 @@ impl Evaluator {
                                 2 => {
                                     // for-each ~item ~index in ~list
                                     self.variables.insert(variables[0].clone(), item.clone());
-                                    self.variables.insert(variables[1].clone(), Value::Number(index as f64));
+                                    self.variables
+                                        .insert(variables[1].clone(), Value::Number(index as f64));
                                 }
                                 _ => return Err("for-each expects 1 or 2 variables".to_string()),
                             }
 
                             // Execute loop body
                             for stmt in &body {
-                                let (_, control) = self.eval_statement_with_control(stmt.clone())?;
+                                let (_, control) =
+                                    self.eval_statement_with_control(stmt.clone())?;
                                 if control == ControlFlow::BreakLoop {
                                     // Restore variables and exit
                                     for (var, old_value) in saved_vars {
@@ -274,9 +300,10 @@ impl Evaluator {
                     Value::Object(obj) => {
                         for (key, value) in obj.iter() {
                             // Create a new scope for loop variables
-                            let saved_vars = variables.iter().map(|var| {
-                                (var.clone(), self.variables.get(var).cloned())
-                            }).collect::<Vec<_>>();
+                            let saved_vars = variables
+                                .iter()
+                                .map(|var| (var.clone(), self.variables.get(var).cloned()))
+                                .collect::<Vec<_>>();
 
                             // Set loop variables based on count
                             match variables.len() {
@@ -286,7 +313,8 @@ impl Evaluator {
                                 }
                                 2 => {
                                     // for-each ~key ~value in ~object
-                                    self.variables.insert(variables[0].clone(), Value::String(key.clone()));
+                                    self.variables
+                                        .insert(variables[0].clone(), Value::String(key.clone()));
                                     self.variables.insert(variables[1].clone(), value.clone());
                                 }
                                 _ => return Err("for-each expects 1 or 2 variables".to_string()),
@@ -294,7 +322,8 @@ impl Evaluator {
 
                             // Execute loop body
                             for stmt in &body {
-                                let (_, control) = self.eval_statement_with_control(stmt.clone())?;
+                                let (_, control) =
+                                    self.eval_statement_with_control(stmt.clone())?;
                                 if control == ControlFlow::BreakLoop {
                                     // Restore variables and exit
                                     for (var, old_value) in saved_vars {
@@ -321,7 +350,7 @@ impl Evaluator {
                     _ => return Err("for-each can only iterate over lists and objects".to_string()),
                 }
                 Ok((Value::Null, ControlFlow::Continue))
-            },
+            }
             Statement::Increment { variable, amount } => {
                 let amount_value = self.eval_expression(amount)?;
 
@@ -335,9 +364,12 @@ impl Evaluator {
                         self.update_variable(variable.clone(), Value::Number(new_value))?;
                         Ok((Value::Null, ControlFlow::Continue))
                     }
-                    _ => Err(format!("Cannot increment '{}': both variable and amount must be numbers", variable))
+                    _ => Err(format!(
+                        "Cannot increment '{}': both variable and amount must be numbers",
+                        variable
+                    )),
                 }
-            },
+            }
             Statement::Decrement { variable, amount } => {
                 let amount_value = self.eval_expression(amount)?;
 
@@ -351,9 +383,12 @@ impl Evaluator {
                         self.update_variable(variable.clone(), Value::Number(new_value))?;
                         Ok((Value::Null, ControlFlow::Continue))
                     }
-                    _ => Err(format!("Cannot decrement '{}': both variable and amount must be numbers", variable))
+                    _ => Err(format!(
+                        "Cannot decrement '{}': both variable and amount must be numbers",
+                        variable
+                    )),
                 }
-            },
+            }
             Statement::Block { body } => {
                 let mut last_value = Value::Null;
                 for stmt in body {
@@ -385,9 +420,11 @@ impl Evaluator {
                 let value = self.eval_expression(expr)?;
                 Ok((value.clone(), ControlFlow::Give(value)))
             }
-            Statement::AttemptRescue { attempt_body, rescue_var, rescue_body } => {
-                self.eval_attempt_rescue(attempt_body, rescue_var, rescue_body)
-            }
+            Statement::AttemptRescue {
+                attempt_body,
+                rescue_var,
+                rescue_body,
+            } => self.eval_attempt_rescue(attempt_body, rescue_var, rescue_body),
         }
     }
 
@@ -437,12 +474,16 @@ impl Evaluator {
         }
     }
 
-
     pub fn eval_expression(&mut self, expr: Expression) -> Result<Value, String> {
         self.eval_expression_with_context(expr, false, None)
     }
 
-    fn eval_expression_with_context(&mut self, expr: Expression, _in_tail_position: bool, _current_function: Option<&str>) -> Result<Value, String> {
+    fn eval_expression_with_context(
+        &mut self,
+        expr: Expression,
+        _in_tail_position: bool,
+        _current_function: Option<&str>,
+    ) -> Result<Value, String> {
         match expr {
             Expression::Number(n, _) => Ok(Value::Number(n)),
             Expression::String(s) => Ok(Value::String(s)),
@@ -501,54 +542,58 @@ impl Evaluator {
                         let right_val = self.eval_expression(*right)?;
 
                         match (left_val, right_val, op) {
-                    (Value::Number(l), Value::Number(r), BinaryOperator::Add) => {
-                        Ok(Value::Number(l + r))
-                    }
-                    (Value::Number(l), Value::Number(r), BinaryOperator::Subtract) => {
-                        Ok(Value::Number(l - r))
-                    }
-                    (Value::Number(l), Value::Number(r), BinaryOperator::Multiply) => {
-                        Ok(Value::Number(l * r))
-                    }
-                    (Value::Number(l), Value::Number(r), BinaryOperator::Divide) => {
-                        if r == 0.0 {
-                            Err("Division by zero".to_string())
-                        } else {
-                            Ok(Value::Number(l / r))
-                        }
-                    }
-                    (Value::Number(l), Value::Number(r), BinaryOperator::IntegerDivide) => {
-                        if r == 0.0 {
-                            Err("Division by zero".to_string())
-                        } else {
-                            Ok(Value::Number((l / r).floor()))
-                        }
-                    }
-                    (Value::Number(l), Value::Number(r), BinaryOperator::Modulo) => {
-                        if r == 0.0 {
-                            Err("Modulo by zero".to_string())
-                        } else {
-                            Ok(Value::Number(l % r))
-                        }
-                    }
-                    (Value::Number(l), Value::Number(r), BinaryOperator::LessThan) => {
-                        Ok(Value::Boolean(l < r))
-                    }
-                    (Value::Number(l), Value::Number(r), BinaryOperator::LessThanOrEqual) => {
-                        Ok(Value::Boolean(l <= r))
-                    }
-                    (Value::Number(l), Value::Number(r), BinaryOperator::GreaterThan) => {
-                        Ok(Value::Boolean(l > r))
-                    }
-                    (Value::Number(l), Value::Number(r), BinaryOperator::GreaterThanOrEqual) => {
-                        Ok(Value::Boolean(l >= r))
-                    }
-                    (l, r, BinaryOperator::Equal) => Ok(Value::Boolean(l == r)),
-                    (l, r, BinaryOperator::NotEqual) => Ok(Value::Boolean(l != r)),
-                    (Value::String(l), Value::String(r), BinaryOperator::Add) => {
-                        Ok(Value::String(format!("{}{}", l, r)))
-                    }
-                    _ => Err("Invalid operation".to_string()),
+                            (Value::Number(l), Value::Number(r), BinaryOperator::Add) => {
+                                Ok(Value::Number(l + r))
+                            }
+                            (Value::Number(l), Value::Number(r), BinaryOperator::Subtract) => {
+                                Ok(Value::Number(l - r))
+                            }
+                            (Value::Number(l), Value::Number(r), BinaryOperator::Multiply) => {
+                                Ok(Value::Number(l * r))
+                            }
+                            (Value::Number(l), Value::Number(r), BinaryOperator::Divide) => {
+                                if r == 0.0 {
+                                    Err("Division by zero".to_string())
+                                } else {
+                                    Ok(Value::Number(l / r))
+                                }
+                            }
+                            (Value::Number(l), Value::Number(r), BinaryOperator::IntegerDivide) => {
+                                if r == 0.0 {
+                                    Err("Division by zero".to_string())
+                                } else {
+                                    Ok(Value::Number((l / r).floor()))
+                                }
+                            }
+                            (Value::Number(l), Value::Number(r), BinaryOperator::Modulo) => {
+                                if r == 0.0 {
+                                    Err("Modulo by zero".to_string())
+                                } else {
+                                    Ok(Value::Number(l % r))
+                                }
+                            }
+                            (Value::Number(l), Value::Number(r), BinaryOperator::LessThan) => {
+                                Ok(Value::Boolean(l < r))
+                            }
+                            (
+                                Value::Number(l),
+                                Value::Number(r),
+                                BinaryOperator::LessThanOrEqual,
+                            ) => Ok(Value::Boolean(l <= r)),
+                            (Value::Number(l), Value::Number(r), BinaryOperator::GreaterThan) => {
+                                Ok(Value::Boolean(l > r))
+                            }
+                            (
+                                Value::Number(l),
+                                Value::Number(r),
+                                BinaryOperator::GreaterThanOrEqual,
+                            ) => Ok(Value::Boolean(l >= r)),
+                            (l, r, BinaryOperator::Equal) => Ok(Value::Boolean(l == r)),
+                            (l, r, BinaryOperator::NotEqual) => Ok(Value::Boolean(l != r)),
+                            (Value::String(l), Value::String(r), BinaryOperator::Add) => {
+                                Ok(Value::String(format!("{}{}", l, r)))
+                            }
+                            _ => Err("Invalid operation".to_string()),
                         }
                     }
                 }
@@ -575,7 +620,8 @@ impl Evaluator {
 
                         Ok(Value::String(message))
                     }
-                    "get" | "post" | "put" | "delete" | "patch" | "http" | "run" | "wait" | "read" | "write" | "clear" => self.eval_positional_function(&name, args),
+                    "get" | "post" | "put" | "delete" | "patch" | "http" | "run" | "wait"
+                    | "read" | "write" | "clear" => self.eval_positional_function(&name, args),
                     "ask" => {
                         #[cfg(target_arch = "wasm32")]
                         {
@@ -651,19 +697,20 @@ impl Evaluator {
                                 match block_name {
                                     "core" => {
                                         // Force use of stdlib function, bypassing user definitions
-                                        if let Some(func) = crate::stdlib::get_stdlib_function(func_name) {
+                                        if let Some(func) =
+                                            crate::stdlib::get_stdlib_function(func_name)
+                                        {
                                             func(args, self)
                                         } else {
                                             Err(format!("Unknown core function: {}", func_name))
                                         }
                                     }
-                                    _ => Err(format!("Unknown block: {}", block_name))
+                                    _ => Err(format!("Unknown block: {}", block_name)),
                                 }
                             } else {
                                 Err(format!("Invalid block syntax: {}", name))
                             }
                         } else {
-
                             // Check if this is a user-defined function
                             let function = if let Some(function) = self.functions.get(&name) {
                                 function.clone()
@@ -705,18 +752,27 @@ impl Evaluator {
                             }
 
                             // If not found in scope, check global variables (also stored without ~)
-                            match found_value.or_else(|| self.variables.get(var_name_without_tilde).cloned()) {
+                            match found_value
+                                .or_else(|| self.variables.get(var_name_without_tilde).cloned())
+                            {
                                 Some(val) => val,
-                                None => return Err(format!("Undefined variable: ~{}", var_name_without_tilde)),
+                                None => {
+                                    return Err(format!(
+                                        "Undefined variable: ~{}",
+                                        var_name_without_tilde
+                                    ));
+                                }
                             }
                         } else {
                             // Try to parse property as literal numeric index
                             match property.parse::<f64>() {
                                 Ok(n) => Value::Number(n),
-                                Err(_) => return Err(format!(
-                                    "Cannot access non-numeric property '{}' on list",
-                                    property
-                                )),
+                                Err(_) => {
+                                    return Err(format!(
+                                        "Cannot access non-numeric property '{}' on list",
+                                        property
+                                    ));
+                                }
                             }
                         };
 
@@ -781,6 +837,11 @@ impl Evaluator {
                     map.insert(key, value);
                 }
                 Ok(Value::Object(map))
+            }
+            Expression::AnonymousFunction { .. } => {
+                // Anonymous functions are not evaluated as standalone values
+                // They are only evaluated in the context of map/filter/reduce
+                Err("Anonymous functions can only be used as arguments to functions like map, filter, and reduce".to_string())
             }
         }
     }
@@ -920,7 +981,7 @@ impl Evaluator {
             Err(error_value) => {
                 self.last_error = Some(error_value.clone());
                 Err(Self::error_value_to_string(&error_value))
-            },
+            }
         }
     }
 
@@ -958,7 +1019,7 @@ impl Evaluator {
             Err(error_value) => {
                 self.last_error = Some(error_value.clone());
                 Err(Self::error_value_to_string(&error_value))
-            },
+            }
         }
     }
 
@@ -995,7 +1056,7 @@ impl Evaluator {
             Err(error_value) => {
                 self.last_error = Some(error_value.clone());
                 Err(Self::error_value_to_string(&error_value))
-            },
+            }
         }
     }
 
@@ -1028,7 +1089,7 @@ impl Evaluator {
             Err(error_value) => {
                 self.last_error = Some(error_value.clone());
                 Err(Self::error_value_to_string(&error_value))
-            },
+            }
         }
     }
 
@@ -1065,7 +1126,7 @@ impl Evaluator {
             Err(error_value) => {
                 self.last_error = Some(error_value.clone());
                 Err(Self::error_value_to_string(&error_value))
-            },
+            }
         }
     }
 
@@ -1108,7 +1169,7 @@ impl Evaluator {
             Err(error_value) => {
                 self.last_error = Some(error_value.clone());
                 Err(Self::error_value_to_string(&error_value))
-            },
+            }
         }
     }
 
@@ -1176,14 +1237,26 @@ impl Evaluator {
         Ok(Value::Null)
     }
 
-    pub fn eval_function(&mut self, function: Function, args: Vec<Expression>) -> Result<Value, String> {
+    pub fn eval_function(
+        &mut self,
+        function: Function,
+        args: Vec<Expression>,
+    ) -> Result<Value, String> {
         self.eval_function_with_name(function, args, None)
     }
 
-    fn eval_function_with_name(&mut self, function: Function, args: Vec<Expression>, function_name: Option<String>) -> Result<Value, String> {
+    fn eval_function_with_name(
+        &mut self,
+        function: Function,
+        args: Vec<Expression>,
+        function_name: Option<String>,
+    ) -> Result<Value, String> {
         // Check call depth to prevent stack overflow
         if self.scope_stack.len() >= self.max_call_depth {
-            return Err(format!("Maximum call depth ({}) exceeded", self.max_call_depth));
+            return Err(format!(
+                "Maximum call depth ({}) exceeded",
+                self.max_call_depth
+            ));
         }
 
         // Check argument count
@@ -1201,7 +1274,6 @@ impl Evaluator {
             current_args.push(self.eval_expression(arg)?);
         }
 
-
         // Critical optimization: Pre-populate scope to avoid repeated HashMap operations
         let mut local_scope = HashMap::with_capacity(function.params.len());
         for (param, value) in function.params.iter().zip(current_args.iter()) {
@@ -1210,7 +1282,6 @@ impl Evaluator {
 
         // Push the pre-populated scope
         self.scope_stack.push(local_scope);
-
 
         // Tail call optimization loop
         let mut found_tail_call = false;
@@ -1260,7 +1331,6 @@ impl Evaluator {
                         // Not a tail call, cache result and return
                         self.scope_stack.pop();
 
-
                         return Ok(return_value);
                     }
                     ControlFlow::BreakLoop => {
@@ -1276,7 +1346,6 @@ impl Evaluator {
             if !found_tail_call {
                 self.scope_stack.pop();
 
-
                 return Ok(last_value);
             }
 
@@ -1291,7 +1360,11 @@ impl Evaluator {
     }
 
     /// Recursively search for tail calls in any statement structure
-    fn find_tail_call_in_statement(&self, stmt: &Statement, function_name: &str) -> Option<Vec<Expression>> {
+    fn find_tail_call_in_statement(
+        &self,
+        stmt: &Statement,
+        function_name: &str,
+    ) -> Option<Vec<Expression>> {
         match stmt {
             // Direct function call in give statement
             Statement::Give(Expression::FunctionCall { name, args }) => {
@@ -1305,17 +1378,27 @@ impl Evaluator {
                 }
             }
             // Check if/else branches
-            Statement::If { condition: _, then_stmt, else_stmt } => {
+            Statement::If {
+                condition: _,
+                then_stmt,
+                else_stmt,
+            } => {
                 if std::env::var("TILDE_DEBUG_TAIL_CALL").is_ok() {
-                    eprintln!("Checking if statement: then={:?}, else={:?}", then_stmt, else_stmt);
+                    eprintln!(
+                        "Checking if statement: then={:?}, else={:?}",
+                        then_stmt, else_stmt
+                    );
                 }
                 // Check the then branch
-                if let Some(tail_args) = self.find_tail_call_in_statement(then_stmt, function_name) {
+                if let Some(tail_args) = self.find_tail_call_in_statement(then_stmt, function_name)
+                {
                     return Some(tail_args);
                 }
                 // Check the else branch if it exists
                 if let Some(else_branch) = else_stmt {
-                    if let Some(tail_args) = self.find_tail_call_in_statement(else_branch, function_name) {
+                    if let Some(tail_args) =
+                        self.find_tail_call_in_statement(else_branch, function_name)
+                    {
                         return Some(tail_args);
                     }
                 }
@@ -1330,32 +1413,42 @@ impl Evaluator {
                 }
             }
             // Try/catch blocks
-            Statement::AttemptRescue { attempt_body, rescue_var: _, rescue_body } => {
+            Statement::AttemptRescue {
+                attempt_body,
+                rescue_var: _,
+                rescue_body,
+            } => {
                 // Check the attempt body (last statement could be tail)
                 if let Some(last_stmt) = attempt_body.last() {
-                    if let Some(tail_args) = self.find_tail_call_in_statement(last_stmt, function_name) {
+                    if let Some(tail_args) =
+                        self.find_tail_call_in_statement(last_stmt, function_name)
+                    {
                         return Some(tail_args);
                     }
                 }
                 // Check the rescue body (last statement could be tail)
                 if let Some(last_stmt) = rescue_body.last() {
-                    if let Some(tail_args) = self.find_tail_call_in_statement(last_stmt, function_name) {
+                    if let Some(tail_args) =
+                        self.find_tail_call_in_statement(last_stmt, function_name)
+                    {
                         return Some(tail_args);
                     }
                 }
                 None
             }
             // For other statement types, no tail call possible
-            _ => None
+            _ => None,
         }
     }
 
     /// Create a hash key from function arguments for memoization
 
-
-
-
-    fn eval_attempt_rescue(&mut self, attempt_body: Vec<Statement>, rescue_var: Option<String>, rescue_body: Vec<Statement>) -> EvalResult {
+    fn eval_attempt_rescue(
+        &mut self,
+        attempt_body: Vec<Statement>,
+        rescue_var: Option<String>,
+        rescue_body: Vec<Statement>,
+    ) -> EvalResult {
         // Try to execute the attempt block
         let mut last_value = Value::Null;
         for stmt in attempt_body {
@@ -1363,7 +1456,7 @@ impl Evaluator {
                 Ok((value, control)) => {
                     last_value = value;
                     match control {
-                        ControlFlow::Continue => {},
+                        ControlFlow::Continue => {}
                         // If we get BreakLoop or Give, propagate it
                         flow => return Ok((last_value, flow)),
                     }
@@ -1388,7 +1481,7 @@ impl Evaluator {
                             Ok((value, control)) => {
                                 rescue_value = value;
                                 match control {
-                                    ControlFlow::Continue => {},
+                                    ControlFlow::Continue => {}
                                     // If we get BreakLoop or Give in rescue, propagate it
                                     flow => return Ok((rescue_value, flow)),
                                 }
@@ -1833,7 +1926,9 @@ mod tests {
 
     #[test]
     fn test_interpolation_with_object_properties() {
-        let mut parser = Parser::new("~user is {\"name\": \"Alice\" \"age\": 30}\n~message is \"User `~user.name` is `~user.age` years old\"");
+        let mut parser = Parser::new(
+            "~user is {\"name\": \"Alice\" \"age\": 30}\n~message is \"User `~user.name` is `~user.age` years old\"",
+        );
         let program = parser.parse().unwrap();
 
         let mut evaluator = Evaluator::new();
@@ -1847,7 +1942,9 @@ mod tests {
 
     #[test]
     fn test_interpolation_with_nested_object_properties() {
-        let mut parser = Parser::new("~data is {\"user\": {\"profile\": {\"name\": \"Bob\"}}}\n~text is \"Hello `~data.user.profile.name`!\"");
+        let mut parser = Parser::new(
+            "~data is {\"user\": {\"profile\": {\"name\": \"Bob\"}}}\n~text is \"Hello `~data.user.profile.name`!\"",
+        );
         let program = parser.parse().unwrap();
 
         let mut evaluator = Evaluator::new();
@@ -1861,7 +1958,9 @@ mod tests {
 
     #[test]
     fn test_interpolation_mixed_variables_and_properties() {
-        let mut parser = Parser::new("~name is \"Charlie\"\n~user is {\"age\": 25}\n~greeting is \"Hi `~name`, you are `~user.age` years old\"");
+        let mut parser = Parser::new(
+            "~name is \"Charlie\"\n~user is {\"age\": 25}\n~greeting is \"Hi `~name`, you are `~user.age` years old\"",
+        );
         let program = parser.parse().unwrap();
 
         let mut evaluator = Evaluator::new();
@@ -1869,13 +1968,16 @@ mod tests {
 
         assert_eq!(
             evaluator.get_variable("greeting"),
-            Some(&Value::String("Hi Charlie, you are 25 years old".to_string()))
+            Some(&Value::String(
+                "Hi Charlie, you are 25 years old".to_string()
+            ))
         );
     }
 
     #[test]
     fn test_interpolation_with_null_property() {
-        let mut parser = Parser::new("~obj is {\"existing\": \"value\"}\n~text is \"Property: `~obj.missing`\"");
+        let mut parser =
+            Parser::new("~obj is {\"existing\": \"value\"}\n~text is \"Property: `~obj.missing`\"");
         let program = parser.parse().unwrap();
 
         let mut evaluator = Evaluator::new();
@@ -1889,7 +1991,8 @@ mod tests {
 
     #[test]
     fn test_list_literal_creation() {
-        let mut parser = Parser::new("~nums is [1, 2, 3]\n~mixed is [1, \"hello\", true]\n~empty is []");
+        let mut parser =
+            Parser::new("~nums is [1, 2, 3]\n~mixed is [1, \"hello\", true]\n~empty is []");
         let program = parser.parse().unwrap();
 
         let mut evaluator = Evaluator::new();
@@ -1913,32 +2016,22 @@ mod tests {
             ]))
         );
 
-        assert_eq!(
-            evaluator.get_variable("empty"),
-            Some(&Value::List(vec![]))
-        );
+        assert_eq!(evaluator.get_variable("empty"), Some(&Value::List(vec![])));
     }
 
     #[test]
     fn test_list_indexing() {
-        let mut parser = Parser::new("~nums is [10, 20, 30]\n~first is ~nums.0\n~second is ~nums.1\n~missing is ~nums.5");
+        let mut parser = Parser::new(
+            "~nums is [10, 20, 30]\n~first is ~nums.0\n~second is ~nums.1\n~missing is ~nums.5",
+        );
         let program = parser.parse().unwrap();
 
         let mut evaluator = Evaluator::new();
         evaluator.eval_program(program).unwrap();
 
-        assert_eq!(
-            evaluator.get_variable("first"),
-            Some(&Value::Number(10.0))
-        );
-        assert_eq!(
-            evaluator.get_variable("second"),
-            Some(&Value::Number(20.0))
-        );
-        assert_eq!(
-            evaluator.get_variable("missing"),
-            Some(&Value::Null)
-        );
+        assert_eq!(evaluator.get_variable("first"), Some(&Value::Number(10.0)));
+        assert_eq!(evaluator.get_variable("second"), Some(&Value::Number(20.0)));
+        assert_eq!(evaluator.get_variable("missing"), Some(&Value::Null));
     }
 
     #[test]
@@ -1982,20 +2075,16 @@ mod tests {
 
     #[test]
     fn test_list_length_function() {
-        let mut parser = Parser::new("~nums is [10, 20, 30]\n~len is length ~nums\n~str_len is length \"hello\"");
+        let mut parser = Parser::new(
+            "~nums is [10, 20, 30]\n~len is length ~nums\n~str_len is length \"hello\"",
+        );
         let program = parser.parse().unwrap();
 
         let mut evaluator = Evaluator::new();
         evaluator.eval_program(program).unwrap();
 
-        assert_eq!(
-            evaluator.get_variable("len"),
-            Some(&Value::Number(3.0))
-        );
-        assert_eq!(
-            evaluator.get_variable("str_len"),
-            Some(&Value::Number(5.0))
-        );
+        assert_eq!(evaluator.get_variable("len"), Some(&Value::Number(3.0)));
+        assert_eq!(evaluator.get_variable("str_len"), Some(&Value::Number(5.0)));
     }
 
     #[test]
@@ -2018,16 +2107,15 @@ mod tests {
         // Original list should be unchanged
         assert_eq!(
             evaluator.get_variable("nums"),
-            Some(&Value::List(vec![
-                Value::Number(10.0),
-                Value::Number(20.0)
-            ]))
+            Some(&Value::List(vec![Value::Number(10.0), Value::Number(20.0)]))
         );
     }
 
     #[test]
     fn test_nested_lists() {
-        let mut parser = Parser::new("~nested is [[1, 2], [3, 4]]\n~first_row is ~nested.0\n~second_row is ~nested.1\n~element is ~second_row.0");
+        let mut parser = Parser::new(
+            "~nested is [[1, 2], [3, 4]]\n~first_row is ~nested.0\n~second_row is ~nested.1\n~element is ~second_row.0",
+        );
         let program = parser.parse().unwrap();
 
         let mut evaluator = Evaluator::new();
@@ -2035,29 +2123,21 @@ mod tests {
 
         assert_eq!(
             evaluator.get_variable("first_row"),
-            Some(&Value::List(vec![
-                Value::Number(1.0),
-                Value::Number(2.0)
-            ]))
+            Some(&Value::List(vec![Value::Number(1.0), Value::Number(2.0)]))
         );
 
         assert_eq!(
             evaluator.get_variable("second_row"),
-            Some(&Value::List(vec![
-                Value::Number(3.0),
-                Value::Number(4.0)
-            ]))
+            Some(&Value::List(vec![Value::Number(3.0), Value::Number(4.0)]))
         );
 
-        assert_eq!(
-            evaluator.get_variable("element"),
-            Some(&Value::Number(3.0))
-        );
+        assert_eq!(evaluator.get_variable("element"), Some(&Value::Number(3.0)));
     }
 
     #[test]
     fn test_list_interpolation() {
-        let mut parser = Parser::new("~nums is [10, 20, 30]\n~message is \"First: `~nums.0`, Last: `~nums.2`\"");
+        let mut parser =
+            Parser::new("~nums is [10, 20, 30]\n~message is \"First: `~nums.0`, Last: `~nums.2`\"");
         let program = parser.parse().unwrap();
 
         let mut evaluator = Evaluator::new();
@@ -2152,7 +2232,11 @@ mod tests {
         let result = evaluator.eval_program(program);
 
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("length can only be used on lists or strings"));
+        assert!(
+            result
+                .unwrap_err()
+                .contains("length can only be used on lists or strings")
+        );
     }
 
     #[test]
@@ -2164,7 +2248,11 @@ mod tests {
         let result = evaluator.eval_program(program);
 
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("append can only be used on lists"));
+        assert!(
+            result
+                .unwrap_err()
+                .contains("append can only be used on lists")
+        );
     }
 
     #[test]
@@ -2188,7 +2276,11 @@ mod tests {
         let result = evaluator.eval_program(program);
 
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("keys can only be used on objects"));
+        assert!(
+            result
+                .unwrap_err()
+                .contains("keys can only be used on objects")
+        );
     }
 
     #[test]
@@ -2200,7 +2292,11 @@ mod tests {
         let result = evaluator.eval_program(program);
 
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("values can only be used on objects"));
+        assert!(
+            result
+                .unwrap_err()
+                .contains("values can only be used on objects")
+        );
     }
 
     #[test]
@@ -2212,12 +2308,17 @@ mod tests {
         let result = evaluator.eval_program(program);
 
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("has can only be used on objects"));
+        assert!(
+            result
+                .unwrap_err()
+                .contains("has can only be used on objects")
+        );
     }
 
     #[test]
     fn test_interpolated_string_with_function_call() {
-        let mut parser = Parser::new("~name is \"World\"\n~message is \"Hello `~name`!\"\n~result is ~message");
+        let mut parser =
+            Parser::new("~name is \"World\"\n~message is \"Hello `~name`!\"\n~result is ~message");
         let program = parser.parse().unwrap();
 
         let mut evaluator = Evaluator::new();
@@ -2240,7 +2341,10 @@ mod tests {
         // Should create intermediate objects
         if let Some(Value::Object(obj)) = evaluator.get_variable("obj") {
             if let Some(Value::Object(nested)) = obj.get("nested") {
-                assert_eq!(nested.get("deep"), Some(&Value::String("value".to_string())));
+                assert_eq!(
+                    nested.get("deep"),
+                    Some(&Value::String("value".to_string()))
+                );
             } else {
                 panic!("Expected nested object");
             }
@@ -2260,7 +2364,10 @@ mod tests {
         let mut evaluator = Evaluator::new();
         evaluator.eval_program(program).unwrap();
 
-        assert_eq!(evaluator.get_variable("result"), Some(&Value::Boolean(true)));
+        assert_eq!(
+            evaluator.get_variable("result"),
+            Some(&Value::Boolean(true))
+        );
 
         // Test :core:is-odd
         let mut parser = Parser::new("~result is :core:is-odd 5");
@@ -2269,7 +2376,10 @@ mod tests {
         let mut evaluator = Evaluator::new();
         evaluator.eval_program(program).unwrap();
 
-        assert_eq!(evaluator.get_variable("result"), Some(&Value::Boolean(true)));
+        assert_eq!(
+            evaluator.get_variable("result"),
+            Some(&Value::Boolean(true))
+        );
     }
 
     #[test]
@@ -2277,17 +2387,25 @@ mod tests {
         use crate::parser::Parser;
 
         // Define a user function that conflicts with stdlib
-        let mut parser = Parser::new("function is-even ~x ( give false )\n~user_result is is-even 4\n~core_result is :core:is-even 4");
+        let mut parser = Parser::new(
+            "function is-even ~x ( give false )\n~user_result is is-even 4\n~core_result is :core:is-even 4",
+        );
         let program = parser.parse().unwrap();
 
         let mut evaluator = Evaluator::new();
         evaluator.eval_program(program).unwrap();
 
         // User function should be called for bare name
-        assert_eq!(evaluator.get_variable("user_result"), Some(&Value::Boolean(false)));
+        assert_eq!(
+            evaluator.get_variable("user_result"),
+            Some(&Value::Boolean(false))
+        );
 
         // Core function should be called for :core: prefix
-        assert_eq!(evaluator.get_variable("core_result"), Some(&Value::Boolean(true)));
+        assert_eq!(
+            evaluator.get_variable("core_result"),
+            Some(&Value::Boolean(true))
+        );
     }
 
     #[test]
@@ -2315,7 +2433,11 @@ mod tests {
         let result = evaluator.eval_program(program);
 
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("Unknown core function: unknown-function"));
+        assert!(
+            result
+                .unwrap_err()
+                .contains("Unknown core function: unknown-function")
+        );
     }
 
     #[test]
@@ -2345,7 +2467,8 @@ mod tests {
         use crate::parser::Parser;
 
         // Test that :core: works with filter function
-        let mut parser = Parser::new("~nums is [1, 2, 3, 4, 5]\n~evens is filter ~nums :core:is-even");
+        let mut parser =
+            Parser::new("~nums is [1, 2, 3, 4, 5]\n~evens is filter ~nums :core:is-even");
         let program = parser.parse().unwrap();
 
         let mut evaluator = Evaluator::new();
@@ -2353,10 +2476,7 @@ mod tests {
 
         assert_eq!(
             evaluator.get_variable("evens"),
-            Some(&Value::List(vec![
-                Value::Number(2.0),
-                Value::Number(4.0),
-            ]))
+            Some(&Value::List(vec![Value::Number(2.0), Value::Number(4.0),]))
         );
     }
 
@@ -2369,7 +2489,7 @@ mod tests {
             "function custom-double ~x ( give ~x * 2 )\n\
              ~nums is [1, 2, 3]\n\
              ~user_doubled is map ~nums custom-double\n\
-             ~core_doubled is map ~nums :core:double"
+             ~core_doubled is map ~nums :core:double",
         );
         let program = parser.parse().unwrap();
 
@@ -2404,15 +2524,21 @@ mod tests {
         let mut parser = Parser::new(
             "~num is 5\n\
              ~doubled is :core:double ~num\n\
-             ~squared is :core:square ~doubled"
+             ~squared is :core:square ~doubled",
         );
         let program = parser.parse().unwrap();
 
         let mut evaluator = Evaluator::new();
         evaluator.eval_program(program).unwrap();
 
-        assert_eq!(evaluator.get_variable("doubled"), Some(&Value::Number(10.0)));
-        assert_eq!(evaluator.get_variable("squared"), Some(&Value::Number(100.0)));
+        assert_eq!(
+            evaluator.get_variable("doubled"),
+            Some(&Value::Number(10.0))
+        );
+        assert_eq!(
+            evaluator.get_variable("squared"),
+            Some(&Value::Number(100.0))
+        );
     }
 
     #[test]
@@ -2423,16 +2549,25 @@ mod tests {
         let mut parser = Parser::new(
             "~zero_even is :core:is-even 0\n\
              ~neg_pos is :core:is-positive -5\n\
-             ~zero_zero is :core:is-zero 0"
+             ~zero_zero is :core:is-zero 0",
         );
         let program = parser.parse().unwrap();
 
         let mut evaluator = Evaluator::new();
         evaluator.eval_program(program).unwrap();
 
-        assert_eq!(evaluator.get_variable("zero_even"), Some(&Value::Boolean(true)));
-        assert_eq!(evaluator.get_variable("neg_pos"), Some(&Value::Boolean(false)));
-        assert_eq!(evaluator.get_variable("zero_zero"), Some(&Value::Boolean(true)));
+        assert_eq!(
+            evaluator.get_variable("zero_even"),
+            Some(&Value::Boolean(true))
+        );
+        assert_eq!(
+            evaluator.get_variable("neg_pos"),
+            Some(&Value::Boolean(false))
+        );
+        assert_eq!(
+            evaluator.get_variable("zero_zero"),
+            Some(&Value::Boolean(true))
+        );
     }
 
     #[test]
@@ -2448,14 +2583,17 @@ mod tests {
                      give false\n\
                  )\n\
              )\n\
-             ~result is *validate-positive 5"
+             ~result is *validate-positive 5",
         );
         let program = parser.parse().unwrap();
 
         let mut evaluator = Evaluator::new();
         evaluator.eval_program(program).unwrap();
 
-        assert_eq!(evaluator.get_variable("result"), Some(&Value::Boolean(true)));
+        assert_eq!(
+            evaluator.get_variable("result"),
+            Some(&Value::Boolean(true))
+        );
     }
 
     #[test]

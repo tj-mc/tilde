@@ -136,7 +136,11 @@ fn test_date_comparison_error_handling() {
 
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("date-before first argument must be a date"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("date-before first argument must be a date")
+    );
 }
 
 #[test]

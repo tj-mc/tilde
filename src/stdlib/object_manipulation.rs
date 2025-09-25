@@ -56,7 +56,7 @@ pub fn eval_pick(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Val
                 if let Some(value) = obj.get(&field_name) {
                     result.insert(field_name, value.clone());
                 }
-            },
+            }
             _ => return Err("pick field names must be strings".to_string()),
         }
     }
@@ -88,7 +88,7 @@ pub fn eval_omit(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Val
         match field_val {
             Value::String(field_name) => {
                 omit_set.insert(field_name);
-            },
+            }
             _ => return Err("omit field names must be strings".to_string()),
         }
     }
@@ -128,7 +128,7 @@ pub fn eval_object_get(args: Vec<Expression>, evaluator: &mut Evaluator) -> Resu
                 } else {
                     return Ok(Value::Null);
                 }
-            },
+            }
             _ => return Ok(Value::Null),
         }
     }
@@ -170,7 +170,7 @@ fn set_nested_value(obj: &mut Value, path: &[&str], value: Value) -> Result<(), 
             Value::Object(map) => {
                 map.insert(path[0].to_string(), value);
                 Ok(())
-            },
+            }
             _ => Err("Cannot set property on non-object".to_string()),
         }
     } else {
@@ -185,7 +185,7 @@ fn set_nested_value(obj: &mut Value, path: &[&str], value: Value) -> Result<(), 
                 } else {
                     Err("Failed to access nested object".to_string())
                 }
-            },
+            }
             _ => Err("Cannot access property on non-object".to_string()),
         }
     }
@@ -216,7 +216,7 @@ fn deep_merge_values(val1: Value, val2: Value) -> Result<Value, String> {
                 }
             }
             Ok(Value::Object(obj1))
-        },
+        }
         (_, val2) => Ok(val2),
     }
 }

@@ -1,7 +1,7 @@
+use super::utils::*;
 use crate::ast::Expression;
 use crate::evaluator::Evaluator;
 use crate::value::Value;
-use super::utils::*;
 
 /// Common predicate functions for filtering
 

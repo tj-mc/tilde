@@ -130,14 +130,13 @@ const orderIds = result.map(getId);
 const sorted = orderIds.sort();
 ```
 
-and finally, in **Tilde**:
+and finally, in **Tilde** with **anonymous functions**:
 ```tilde
 ~result is get "https://api.orderhistory.net/krustykrab"
-function get-id ~order ( ~order.id )
-~order-ids is map ~result get-id
+~order-ids is map ~result |~order (~order.id)|
 ~sorted is sort ~order-ids
 ```
-Shortest in both lines and characters.
+Just 3 lines! Anonymous functions make it even more concise.
 
 As you can see, Tilde is focused on simple and concise syntax that allows you to understand any script easily.
 

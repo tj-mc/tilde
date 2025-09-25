@@ -3,7 +3,10 @@ use crate::evaluator::Evaluator;
 use crate::value::Value;
 use rand::Rng;
 
-pub fn eval_random_positional(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
+pub fn eval_random_positional(
+    args: Vec<Expression>,
+    evaluator: &mut Evaluator,
+) -> Result<Value, String> {
     if args.len() != 2 {
         return Err("random requires exactly 2 arguments".to_string());
     }
@@ -25,7 +28,8 @@ pub fn eval_random_positional(args: Vec<Expression>, evaluator: &mut Evaluator) 
     }
 
     // If either argument was a float literal, return float; otherwise check fractional parts
-    let should_return_float = min_was_float || max_was_float || min.fract() != 0.0 || max.fract() != 0.0;
+    let should_return_float =
+        min_was_float || max_was_float || min.fract() != 0.0 || max.fract() != 0.0;
 
     let mut rng = rand::thread_rng();
 
@@ -43,7 +47,10 @@ pub fn eval_random_positional(args: Vec<Expression>, evaluator: &mut Evaluator) 
 }
 
 /// Wrapper for stdlib compatibility
-pub fn eval_random_positional_wrapper(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
+pub fn eval_random_positional_wrapper(
+    args: Vec<Expression>,
+    evaluator: &mut Evaluator,
+) -> Result<Value, String> {
     eval_random_positional(args, evaluator)
 }
 
@@ -56,7 +63,10 @@ mod tests {
     #[test]
     fn test_random_integer_range() {
         let mut evaluator = Evaluator::new();
-        let args = vec![Expression::Number(1.0, false), Expression::Number(5.0, false)];
+        let args = vec![
+            Expression::Number(1.0, false),
+            Expression::Number(5.0, false),
+        ];
 
         // Test multiple times to ensure it's in range
         for _ in 0..10 {
@@ -74,7 +84,10 @@ mod tests {
     #[test]
     fn test_random_float_range() {
         let mut evaluator = Evaluator::new();
-        let args = vec![Expression::Number(0.0, false), Expression::Number(1.5, false)];
+        let args = vec![
+            Expression::Number(0.0, false),
+            Expression::Number(1.5, false),
+        ];
 
         // Test multiple times to ensure it's in range
         for _ in 0..10 {
@@ -91,7 +104,10 @@ mod tests {
     fn test_random_mixed_types() {
         let mut evaluator = Evaluator::new();
         // One integer, one float - should return float
-        let args = vec![Expression::Number(1.0, false), Expression::Number(2.5, false)];
+        let args = vec![
+            Expression::Number(1.0, false),
+            Expression::Number(2.5, false),
+        ];
 
         let result = eval_random_positional(args, &mut evaluator).unwrap();
         if let Value::Number(n) = result {
@@ -104,7 +120,10 @@ mod tests {
     #[test]
     fn test_random_same_values() {
         let mut evaluator = Evaluator::new();
-        let args = vec![Expression::Number(5.0, false), Expression::Number(5.0, false)];
+        let args = vec![
+            Expression::Number(5.0, false),
+            Expression::Number(5.0, false),
+        ];
 
         let result = eval_random_positional(args, &mut evaluator).unwrap();
         if let Value::Number(n) = result {
@@ -125,7 +144,11 @@ mod tests {
         assert!(result.unwrap_err().contains("exactly 2 arguments"));
 
         // Too many arguments
-        let args = vec![Expression::Number(1.0, false), Expression::Number(2.0, false), Expression::Number(3.0, false)];
+        let args = vec![
+            Expression::Number(1.0, false),
+            Expression::Number(2.0, false),
+            Expression::Number(3.0, false),
+        ];
         let result = eval_random_positional(args, &mut evaluator);
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("exactly 2 arguments"));
@@ -134,7 +157,10 @@ mod tests {
     #[test]
     fn test_random_non_numeric_arguments() {
         let mut evaluator = Evaluator::new();
-        let args = vec![Expression::String("hello".to_string()), Expression::Number(5.0, false)];
+        let args = vec![
+            Expression::String("hello".to_string()),
+            Expression::Number(5.0, false),
+        ];
 
         let result = eval_random_positional(args, &mut evaluator);
         assert!(result.is_err());
@@ -144,17 +170,27 @@ mod tests {
     #[test]
     fn test_random_min_greater_than_max() {
         let mut evaluator = Evaluator::new();
-        let args = vec![Expression::Number(10.0, false), Expression::Number(5.0, false)];
+        let args = vec![
+            Expression::Number(10.0, false),
+            Expression::Number(5.0, false),
+        ];
 
         let result = eval_random_positional(args, &mut evaluator);
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("minimum value cannot be greater than maximum"));
+        assert!(
+            result
+                .unwrap_err()
+                .contains("minimum value cannot be greater than maximum")
+        );
     }
 
     #[test]
     fn test_random_negative_range() {
         let mut evaluator = Evaluator::new();
-        let args = vec![Expression::Number(-5.0, false), Expression::Number(-1.0, false)];
+        let args = vec![
+            Expression::Number(-5.0, false),
+            Expression::Number(-1.0, false),
+        ];
 
         let result = eval_random_positional(args, &mut evaluator).unwrap();
         if let Value::Number(n) = result {

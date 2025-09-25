@@ -83,7 +83,10 @@ pub fn eval_difference(args: Vec<Expression>, evaluator: &mut Evaluator) -> Resu
 }
 
 /// Returns the intersection of two lists (elements that appear in both lists)
-pub fn eval_intersection(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
+pub fn eval_intersection(
+    args: Vec<Expression>,
+    evaluator: &mut Evaluator,
+) -> Result<Value, String> {
     if args.len() != 2 {
         return Err("intersection requires exactly 2 arguments (list1, list2)".to_string());
     }
@@ -131,13 +134,17 @@ fn value_to_hash_key(value: &Value) -> Result<String, String> {
             } else {
                 Ok(format!("n:{}", n))
             }
-        },
+        }
         Value::String(s) => Ok(format!("s:{}", s)),
         Value::Boolean(b) => Ok(format!("b:{}", b)),
         Value::Null => Ok("null".to_string()),
         Value::Date(dt) => Ok(format!("d:{}", dt.format("%Y-%m-%dT%H:%M:%SZ"))),
         Value::Error(err) => Ok(format!("e:{}", err.message)),
-        Value::List(_) => Err("Set operations cannot be performed on lists containing other lists".to_string()),
-        Value::Object(_) => Err("Set operations cannot be performed on lists containing objects".to_string()),
+        Value::List(_) => {
+            Err("Set operations cannot be performed on lists containing other lists".to_string())
+        }
+        Value::Object(_) => {
+            Err("Set operations cannot be performed on lists containing objects".to_string())
+        }
     }
 }

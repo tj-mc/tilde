@@ -74,7 +74,7 @@ fn run_repl() {
 
         let mut line = String::new();
         match io::stdin().read_line(&mut line) {
-            Ok(_) => {},
+            Ok(_) => {}
             Err(e) => {
                 eprintln!("Error reading input: {}", e);
                 continue;

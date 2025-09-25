@@ -1,21 +1,21 @@
+pub mod collection;
+pub mod crypto;
+pub mod date;
+pub mod encoding;
+pub mod filesystem;
+pub mod helpers;
+pub mod json;
 pub mod list;
+pub mod list_advanced;
 pub mod list_mutations;
 pub mod list_queries;
-pub mod list_advanced;
+pub mod math;
+pub mod object;
+pub mod object_manipulation;
 pub mod set_operations;
 pub mod string;
-pub mod math;
-pub mod helpers;
-pub mod object;
-pub mod collection;
-pub mod date;
 pub mod system;
 pub mod type_checking;
-pub mod json;
-pub mod encoding;
-pub mod crypto;
-pub mod filesystem;
-pub mod object_manipulation;
 mod utils;
 
 use crate::ast::Expression;
@@ -26,58 +26,169 @@ use crate::value::Value;
 pub fn get_stdlib_function_names() -> &'static [&'static str] {
     &[
         // List functions
-        "map", "filter", "reduce", "sort", "reverse", "list",
+        "map",
+        "filter",
+        "reduce",
+        "sort",
+        "reverse",
+        "list",
         // Advanced list functions with predicates
-        "find", "find-index", "find-last", "every", "some", "remove-if", "count-if",
-        "take-while", "drop-while", "partition", "group-by", "sort-by",
+        "find",
+        "find-index",
+        "find-last",
+        "every",
+        "some",
+        "remove-if",
+        "count-if",
+        "take-while",
+        "drop-while",
+        "partition",
+        "group-by",
+        "sort-by",
         // List mutation functions
-        "remove", "remove-at", "insert", "set-at", "pop", "shift", "unshift",
+        "remove",
+        "remove-at",
+        "insert",
+        "set-at",
+        "pop",
+        "shift",
+        "unshift",
         // List query functions
-        "index-of", "contains", "slice", "concat", "take", "drop",
+        "index-of",
+        "contains",
+        "slice",
+        "concat",
+        "take",
+        "drop",
         // List advanced functions
-        "flatten", "unique", "zip", "chunk", "transpose",
+        "flatten",
+        "unique",
+        "zip",
+        "chunk",
+        "transpose",
         // Set operations
-        "union", "difference", "intersection",
+        "union",
+        "difference",
+        "intersection",
         // String functions
-        "split", "join", "trim", "uppercase", "lowercase",
-        "starts-with", "ends-with", "substring", "replace", "repeat", "pad-left", "pad-right",
+        "split",
+        "join",
+        "trim",
+        "uppercase",
+        "lowercase",
+        "starts-with",
+        "ends-with",
+        "substring",
+        "replace",
+        "repeat",
+        "pad-left",
+        "pad-right",
         // Math functions
-        "absolute", "square-root", "random",
-        "sin", "cos", "tan", "asin", "acos", "atan", "atan2",
-        "log", "log10", "exp", "pow", "round", "floor", "ceil", "pi", "e",
+        "absolute",
+        "square-root",
+        "random",
+        "sin",
+        "cos",
+        "tan",
+        "asin",
+        "acos",
+        "atan",
+        "atan2",
+        "log",
+        "log10",
+        "exp",
+        "pow",
+        "round",
+        "floor",
+        "ceil",
+        "pi",
+        "e",
         // Date functions
-        "now", "date", "date-add", "date-subtract", "date-diff", "date-format", "date-parse",
-        "date-year", "date-month", "date-day", "date-hour", "date-minute", "date-second", "date-weekday",
-        "date-before", "date-after", "date-equal",
+        "now",
+        "date",
+        "date-add",
+        "date-subtract",
+        "date-diff",
+        "date-format",
+        "date-parse",
+        "date-year",
+        "date-month",
+        "date-day",
+        "date-hour",
+        "date-minute",
+        "date-second",
+        "date-weekday",
+        "date-before",
+        "date-after",
+        "date-equal",
         // Object functions
-        "keys", "values", "has",
+        "keys",
+        "values",
+        "has",
         // Collection functions
-        "length", "append",
+        "length",
+        "append",
         // Common helper functions - predicates
-        "is-even", "is-odd", "is-positive", "is-negative", "is-zero",
+        "is-even",
+        "is-odd",
+        "is-positive",
+        "is-negative",
+        "is-zero",
         // Common helper functions - transformations
-        "double", "triple", "quadruple", "half", "square", "increment", "decrement",
+        "double",
+        "triple",
+        "quadruple",
+        "half",
+        "square",
+        "increment",
+        "decrement",
         // Common helper functions - reductions
-        "add", "multiply", "max", "min", "fibonacci",
+        "add",
+        "multiply",
+        "max",
+        "min",
+        "fibonacci",
         // System functions
         "env",
         // Type checking functions
-        "is-number", "is-string", "is-boolean", "is-list", "is-object", "is-null", "is-empty", "is-defined",
+        "is-number",
+        "is-string",
+        "is-boolean",
+        "is-list",
+        "is-object",
+        "is-null",
+        "is-empty",
+        "is-defined",
         // JSON functions
-        "to-json", "from-json",
+        "to-json",
+        "from-json",
         // Encoding functions
-        "base64-encode", "base64-decode", "url-encode", "url-decode",
+        "base64-encode",
+        "base64-decode",
+        "url-encode",
+        "url-decode",
         // Cryptography functions
-        "sha256", "md5", "hmac-sha256",
+        "sha256",
+        "md5",
+        "hmac-sha256",
         // Filesystem functions
-        "file-exists", "dir-exists", "file-size",
+        "file-exists",
+        "dir-exists",
+        "file-size",
         // Object manipulation functions
-        "merge", "pick", "omit", "object-get", "object-set", "deep-merge",
+        "merge",
+        "pick",
+        "omit",
+        "object-get",
+        "object-set",
+        "deep-merge",
     ]
 }
 
 /// Register all standard library functions
-pub fn get_stdlib_function(name: &str) -> Option<fn(Vec<Expression>, &mut Evaluator) -> Result<Value, String>> {
+pub fn get_stdlib_function(
+    name: &str,
+) -> Option<fn(Vec<Expression>, &mut Evaluator) -> Result<Value, String>> {
     match name {
         // List functions
         "map" => Some(list::eval_map),

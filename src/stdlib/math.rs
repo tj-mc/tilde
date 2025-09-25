@@ -1,7 +1,7 @@
+use super::utils::*;
 use crate::ast::Expression;
 use crate::evaluator::Evaluator;
 use crate::value::Value;
-use super::utils::*;
 
 pub fn eval_absolute(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
     let number = extract_number_arg(&args, evaluator, "absolute")?;

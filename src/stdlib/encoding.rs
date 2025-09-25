@@ -3,7 +3,10 @@ use crate::evaluator::Evaluator;
 use crate::value::Value;
 
 /// Encodes a string to base64
-pub fn eval_base64_encode(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
+pub fn eval_base64_encode(
+    args: Vec<Expression>,
+    evaluator: &mut Evaluator,
+) -> Result<Value, String> {
     if args.len() != 1 {
         return Err("base64-encode requires exactly 1 argument".to_string());
     }
@@ -14,12 +17,18 @@ pub fn eval_base64_encode(args: Vec<Expression>, evaluator: &mut Evaluator) -> R
         _ => return Err("base64-encode argument must be a string".to_string()),
     };
 
-    let encoded = base64::Engine::encode(&base64::engine::general_purpose::STANDARD, string.as_bytes());
+    let encoded = base64::Engine::encode(
+        &base64::engine::general_purpose::STANDARD,
+        string.as_bytes(),
+    );
     Ok(Value::String(encoded))
 }
 
 /// Decodes a base64 string
-pub fn eval_base64_decode(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
+pub fn eval_base64_decode(
+    args: Vec<Expression>,
+    evaluator: &mut Evaluator,
+) -> Result<Value, String> {
     if args.len() != 1 {
         return Err("base64-decode requires exactly 1 argument".to_string());
     }
@@ -31,12 +40,10 @@ pub fn eval_base64_decode(args: Vec<Expression>, evaluator: &mut Evaluator) -> R
     };
 
     match base64::Engine::decode(&base64::engine::general_purpose::STANDARD, &string) {
-        Ok(bytes) => {
-            match String::from_utf8(bytes) {
-                Ok(decoded) => Ok(Value::String(decoded)),
-                Err(_) => Err("Invalid UTF-8 in decoded base64 data".to_string()),
-            }
-        }
+        Ok(bytes) => match String::from_utf8(bytes) {
+            Ok(decoded) => Ok(Value::String(decoded)),
+            Err(_) => Err("Invalid UTF-8 in decoded base64 data".to_string()),
+        },
         Err(_) => Err("Invalid base64 input".to_string()),
     }
 }

@@ -16,9 +16,18 @@ fn test_contains_on_strings() {
     let result = evaluator.eval_program(program);
     assert!(result.is_ok());
 
-    assert_eq!(evaluator.get_variable("has_at"), Some(&Value::Boolean(true)));
-    assert_eq!(evaluator.get_variable("has_dot"), Some(&Value::Boolean(true)));
-    assert_eq!(evaluator.get_variable("has_xyz"), Some(&Value::Boolean(false)));
+    assert_eq!(
+        evaluator.get_variable("has_at"),
+        Some(&Value::Boolean(true))
+    );
+    assert_eq!(
+        evaluator.get_variable("has_dot"),
+        Some(&Value::Boolean(true))
+    );
+    assert_eq!(
+        evaluator.get_variable("has_xyz"),
+        Some(&Value::Boolean(false))
+    );
 }
 
 #[test]
@@ -36,8 +45,14 @@ fn test_contains_on_lists_still_works() {
     let result = evaluator.eval_program(program);
     assert!(result.is_ok());
 
-    assert_eq!(evaluator.get_variable("has_three"), Some(&Value::Boolean(true)));
-    assert_eq!(evaluator.get_variable("has_ten"), Some(&Value::Boolean(false)));
+    assert_eq!(
+        evaluator.get_variable("has_three"),
+        Some(&Value::Boolean(true))
+    );
+    assert_eq!(
+        evaluator.get_variable("has_ten"),
+        Some(&Value::Boolean(false))
+    );
 }
 
 #[test]
@@ -53,7 +68,11 @@ fn test_contains_string_type_error() {
 
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("search value must also be a string"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("search value must also be a string")
+    );
 }
 
 #[test]
@@ -74,7 +93,10 @@ fn test_contains_with_attempt_rescue() {
     let result = evaluator.eval_program(program);
     assert!(result.is_ok());
 
-    assert_eq!(evaluator.get_variable("error_caught"), Some(&Value::Boolean(true)));
+    assert_eq!(
+        evaluator.get_variable("error_caught"),
+        Some(&Value::Boolean(true))
+    );
 }
 
 #[test]
@@ -94,7 +116,10 @@ fn test_index_of_on_strings() {
     assert!(result.is_ok());
 
     assert_eq!(evaluator.get_variable("at_pos"), Some(&Value::Number(4.0)));
-    assert_eq!(evaluator.get_variable("dot_pos"), Some(&Value::Number(12.0)));
+    assert_eq!(
+        evaluator.get_variable("dot_pos"),
+        Some(&Value::Number(12.0))
+    );
     assert_eq!(evaluator.get_variable("missing"), Some(&Value::Null));
 }
 
@@ -113,6 +138,9 @@ fn test_index_of_on_lists_still_works() {
     let result = evaluator.eval_program(program);
     assert!(result.is_ok());
 
-    assert_eq!(evaluator.get_variable("banana_pos"), Some(&Value::Number(1.0)));
+    assert_eq!(
+        evaluator.get_variable("banana_pos"),
+        Some(&Value::Number(1.0))
+    );
     assert_eq!(evaluator.get_variable("missing_pos"), Some(&Value::Null));
 }

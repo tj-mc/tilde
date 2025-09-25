@@ -1,7 +1,7 @@
 use crate::ast::Expression;
 use crate::evaluator::Evaluator;
-use crate::value::Value;
 use crate::stdlib::utils::evaluate_args;
+use crate::value::Value;
 
 /// Find the index of the first occurrence of a value in a list
 /// Usage: index-of list value
@@ -24,17 +24,16 @@ pub fn eval_index_of(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result
                 }
             }
             Ok(Value::Null)
-        },
-        Value::String(s) => {
-            match value {
-                Value::String(search_str) => {
-                    match s.find(&search_str) {
-                        Some(index) => Ok(Value::Number(index as f64)),
-                        None => Ok(Value::Null),
-                    }
-                },
-                _ => Err("index-of: when searching in a string, the search value must also be a string".to_string()),
-            }
+        }
+        Value::String(s) => match value {
+            Value::String(search_str) => match s.find(&search_str) {
+                Some(index) => Ok(Value::Number(index as f64)),
+                None => Ok(Value::Null),
+            },
+            _ => Err(
+                "index-of: when searching in a string, the search value must also be a string"
+                    .to_string(),
+            ),
         },
         _ => Err("index-of: first argument must be a list or string".to_string()),
     }
@@ -55,11 +54,12 @@ pub fn eval_contains(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result
 
     match list {
         Value::List(l) => Ok(Value::Boolean(l.contains(&value))),
-        Value::String(s) => {
-            match value {
-                Value::String(search_str) => Ok(Value::Boolean(s.contains(&search_str))),
-                _ => Err("contains: when searching in a string, the search value must also be a string".to_string()),
-            }
+        Value::String(s) => match value {
+            Value::String(search_str) => Ok(Value::Boolean(s.contains(&search_str))),
+            _ => Err(
+                "contains: when searching in a string, the search value must also be a string"
+                    .to_string(),
+            ),
         },
         _ => Err("contains: first argument must be a list or string".to_string()),
     }
@@ -227,4 +227,3 @@ pub fn eval_drop(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Val
     let result = list[count..].to_vec();
     Ok(Value::List(result))
 }
-

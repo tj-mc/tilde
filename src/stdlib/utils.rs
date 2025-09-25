@@ -3,9 +3,16 @@ use crate::evaluator::Evaluator;
 use crate::value::Value;
 
 /// Extract a single number argument from function arguments
-pub fn extract_number_arg(args: &[Expression], evaluator: &mut Evaluator, function_name: &str) -> Result<f64, String> {
+pub fn extract_number_arg(
+    args: &[Expression],
+    evaluator: &mut Evaluator,
+    function_name: &str,
+) -> Result<f64, String> {
     if args.len() != 1 {
-        return Err(format!("{} requires exactly 1 argument (number)", function_name));
+        return Err(format!(
+            "{} requires exactly 1 argument (number)",
+            function_name
+        ));
     }
 
     let value = evaluator.eval_expression(args[0].clone())?;
@@ -16,9 +23,16 @@ pub fn extract_number_arg(args: &[Expression], evaluator: &mut Evaluator, functi
 }
 
 /// Extract a single string argument from function arguments
-pub fn extract_string_arg(args: &[Expression], evaluator: &mut Evaluator, function_name: &str) -> Result<String, String> {
+pub fn extract_string_arg(
+    args: &[Expression],
+    evaluator: &mut Evaluator,
+    function_name: &str,
+) -> Result<String, String> {
     if args.len() != 1 {
-        return Err(format!("{} requires exactly 1 argument (string)", function_name));
+        return Err(format!(
+            "{} requires exactly 1 argument (string)",
+            function_name
+        ));
     }
 
     let value = evaluator.eval_expression(args[0].clone())?;
@@ -29,9 +43,16 @@ pub fn extract_string_arg(args: &[Expression], evaluator: &mut Evaluator, functi
 }
 
 /// Extract two number arguments from function arguments
-pub fn extract_two_number_args(args: &[Expression], evaluator: &mut Evaluator, function_name: &str) -> Result<(f64, f64), String> {
+pub fn extract_two_number_args(
+    args: &[Expression],
+    evaluator: &mut Evaluator,
+    function_name: &str,
+) -> Result<(f64, f64), String> {
     if args.len() != 2 {
-        return Err(format!("{} requires exactly 2 arguments (number, number)", function_name));
+        return Err(format!(
+            "{} requires exactly 2 arguments (number, number)",
+            function_name
+        ));
     }
 
     let a_val = evaluator.eval_expression(args[0].clone())?;
@@ -44,9 +65,16 @@ pub fn extract_two_number_args(args: &[Expression], evaluator: &mut Evaluator, f
 }
 
 /// Extract two arguments of specified types for functions like split/join
-pub fn extract_string_string_args(args: &[Expression], evaluator: &mut Evaluator, function_name: &str) -> Result<(String, String), String> {
+pub fn extract_string_string_args(
+    args: &[Expression],
+    evaluator: &mut Evaluator,
+    function_name: &str,
+) -> Result<(String, String), String> {
     if args.len() != 2 {
-        return Err(format!("{} requires exactly 2 arguments (string, string)", function_name));
+        return Err(format!(
+            "{} requires exactly 2 arguments (string, string)",
+            function_name
+        ));
     }
 
     let first_val = evaluator.eval_expression(args[0].clone())?;
@@ -59,16 +87,28 @@ pub fn extract_string_string_args(args: &[Expression], evaluator: &mut Evaluator
 
     let second = match second_val {
         Value::String(s) => s,
-        _ => return Err(format!("{} second argument must be a string", function_name)),
+        _ => {
+            return Err(format!(
+                "{} second argument must be a string",
+                function_name
+            ));
+        }
     };
 
     Ok((first, second))
 }
 
 /// Extract a list from the first argument
-pub fn extract_list_arg(args: &[Expression], evaluator: &mut Evaluator, function_name: &str) -> Result<Vec<Value>, String> {
+pub fn extract_list_arg(
+    args: &[Expression],
+    evaluator: &mut Evaluator,
+    function_name: &str,
+) -> Result<Vec<Value>, String> {
     if args.is_empty() {
-        return Err(format!("{} requires at least 1 argument (list)", function_name));
+        return Err(format!(
+            "{} requires at least 1 argument (list)",
+            function_name
+        ));
     }
 
     let list_val = evaluator.eval_expression(args[0].clone())?;
@@ -79,9 +119,16 @@ pub fn extract_list_arg(args: &[Expression], evaluator: &mut Evaluator, function
 }
 
 /// Extract list and string arguments for functions like join
-pub fn extract_list_string_args(args: &[Expression], evaluator: &mut Evaluator, function_name: &str) -> Result<(Vec<Value>, String), String> {
+pub fn extract_list_string_args(
+    args: &[Expression],
+    evaluator: &mut Evaluator,
+    function_name: &str,
+) -> Result<(Vec<Value>, String), String> {
     if args.len() != 2 {
-        return Err(format!("{} requires exactly 2 arguments (list, string)", function_name));
+        return Err(format!(
+            "{} requires exactly 2 arguments (list, string)",
+            function_name
+        ));
     }
 
     let list = extract_list_arg(args, evaluator, function_name)?;
@@ -90,7 +137,10 @@ pub fn extract_list_string_args(args: &[Expression], evaluator: &mut Evaluator, 
 }
 
 /// Evaluate all arguments and return as a Vec of Values
-pub fn evaluate_args(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Vec<Value>, String> {
+pub fn evaluate_args(
+    args: Vec<Expression>,
+    evaluator: &mut Evaluator,
+) -> Result<Vec<Value>, String> {
     let mut result = Vec::new();
     for arg in args {
         result.push(evaluator.eval_expression(arg)?);
@@ -99,7 +149,10 @@ pub fn evaluate_args(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result
 }
 
 /// Extract a string value from an expression
-pub fn extract_string_value(expr: &Expression, evaluator: &mut Evaluator) -> Result<String, String> {
+pub fn extract_string_value(
+    expr: &Expression,
+    evaluator: &mut Evaluator,
+) -> Result<String, String> {
     let value = evaluator.eval_expression(expr.clone())?;
     match value {
         Value::String(s) => Ok(s),
@@ -117,9 +170,16 @@ pub fn extract_number_value(expr: &Expression, evaluator: &mut Evaluator) -> Res
 }
 
 /// Extract string and number arguments
-pub fn extract_string_number_args(args: &[Expression], evaluator: &mut Evaluator, function_name: &str) -> Result<(String, f64), String> {
+pub fn extract_string_number_args(
+    args: &[Expression],
+    evaluator: &mut Evaluator,
+    function_name: &str,
+) -> Result<(String, f64), String> {
     if args.len() != 2 {
-        return Err(format!("{} requires exactly 2 arguments (string, number)", function_name));
+        return Err(format!(
+            "{} requires exactly 2 arguments (string, number)",
+            function_name
+        ));
     }
 
     let string_val = evaluator.eval_expression(args[0].clone())?;
@@ -132,7 +192,12 @@ pub fn extract_string_number_args(args: &[Expression], evaluator: &mut Evaluator
 
     let number = match number_val {
         Value::Number(n) => n,
-        _ => return Err(format!("{} second argument must be a number", function_name)),
+        _ => {
+            return Err(format!(
+                "{} second argument must be a number",
+                function_name
+            ));
+        }
     };
 
     Ok((string, number))

@@ -1,6 +1,6 @@
+use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 use std::fmt;
-use chrono::{DateTime, Utc};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
@@ -57,7 +57,7 @@ impl Value {
             Value::String(s) => !s.is_empty(),
             Value::List(l) => !l.is_empty(),
             Value::Object(map) => !map.is_empty(),
-            Value::Date(_) => true, // Dates are always truthy
+            Value::Date(_) => true,   // Dates are always truthy
             Value::Error(_) => false, // Errors are falsy
         }
     }

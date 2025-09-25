@@ -5,7 +5,8 @@ use tilde::value::Value;
 #[test]
 fn test_stdlib_reverse() {
     let mut evaluator = Evaluator::new();
-    let mut parser = Parser::new("~numbers is [1, 2, 3]\n~reversed is reverse ~numbers\nsay ~reversed");
+    let mut parser =
+        Parser::new("~numbers is [1, 2, 3]\n~reversed is reverse ~numbers\nsay ~reversed");
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
     // Should reverse the list
@@ -114,7 +115,11 @@ fn test_map_errors() {
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("map requires exactly 2 arguments"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("map requires exactly 2 arguments")
+    );
 
     // Test: First argument not a list
     let program_text = "~result is map \"not a list\" double";
@@ -122,7 +127,11 @@ fn test_map_errors() {
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("map first argument must be a list"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("map first argument must be a list")
+    );
 
     // Test: Function doesn't exist
     let program_text = "~result is map [1, 2, 3] nonexistent";
@@ -130,7 +139,11 @@ fn test_map_errors() {
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("Unknown function: nonexistent"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("Unknown function: nonexistent")
+    );
 
     // Test: Function has wrong number of parameters
     let mut evaluator = Evaluator::new();
@@ -142,7 +155,11 @@ function bad_func ~a ~b (give ~a + ~b)
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("must take exactly one parameter"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("must take exactly one parameter")
+    );
 }
 
 #[test]
@@ -155,7 +172,11 @@ fn test_filter_errors() {
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("filter requires exactly 2 arguments"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("filter requires exactly 2 arguments")
+    );
 
     // Test: First argument not a list
     let program_text = "~result is filter \"not a list\" is_even";
@@ -163,7 +184,11 @@ fn test_filter_errors() {
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("filter first argument must be a list"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("filter first argument must be a list")
+    );
 }
 
 #[test]
@@ -176,7 +201,11 @@ fn test_reduce_errors() {
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("reduce requires exactly 3 arguments"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("reduce requires exactly 3 arguments")
+    );
 
     // Test: Function needs two parameters
     let mut evaluator = Evaluator::new();
@@ -188,7 +217,11 @@ function bad_func ~x (give ~x)
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("must take exactly two parameters"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("must take exactly two parameters")
+    );
 }
 
 #[test]
@@ -201,7 +234,11 @@ fn test_sort_errors() {
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("sort requires exactly 1 argument"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("sort requires exactly 1 argument")
+    );
 
     // Test: Argument not a list
     let program_text = "~result is sort \"not a list\"";
@@ -209,7 +246,11 @@ fn test_sort_errors() {
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("sort first argument must be a list"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("sort first argument must be a list")
+    );
 }
 
 // ============================================================================
@@ -598,7 +639,11 @@ fn test_find_errors() {
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program);
     assert!(result.is_err());
-    assert!(result.unwrap_err().contains("find requires exactly 2 arguments"));
+    assert!(
+        result
+            .unwrap_err()
+            .contains("find requires exactly 2 arguments")
+    );
 
     // Test: Non-list first argument
     let mut evaluator2 = Evaluator::new();
@@ -610,7 +655,11 @@ function dummy ~x (give true)
     let program2 = parser2.parse().unwrap();
     let result2 = evaluator2.eval_program(program2);
     assert!(result2.is_err());
-    assert!(result2.unwrap_err().contains("find can only be used on lists"));
+    assert!(
+        result2
+            .unwrap_err()
+            .contains("find can only be used on lists")
+    );
 }
 
 #[test]

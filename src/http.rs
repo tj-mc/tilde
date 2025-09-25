@@ -1,4 +1,4 @@
-use crate::value::{Value, ErrorValue};
+use crate::value::{ErrorValue, Value};
 use std::collections::HashMap;
 
 /// HTTP response object containing status, headers, and body
@@ -17,9 +17,15 @@ impl HttpResponse {
         let mut response_map = HashMap::new();
 
         response_map.insert("status".to_string(), Value::Number(self.status as f64));
-        response_map.insert("status_text".to_string(), Value::String(self.status_text.clone()));
+        response_map.insert(
+            "status_text".to_string(),
+            Value::String(self.status_text.clone()),
+        );
         response_map.insert("url".to_string(), Value::String(self.url.clone()));
-        response_map.insert("response_time_ms".to_string(), Value::Number(self.response_time_ms as f64));
+        response_map.insert(
+            "response_time_ms".to_string(),
+            Value::Number(self.response_time_ms as f64),
+        );
 
         // Convert headers to Tilde object
         let mut headers_map = HashMap::new();
@@ -41,8 +47,14 @@ impl HttpResponse {
         }
 
         // Add convenience fields
-        response_map.insert("ok".to_string(), Value::Boolean(self.status >= 200 && self.status < 300));
-        response_map.insert("success".to_string(), Value::Boolean(self.status >= 200 && self.status < 300));
+        response_map.insert(
+            "ok".to_string(),
+            Value::Boolean(self.status >= 200 && self.status < 300),
+        );
+        response_map.insert(
+            "success".to_string(),
+            Value::Boolean(self.status >= 200 && self.status < 300),
+        );
 
         Value::Object(response_map)
     }
@@ -60,7 +72,8 @@ impl HttpResponse {
             }
             serde_json::Value::String(s) => Value::String(s),
             serde_json::Value::Array(arr) => {
-                let tails_list: Vec<Value> = arr.into_iter().map(Self::json_to_tails_value).collect();
+                let tails_list: Vec<Value> =
+                    arr.into_iter().map(Self::json_to_tails_value).collect();
                 Value::List(tails_list)
             }
             serde_json::Value::Object(obj) => {
@@ -114,25 +127,31 @@ impl HttpRequest {
 
     pub fn with_json_body(mut self, json_value: &Value) -> Result<Self, String> {
         let json_str = self.value_to_json_string(json_value)?;
-        self.headers.insert("content-type".to_string(), "application/json".to_string());
+        self.headers
+            .insert("content-type".to_string(), "application/json".to_string());
         self.body = Some(json_str);
         Ok(self)
     }
 
     pub fn with_bearer_token(mut self, token: &str) -> Self {
-        self.headers.insert("authorization".to_string(), format!("Bearer {}", token));
+        self.headers
+            .insert("authorization".to_string(), format!("Bearer {}", token));
         self
     }
 
     pub fn with_basic_auth(mut self, username: &str, password: &str) -> Self {
         let credentials = base64::encode(format!("{}:{}", username, password));
-        self.headers.insert("authorization".to_string(), format!("Basic {}", credentials));
+        self.headers.insert(
+            "authorization".to_string(),
+            format!("Basic {}", credentials),
+        );
         self
     }
 
     fn value_to_json_string(&self, value: &Value) -> Result<String, String> {
         let json_value = self.tilde_value_to_json(value)?;
-        serde_json::to_string(&json_value).map_err(|e| format!("Failed to serialize to JSON: {}", e))
+        serde_json::to_string(&json_value)
+            .map_err(|e| format!("Failed to serialize to JSON: {}", e))
     }
 
     fn tilde_value_to_json(&self, value: &Value) -> Result<serde_json::Value, String> {
@@ -140,7 +159,7 @@ impl HttpRequest {
             Value::Null => Ok(serde_json::Value::Null),
             Value::Boolean(b) => Ok(serde_json::Value::Bool(*b)),
             Value::Number(n) => Ok(serde_json::Value::Number(
-                serde_json::Number::from_f64(*n).ok_or("Invalid number")?
+                serde_json::Number::from_f64(*n).ok_or("Invalid number")?,
             )),
             Value::String(s) => Ok(serde_json::Value::String(s.clone())),
             Value::List(list) => {
@@ -157,7 +176,9 @@ impl HttpRequest {
                 }
                 Ok(serde_json::Value::Object(json_obj))
             }
-            Value::Date(dt) => Ok(serde_json::Value::String(dt.format("%Y-%m-%dT%H:%M:%SZ").to_string())),
+            Value::Date(dt) => Ok(serde_json::Value::String(
+                dt.format("%Y-%m-%dT%H:%M:%SZ").to_string(),
+            )),
             Value::Error(_) => Err("Cannot serialize Error values to JSON".to_string()),
         }
     }
@@ -190,7 +211,8 @@ impl HttpClient {
         // Create mock response based on URL patterns
         let response = match request.url.as_str() {
             url if url.contains("httpbin.org/json") => {
-                let mock_body = r#"{"slideshow":{"author":"Mock Author","title":"Mock Slideshow"}}"#;
+                let mock_body =
+                    r#"{"slideshow":{"author":"Mock Author","title":"Mock Slideshow"}}"#;
 
                 HttpResponse {
                     status: 200,
@@ -198,12 +220,13 @@ impl HttpClient {
                     headers: [
                         ("content-type".to_string(), "application/json".to_string()),
                         ("server".to_string(), "Mock-Server/1.0".to_string()),
-                    ].into(),
+                    ]
+                    .into(),
                     body: mock_body.to_string(),
                     url: request.url.clone(),
                     response_time_ms: 2, // Slightly longer for timing test
                 }
-            },
+            }
             url if url.contains("httpbin.org/get") => {
                 let mock_body = r#"{"args":{},"headers":{"User-Agent":"Tilde/1.0","Accept":"application/json","Host":"httpbin.org"},"origin":"127.0.0.1","url":"https://httpbin.org/get"}"#;
 
@@ -213,12 +236,13 @@ impl HttpClient {
                     headers: [
                         ("content-type".to_string(), "application/json".to_string()),
                         ("server".to_string(), "Mock-Server/1.0".to_string()),
-                    ].into(),
+                    ]
+                    .into(),
                     body: mock_body.to_string(),
                     url: request.url.clone(),
                     response_time_ms: 2, // Slightly longer for timing test
                 }
-            },
+            }
             url if url.contains("httpbin.org/post") => {
                 let default_body = "{}".to_string();
                 let body_data = request.body.as_ref().unwrap_or(&default_body);
@@ -234,12 +258,13 @@ impl HttpClient {
                     headers: [
                         ("content-type".to_string(), "application/json".to_string()),
                         ("server".to_string(), "Mock-Server/1.0".to_string()),
-                    ].into(),
+                    ]
+                    .into(),
                     body: mock_body,
                     url: request.url.clone(),
                     response_time_ms: 1,
                 }
-            },
+            }
             url if url.contains("httpbin.org/put") => {
                 let default_body = "".to_string();
                 let body_data = request.body.as_ref().unwrap_or(&default_body);
@@ -254,12 +279,13 @@ impl HttpClient {
                     headers: [
                         ("content-type".to_string(), "application/json".to_string()),
                         ("server".to_string(), "Mock-Server/1.0".to_string()),
-                    ].into(),
+                    ]
+                    .into(),
                     body: mock_body,
                     url: request.url.clone(),
                     response_time_ms: 1,
                 }
-            },
+            }
             url if url.contains("httpbin.org/delete") => {
                 let mock_body = r#"{"args":{},"headers":{"Host":"httpbin.org"},"origin":"127.0.0.1","url":"https://httpbin.org/delete"}"#;
 
@@ -269,12 +295,13 @@ impl HttpClient {
                     headers: [
                         ("content-type".to_string(), "application/json".to_string()),
                         ("server".to_string(), "Mock-Server/1.0".to_string()),
-                    ].into(),
+                    ]
+                    .into(),
                     body: mock_body.to_string(),
                     url: request.url.clone(),
                     response_time_ms: 1,
                 }
-            },
+            }
             url if url.contains("httpbin.org/patch") => {
                 let default_body = "".to_string();
                 let body_data = request.body.as_ref().unwrap_or(&default_body);
@@ -289,12 +316,13 @@ impl HttpClient {
                     headers: [
                         ("content-type".to_string(), "application/json".to_string()),
                         ("server".to_string(), "Mock-Server/1.0".to_string()),
-                    ].into(),
+                    ]
+                    .into(),
                     body: mock_body,
                     url: request.url.clone(),
                     response_time_ms: 1,
                 }
-            },
+            }
             url if url.contains("httpbin.org/status/404") => {
                 return Err(Self::create_error(
                     "http status: 404".to_string(),
@@ -302,12 +330,19 @@ impl HttpClient {
                     Some(request.url),
                     [
                         ("status".to_string(), Value::Number(404.0)),
-                        ("status_text".to_string(), Value::String("Not Found".to_string())),
+                        (
+                            "status_text".to_string(),
+                            Value::String("Not Found".to_string()),
+                        ),
                         ("response_time_ms".to_string(), Value::Number(1.0)),
-                        ("body".to_string(), Value::String("404 Not Found".to_string())),
-                    ].into(),
+                        (
+                            "body".to_string(),
+                            Value::String("404 Not Found".to_string()),
+                        ),
+                    ]
+                    .into(),
                 ));
-            },
+            }
             url if url.contains("httpbin.org/delay/") => {
                 // Simulate timeout for delay requests with short timeout
                 return Err(Self::create_error(
@@ -315,11 +350,18 @@ impl HttpClient {
                     Some("timeout".to_string()),
                     Some(request.url),
                     [
-                        ("response_time_ms".to_string(), Value::Number(request.timeout_ms as f64)),
-                        ("timeout_ms".to_string(), Value::Number(request.timeout_ms as f64)),
-                    ].into(),
+                        (
+                            "response_time_ms".to_string(),
+                            Value::Number(request.timeout_ms as f64),
+                        ),
+                        (
+                            "timeout_ms".to_string(),
+                            Value::Number(request.timeout_ms as f64),
+                        ),
+                    ]
+                    .into(),
                 ));
-            },
+            }
             url if url == "not-a-valid-url" => {
                 return Err(Self::create_error(
                     "Invalid URL format".to_string(),
@@ -327,7 +369,7 @@ impl HttpClient {
                     Some(request.url),
                     HashMap::new(),
                 ));
-            },
+            }
             _ => {
                 // Default mock response for unknown URLs
                 HttpResponse {
@@ -336,7 +378,8 @@ impl HttpClient {
                     headers: [
                         ("content-type".to_string(), "text/plain".to_string()),
                         ("server".to_string(), "Mock-Server/1.0".to_string()),
-                    ].into(),
+                    ]
+                    .into(),
                     body: "Mock response".to_string(),
                     url: request.url.clone(),
                     response_time_ms: 1,
@@ -419,12 +462,14 @@ impl HttpClient {
                 }
                 req.call()
             }
-            _ => return Err(Self::create_error(
-                format!("Unsupported HTTP method: {}", request.method),
-                Some("unsupported_method".to_string()),
-                Some(request.url.clone()),
-                HashMap::new(),
-            )),
+            _ => {
+                return Err(Self::create_error(
+                    format!("Unsupported HTTP method: {}", request.method),
+                    Some("unsupported_method".to_string()),
+                    Some(request.url.clone()),
+                    HashMap::new(),
+                ));
+            }
         };
 
         let response_time_ms = start_time.elapsed().as_millis() as u64;
@@ -433,12 +478,19 @@ impl HttpClient {
             Ok(mut response) => {
                 // Extract metadata first
                 let status = response.status().as_u16();
-                let status_text = response.status().canonical_reason().unwrap_or("Unknown").to_string();
+                let status_text = response
+                    .status()
+                    .canonical_reason()
+                    .unwrap_or("Unknown")
+                    .to_string();
 
                 // Extract headers
                 let mut headers = HashMap::new();
                 for (name, value) in response.headers() {
-                    headers.insert(name.to_string().to_lowercase(), value.to_str().unwrap_or("").to_string());
+                    headers.insert(
+                        name.to_string().to_lowercase(),
+                        value.to_str().unwrap_or("").to_string(),
+                    );
                 }
 
                 // Read response body
@@ -449,7 +501,11 @@ impl HttpClient {
                             format!("Failed to read response body: {}", e),
                             Some("body_read_error".to_string()),
                             Some(request.url),
-                            [("response_time_ms".to_string(), Value::Number(response_time_ms as f64))].into(),
+                            [(
+                                "response_time_ms".to_string(),
+                                Value::Number(response_time_ms as f64),
+                            )]
+                            .into(),
                         ));
                     }
                 };
@@ -468,8 +524,14 @@ impl HttpClient {
                     let mut error_context = HashMap::new();
                     error_context.insert("status".to_string(), Value::Number(status as f64));
                     error_context.insert("status_text".to_string(), Value::String(status_text));
-                    error_context.insert("response_time_ms".to_string(), Value::Number(response_time_ms as f64));
-                    error_context.insert("body".to_string(), Value::String(http_response.body.clone()));
+                    error_context.insert(
+                        "response_time_ms".to_string(),
+                        Value::Number(response_time_ms as f64),
+                    );
+                    error_context.insert(
+                        "body".to_string(),
+                        Value::String(http_response.body.clone()),
+                    );
 
                     // Include headers in error context
                     let mut headers_map = HashMap::new();
@@ -491,8 +553,14 @@ impl HttpClient {
             Err(error) => {
                 // Handle ureq errors
                 let mut error_context = HashMap::new();
-                error_context.insert("response_time_ms".to_string(), Value::Number(response_time_ms as f64));
-                error_context.insert("timeout_ms".to_string(), Value::Number(request.timeout_ms as f64));
+                error_context.insert(
+                    "response_time_ms".to_string(),
+                    Value::Number(response_time_ms as f64),
+                );
+                error_context.insert(
+                    "timeout_ms".to_string(),
+                    Value::Number(request.timeout_ms as f64),
+                );
 
                 // Handle different types of ureq errors
                 let (error_message, error_code) = match error {
@@ -500,22 +568,17 @@ impl HttpClient {
                         // This is an HTTP status code error (4xx, 5xx)
                         error_context.insert("status".to_string(), Value::Number(status as f64));
                         (format!("http status: {}", status), "http_error")
-                    },
-                    ureq::Error::Timeout(_) => {
-                        (error.to_string(), "timeout")
-                    },
-                    ureq::Error::HostNotFound => {
-                        (error.to_string(), "dns_error")
-                    },
-                    ureq::Error::ConnectionFailed => {
-                        (error.to_string(), "connection_failed")
-                    },
-                    _ => {
-                        (error.to_string(), "network_error")
                     }
+                    ureq::Error::Timeout(_) => (error.to_string(), "timeout"),
+                    ureq::Error::HostNotFound => (error.to_string(), "dns_error"),
+                    ureq::Error::ConnectionFailed => (error.to_string(), "connection_failed"),
+                    _ => (error.to_string(), "network_error"),
                 };
 
-                error_context.insert("error_details".to_string(), Value::String(error_message.clone()));
+                error_context.insert(
+                    "error_details".to_string(),
+                    Value::String(error_message.clone()),
+                );
 
                 Err(Self::create_error(
                     error_message,
@@ -538,7 +601,12 @@ impl HttpClient {
         ))
     }
 
-    fn create_error(message: String, code: Option<String>, source: Option<String>, context: HashMap<String, Value>) -> Value {
+    fn create_error(
+        message: String,
+        code: Option<String>,
+        source: Option<String>,
+        context: HashMap<String, Value>,
+    ) -> Value {
         Value::Error(ErrorValue {
             message,
             code,
@@ -549,7 +617,17 @@ impl HttpClient {
 }
 
 /// Parse HTTP options from Tilde value
-pub fn parse_http_options(options_value: Option<Value>) -> Result<(HashMap<String, String>, Option<String>, u64, Option<HashMap<String, String>>), String> {
+pub fn parse_http_options(
+    options_value: Option<Value>,
+) -> Result<
+    (
+        HashMap<String, String>,
+        Option<String>,
+        u64,
+        Option<HashMap<String, String>>,
+    ),
+    String,
+> {
     let mut headers = HashMap::new();
     let mut body = None;
     let mut timeout_ms = 30000;
@@ -592,9 +670,13 @@ pub fn parse_http_options(options_value: Option<Value>) -> Result<(HashMap<Strin
 
         if let Some(Value::Object(auth)) = options.get("basic_auth") {
             if let (Some(Value::String(username)), Some(Value::String(password))) =
-                (auth.get("username"), auth.get("password")) {
+                (auth.get("username"), auth.get("password"))
+            {
                 let credentials = base64::encode(format!("{}:{}", username, password));
-                headers.insert("authorization".to_string(), format!("Basic {}", credentials));
+                headers.insert(
+                    "authorization".to_string(),
+                    format!("Basic {}", credentials),
+                );
             }
         }
 
@@ -606,7 +688,12 @@ pub fn parse_http_options(options_value: Option<Value>) -> Result<(HashMap<Strin
                     Value::String(s) => s.clone(),
                     Value::Number(n) => n.to_string(),
                     Value::Boolean(b) => b.to_string(),
-                    _ => return Err(format!("Query parameter '{}' must be a string, number, or boolean", key)),
+                    _ => {
+                        return Err(format!(
+                            "Query parameter '{}' must be a string, number, or boolean",
+                            key
+                        ));
+                    }
                 };
                 params.insert(key.clone(), param_value);
             }
@@ -618,7 +705,10 @@ pub fn parse_http_options(options_value: Option<Value>) -> Result<(HashMap<Strin
 }
 
 /// Builds a URL with query parameters
-pub fn build_url_with_query(base_url: &str, query_params: Option<HashMap<String, String>>) -> String {
+pub fn build_url_with_query(
+    base_url: &str,
+    query_params: Option<HashMap<String, String>>,
+) -> String {
     if let Some(params) = query_params {
         if params.is_empty() {
             return base_url.to_string();

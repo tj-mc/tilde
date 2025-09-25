@@ -162,7 +162,10 @@ if ~result0 == 10 and ~result1 == 20 and ~result4 == 50 (
     let stdout = String::from_utf8_lossy(&output.stdout);
     println!("Dynamic access test output:\n{}", stdout);
 
-    assert!(output.status.success(), "Dynamic access test failed to execute");
+    assert!(
+        output.status.success(),
+        "Dynamic access test failed to execute"
+    );
     assert!(stdout.contains("✅ Dynamic property access working correctly"));
 }
 

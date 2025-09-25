@@ -735,7 +735,9 @@ fn test_string_interpolation_basic() {
 
     assert_eq!(
         evaluator.get_variable("greeting"),
-        Some(&Value::String("Hello Alice, you are 25 years old!".to_string()))
+        Some(&Value::String(
+            "Hello Alice, you are 25 years old!".to_string()
+        ))
     );
 }
 
@@ -837,7 +839,9 @@ fn test_complex_interpolation_patterns() {
     if let Some(Value::Object(result_map)) = evaluator.get_variable("result") {
         assert_eq!(
             result_map.get("output"),
-            Some(&Value::String("User Bob has admin access on production\n".to_string()))
+            Some(&Value::String(
+                "User Bob has admin access on production\n".to_string()
+            ))
         );
     } else {
         panic!("Expected result to be an object with output");
@@ -860,7 +864,9 @@ fn test_shell_error_handling() {
     // Command should fail and stderr should be captured in output
     if let Some(Value::Object(result_map)) = evaluator.get_variable("result") {
         if let Some(Value::String(output)) = result_map.get("output") {
-            assert!(output.contains("No such file or directory") || output.contains("cannot access"));
+            assert!(
+                output.contains("No such file or directory") || output.contains("cannot access")
+            );
         }
     }
 
@@ -1047,10 +1053,22 @@ fn test_logical_and_operator() {
     let mut evaluator = Evaluator::new();
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("result1"), Some(&Value::Boolean(true)));
-    assert_eq!(evaluator.get_variable("result2"), Some(&Value::Boolean(false)));
-    assert_eq!(evaluator.get_variable("result3"), Some(&Value::Boolean(false)));
-    assert_eq!(evaluator.get_variable("result4"), Some(&Value::Boolean(false)));
+    assert_eq!(
+        evaluator.get_variable("result1"),
+        Some(&Value::Boolean(true))
+    );
+    assert_eq!(
+        evaluator.get_variable("result2"),
+        Some(&Value::Boolean(false))
+    );
+    assert_eq!(
+        evaluator.get_variable("result3"),
+        Some(&Value::Boolean(false))
+    );
+    assert_eq!(
+        evaluator.get_variable("result4"),
+        Some(&Value::Boolean(false))
+    );
     assert_eq!(evaluator.get_variable("result5"), Some(&Value::Number(2.0))); // 1 is truthy, return 2
     assert_eq!(evaluator.get_variable("result6"), Some(&Value::Number(0.0))); // 0 is falsy, return 0
     assert_eq!(evaluator.get_variable("result7"), Some(&Value::Number(0.0))); // 5 is truthy, return 0
@@ -1074,10 +1092,22 @@ fn test_logical_or_operator() {
     let mut evaluator = Evaluator::new();
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("result1"), Some(&Value::Boolean(true)));
-    assert_eq!(evaluator.get_variable("result2"), Some(&Value::Boolean(true)));
-    assert_eq!(evaluator.get_variable("result3"), Some(&Value::Boolean(true)));
-    assert_eq!(evaluator.get_variable("result4"), Some(&Value::Boolean(false)));
+    assert_eq!(
+        evaluator.get_variable("result1"),
+        Some(&Value::Boolean(true))
+    );
+    assert_eq!(
+        evaluator.get_variable("result2"),
+        Some(&Value::Boolean(true))
+    );
+    assert_eq!(
+        evaluator.get_variable("result3"),
+        Some(&Value::Boolean(true))
+    );
+    assert_eq!(
+        evaluator.get_variable("result4"),
+        Some(&Value::Boolean(false))
+    );
     assert_eq!(evaluator.get_variable("result5"), Some(&Value::Number(1.0))); // 1 is truthy, return 1
     assert_eq!(evaluator.get_variable("result6"), Some(&Value::Number(3.0))); // 0 is falsy, return 3
     assert_eq!(evaluator.get_variable("result7"), Some(&Value::Number(5.0))); // 5 is truthy, return 5
@@ -1099,9 +1129,15 @@ fn test_logical_operator_precedence() {
     evaluator.eval_program(program).unwrap();
 
     // true or (false and false) => true or false => true
-    assert_eq!(evaluator.get_variable("result1"), Some(&Value::Boolean(true)));
+    assert_eq!(
+        evaluator.get_variable("result1"),
+        Some(&Value::Boolean(true))
+    );
     // (false and true) or true => false or true => true
-    assert_eq!(evaluator.get_variable("result2"), Some(&Value::Boolean(true)));
+    assert_eq!(
+        evaluator.get_variable("result2"),
+        Some(&Value::Boolean(true))
+    );
     // 1 or (0 and 2) => 1 or 0 => 1
     assert_eq!(evaluator.get_variable("result3"), Some(&Value::Number(1.0)));
     // (0 and 1) or 3 => 0 or 3 => 3
@@ -1165,8 +1201,14 @@ fn test_logical_operators_short_circuit() {
     // true or X => true (X not evaluated)
     // false and X => false (X not evaluated)
     assert_eq!(evaluator.get_variable("counter"), Some(&Value::Number(0.0)));
-    assert_eq!(evaluator.get_variable("result1"), Some(&Value::Boolean(true)));
-    assert_eq!(evaluator.get_variable("result2"), Some(&Value::Boolean(false)));
+    assert_eq!(
+        evaluator.get_variable("result1"),
+        Some(&Value::Boolean(true))
+    );
+    assert_eq!(
+        evaluator.get_variable("result2"),
+        Some(&Value::Boolean(false))
+    );
 }
 
 #[test]
@@ -1192,13 +1234,22 @@ fn test_nested_function_calls_with_parentheses() {
     evaluator.eval_program(program).unwrap();
 
     // Test nested addition: 43 + (100 + 28) = 171
-    assert_eq!(evaluator.get_variable("result1"), Some(&Value::Number(171.0)));
+    assert_eq!(
+        evaluator.get_variable("result1"),
+        Some(&Value::Number(171.0))
+    );
 
     // Test mixed operations: 5 * (10 + 20) = 150
-    assert_eq!(evaluator.get_variable("result2"), Some(&Value::Number(150.0)));
+    assert_eq!(
+        evaluator.get_variable("result2"),
+        Some(&Value::Number(150.0))
+    );
 
     // Test both args as nested calls: (1 + 2) + (3 + 4) = 10
-    assert_eq!(evaluator.get_variable("result3"), Some(&Value::Number(10.0)));
+    assert_eq!(
+        evaluator.get_variable("result3"),
+        Some(&Value::Number(10.0))
+    );
 }
 
 #[test]
@@ -1242,13 +1293,22 @@ fn test_prime_number_checker() {
     evaluator.eval_program(program).unwrap();
 
     // Test prime number results
-    assert_eq!(evaluator.get_variable("test1"), Some(&Value::Boolean(false))); // 1 is not prime
-    assert_eq!(evaluator.get_variable("test2"), Some(&Value::Boolean(true)));  // 2 is prime
-    assert_eq!(evaluator.get_variable("test3"), Some(&Value::Boolean(true)));  // 3 is prime
-    assert_eq!(evaluator.get_variable("test4"), Some(&Value::Boolean(false))); // 4 is not prime
-    assert_eq!(evaluator.get_variable("test5"), Some(&Value::Boolean(false))); // 9 is not prime
-    assert_eq!(evaluator.get_variable("test6"), Some(&Value::Boolean(true)));  // 11 is prime
-    assert_eq!(evaluator.get_variable("test7"), Some(&Value::Boolean(true)));  // 17 is prime
+    assert_eq!(
+        evaluator.get_variable("test1"),
+        Some(&Value::Boolean(false))
+    ); // 1 is not prime
+    assert_eq!(evaluator.get_variable("test2"), Some(&Value::Boolean(true))); // 2 is prime
+    assert_eq!(evaluator.get_variable("test3"), Some(&Value::Boolean(true))); // 3 is prime
+    assert_eq!(
+        evaluator.get_variable("test4"),
+        Some(&Value::Boolean(false))
+    ); // 4 is not prime
+    assert_eq!(
+        evaluator.get_variable("test5"),
+        Some(&Value::Boolean(false))
+    ); // 9 is not prime
+    assert_eq!(evaluator.get_variable("test6"), Some(&Value::Boolean(true))); // 11 is prime
+    assert_eq!(evaluator.get_variable("test7"), Some(&Value::Boolean(true))); // 17 is prime
 }
 
 #[test]

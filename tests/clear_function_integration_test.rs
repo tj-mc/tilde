@@ -87,7 +87,10 @@ fn test_clear_in_loop() {
     let mut evaluator = Evaluator::new();
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("clear_count"), Some(&Value::Number(3.0)));
+    assert_eq!(
+        evaluator.get_variable("clear_count"),
+        Some(&Value::Number(3.0))
+    );
     assert_eq!(evaluator.get_variable("i"), Some(&Value::Number(3.0)));
 }
 
@@ -191,7 +194,10 @@ fn test_clear_chained_with_assignments() {
     let mut evaluator = Evaluator::new();
     evaluator.eval_program(program).unwrap();
 
-    assert_eq!(evaluator.get_variable("position"), Some(&Value::Number(30.0)));
+    assert_eq!(
+        evaluator.get_variable("position"),
+        Some(&Value::Number(30.0))
+    );
 }
 
 #[test]

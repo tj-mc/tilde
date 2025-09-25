@@ -44,7 +44,8 @@ impl Parser {
     }
 
     pub(crate) fn is_statement_terminator(&self) -> bool {
-        matches!(self.current_token(),
+        matches!(
+            self.current_token(),
             Token::Eof
                 | Token::Newline
                 | Token::If
@@ -58,9 +59,8 @@ impl Parser {
     }
 
     pub(crate) fn is_expression_terminator(&self) -> bool {
-        self.is_statement_terminator() || matches!(self.current_token(),
-            Token::RightParen | Token::Comma
-        )
+        self.is_statement_terminator()
+            || matches!(self.current_token(), Token::RightParen | Token::Comma)
     }
 
     pub(crate) fn expect(&mut self, expected: Token) -> Result<(), String> {
@@ -653,5 +653,156 @@ mod tests {
             }
             _ => panic!("Expected assignment"),
         }
+    }
+
+    #[test]
+    fn test_parse_anonymous_function_single_param() {
+        let mut parser = Parser::new("|~x (~x * 2)|");
+        let expr = parser.parse_expression().unwrap();
+
+        match expr {
+            Expression::AnonymousFunction { params, body } => {
+                assert_eq!(params.len(), 1);
+                assert_eq!(params[0], "x");
+                // Body should be (~x * 2)
+                match body.as_ref() {
+                    Expression::BinaryOp { left, op, right } => {
+                        assert_eq!(*op, BinaryOperator::Multiply);
+                        assert_eq!(**left, Expression::Variable("x".to_string()));
+                        assert_eq!(**right, Expression::Number(2.0, false));
+                    }
+                    _ => panic!("Expected binary operation in body"),
+                }
+            }
+            _ => panic!("Expected anonymous function"),
+        }
+    }
+
+    #[test]
+    fn test_parse_anonymous_function_multi_param() {
+        let mut parser = Parser::new("|~a ~b (~a + ~b)|");
+        let expr = parser.parse_expression().unwrap();
+
+        match expr {
+            Expression::AnonymousFunction { params, body } => {
+                assert_eq!(params.len(), 2);
+                assert_eq!(params[0], "a");
+                assert_eq!(params[1], "b");
+                // Body should be (~a + ~b)
+                match body.as_ref() {
+                    Expression::BinaryOp { left, op, right } => {
+                        assert_eq!(*op, BinaryOperator::Add);
+                        assert_eq!(**left, Expression::Variable("a".to_string()));
+                        assert_eq!(**right, Expression::Variable("b".to_string()));
+                    }
+                    _ => panic!("Expected binary operation in body"),
+                }
+            }
+            _ => panic!("Expected anonymous function"),
+        }
+    }
+
+    #[test]
+    fn test_parse_map_with_anonymous_function() {
+        let mut parser = Parser::new("map ~list |~x (~x * 2)|");
+        let expr = parser.parse_expression().unwrap();
+
+        match expr {
+            Expression::FunctionCall { name, args } => {
+                assert_eq!(name, "map");
+                assert_eq!(args.len(), 2);
+                assert_eq!(args[0], Expression::Variable("list".to_string()));
+
+                match &args[1] {
+                    Expression::AnonymousFunction { params, body } => {
+                        assert_eq!(params.len(), 1);
+                        assert_eq!(params[0], "x");
+                        // Verify body structure
+                        match body.as_ref() {
+                            Expression::BinaryOp { .. } => {} // OK
+                            _ => panic!("Expected binary op in anonymous function body"),
+                        }
+                    }
+                    _ => panic!("Expected anonymous function as second argument"),
+                }
+            }
+            _ => panic!("Expected function call"),
+        }
+    }
+
+    #[test]
+    fn test_parse_anonymous_function_with_property_access() {
+        let mut parser = Parser::new("|~order (~order.id)|");
+        let expr = parser.parse_expression().unwrap();
+
+        match expr {
+            Expression::AnonymousFunction { params, body } => {
+                assert_eq!(params.len(), 1);
+                assert_eq!(params[0], "order");
+
+                match body.as_ref() {
+                    Expression::PropertyAccess { object, property } => {
+                        assert_eq!(**object, Expression::Variable("order".to_string()));
+                        assert_eq!(property, "id");
+                    }
+                    _ => panic!("Expected property access in body"),
+                }
+            }
+            _ => panic!("Expected anonymous function"),
+        }
+    }
+
+    #[test]
+    fn test_parse_nested_anonymous_functions() {
+        let mut parser = Parser::new("|~x (map ~x |~y (~y + 1)|)|");
+        let expr = parser.parse_expression().unwrap();
+
+        match expr {
+            Expression::AnonymousFunction { params, body } => {
+                assert_eq!(params.len(), 1);
+                assert_eq!(params[0], "x");
+
+                // Body should be a map call with nested anonymous function
+                match body.as_ref() {
+                    Expression::FunctionCall { name, args } => {
+                        assert_eq!(name, "map");
+                        assert_eq!(args.len(), 2);
+
+                        // Second arg should be another anonymous function
+                        match &args[1] {
+                            Expression::AnonymousFunction {
+                                params: inner_params,
+                                ..
+                            } => {
+                                assert_eq!(inner_params.len(), 1);
+                                assert_eq!(inner_params[0], "y");
+                            }
+                            _ => panic!("Expected nested anonymous function"),
+                        }
+                    }
+                    _ => panic!("Expected function call in body"),
+                }
+            }
+            _ => panic!("Expected anonymous function"),
+        }
+    }
+
+    #[test]
+    fn test_parse_anonymous_function_errors() {
+        // Missing closing pipe
+        let mut parser = Parser::new("|~x (~x * 2)");
+        assert!(parser.parse_expression().is_err());
+
+        // Missing opening parenthesis
+        let mut parser = Parser::new("|~x ~x * 2|");
+        assert!(parser.parse_expression().is_err());
+
+        // No parameters
+        let mut parser = Parser::new("|(~x * 2)|");
+        assert!(parser.parse_expression().is_err());
+
+        // Invalid parameter (not a variable)
+        let mut parser = Parser::new("|42 (~x * 2)|");
+        assert!(parser.parse_expression().is_err());
     }
 }

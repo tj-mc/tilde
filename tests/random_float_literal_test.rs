@@ -31,7 +31,10 @@ fn test_random_float_literal_detection() {
                 }
             }
         }
-        assert!(found_non_integer, "random 0.0 1 should return floats, not just integers");
+        assert!(
+            found_non_integer,
+            "random 0.0 1 should return floats, not just integers"
+        );
     } else {
         panic!("Expected number value");
     }
@@ -41,9 +44,9 @@ fn test_random_float_literal_detection() {
 fn test_random_integer_vs_float_literal() {
     // Test all combinations to ensure proper behavior
     let test_cases = vec![
-        ("random 0 1", true),     // Both integers -> should return int (0 or 1)
-        ("random 0.0 1", false), // Float literal -> should return float
-        ("random 0 1.0", false), // Float literal -> should return float
+        ("random 0 1", true),      // Both integers -> should return int (0 or 1)
+        ("random 0.0 1", false),   // Float literal -> should return float
+        ("random 0 1.0", false),   // Float literal -> should return float
         ("random 0.0 1.0", false), // Both float literals -> should return float
     ];
 
@@ -67,9 +70,17 @@ fn test_random_integer_vs_float_literal() {
         }
 
         if should_be_integer_only {
-            assert!(!found_non_integer, "{} should only return integers (0 or 1)", expr);
+            assert!(
+                !found_non_integer,
+                "{} should only return integers (0 or 1)",
+                expr
+            );
         } else {
-            assert!(found_non_integer, "{} should return floats (including non-integers)", expr);
+            assert!(
+                found_non_integer,
+                "{} should return floats (including non-integers)",
+                expr
+            );
         }
     }
 }

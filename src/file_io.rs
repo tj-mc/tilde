@@ -3,7 +3,10 @@ use crate::evaluator::Evaluator;
 use crate::value::Value;
 use std::collections::HashMap;
 
-pub fn eval_read_positional(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
+pub fn eval_read_positional(
+    args: Vec<Expression>,
+    evaluator: &mut Evaluator,
+) -> Result<Value, String> {
     if args.len() != 1 {
         return Err("read requires exactly 1 argument (file path)".to_string());
     }
@@ -49,7 +52,10 @@ pub fn eval_read_positional(args: Vec<Expression>, evaluator: &mut Evaluator) ->
     Ok(Value::Object(result))
 }
 
-pub fn eval_write_positional(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
+pub fn eval_write_positional(
+    args: Vec<Expression>,
+    evaluator: &mut Evaluator,
+) -> Result<Value, String> {
     if args.len() != 2 {
         return Err("write requires exactly 2 arguments (file path, content)".to_string());
     }
@@ -80,7 +86,10 @@ pub fn eval_write_positional(args: Vec<Expression>, evaluator: &mut Evaluator) -
             // Successfully wrote the file
             result.insert("success".to_string(), Value::Boolean(true));
             result.insert("path".to_string(), Value::String(file_path));
-            result.insert("bytes_written".to_string(), Value::Number(content.len() as f64));
+            result.insert(
+                "bytes_written".to_string(),
+                Value::Number(content.len() as f64),
+            );
             result.insert("error".to_string(), Value::Null);
         }
         Err(e) => {
@@ -116,7 +125,10 @@ mod tests {
         let result = eval_read_positional(args, &mut evaluator).unwrap();
 
         if let Value::Object(obj) = result {
-            assert_eq!(obj.get("content"), Some(&Value::String(test_content.to_string())));
+            assert_eq!(
+                obj.get("content"),
+                Some(&Value::String(test_content.to_string()))
+            );
             assert_eq!(obj.get("exists"), Some(&Value::Boolean(true)));
             assert_eq!(obj.get("error"), Some(&Value::Null));
 
@@ -219,13 +231,18 @@ mod tests {
         let mut evaluator = Evaluator::new();
 
         // Set up a variable with the file path
-        evaluator.variables.insert("filepath".to_string(), Value::String(test_path.to_string()));
+        evaluator
+            .variables
+            .insert("filepath".to_string(), Value::String(test_path.to_string()));
 
         let args = vec![Expression::Variable("filepath".to_string())];
         let result = eval_read_positional(args, &mut evaluator).unwrap();
 
         if let Value::Object(obj) = result {
-            assert_eq!(obj.get("content"), Some(&Value::String(test_content.to_string())));
+            assert_eq!(
+                obj.get("content"),
+                Some(&Value::String(test_content.to_string()))
+            );
             assert_eq!(obj.get("exists"), Some(&Value::Boolean(true)));
             assert_eq!(obj.get("error"), Some(&Value::Null));
         } else {

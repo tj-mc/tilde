@@ -320,6 +320,78 @@ function fibonacci ~n (
 say "The 10th Fibonacci number is " ~fib-10
 ```
 
+### Anonymous Functions
+
+Anonymous functions provide a concise way to define functions inline without naming them. They use the pipe syntax: `|~param1 ~param2 (body)|`
+
+**Single parameter:**
+```tilde
+~numbers is [1, 2, 3, 4, 5]
+~doubled is map ~numbers |~x (~x * 2)|
+say ~doubled  # [2, 4, 6, 8, 10]
+```
+
+**Multiple parameters:**
+```tilde
+~numbers is [1, 2, 3, 4, 5]
+~sum is reduce ~numbers |~a ~b (~a + ~b)| 0
+say ~sum  # 15
+```
+
+**Property access in anonymous functions:**
+```tilde
+~orders is [
+    {"id": 101, "amount": 50},
+    {"id": 102, "amount": 75},
+    {"id": 103, "amount": 30}
+]
+~order-ids is map ~orders |~order (~order.id)|
+~sorted is sort ~order-ids
+say ~sorted  # [101, 102, 103]
+```
+
+**Filtering with anonymous functions:**
+```tilde
+~numbers is [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+~evens is filter ~numbers |~n (~n % 2 == 0)|
+say ~evens  # [2, 4, 6, 8, 10]
+```
+
+**Complex anonymous functions:**
+```tilde
+~words is ["cat", "elephant", "dog", "bird"]
+~long-words is filter ~words |~word ((length ~word) > 3)|
+say ~long-words  # ["elephant", "bird"]
+```
+
+**Nested anonymous functions:**
+```tilde
+~matrix is [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+~doubled-matrix is map ~matrix |~row (
+    map ~row |~x (~x * 2)|
+)|
+say ~doubled-matrix  # [[2, 4, 6], [8, 10, 12], [14, 16, 18]]
+```
+
+#### Anonymous Function Features
+
+- **Scope isolation:** Variables defined inside anonymous functions don't affect outer scope
+- **Closure support:** Anonymous functions can read variables from outer scopes
+- **Parameter shadowing:** Parameters hide outer variables with the same name
+- **Single expression body:** Anonymous functions contain one expression that's automatically returned
+
+#### When to Use Anonymous Functions vs Named Functions
+
+**Use anonymous functions for:**
+- Simple transformations with `map`, `filter`, `reduce`
+- One-time use functions
+- Short, obvious operations
+
+**Use named functions for:**
+- Complex logic requiring multiple statements
+- Functions used multiple times
+- Functions that improve code readability when named
+
 ### Function Scope
 - Parameters are local to the function and don't affect variables in the calling scope
 - Variables defined inside an function are local to that function 
