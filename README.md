@@ -8,7 +8,7 @@ With friendly syntax, built-in HTTP, and an extensive library of helper function
 
 ### Hit the web like Spiderman
 ```tilde
-~user is get "https://api.github.com/users/octocat"
+~user is get "https://api.github.com/users/tj-mc"
 say "Found user: `~user.body.name` with `~user.body.public_repos` repos"
 ```
 
