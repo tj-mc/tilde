@@ -34,6 +34,14 @@ impl Parser {
                         variable: var_name,
                         amount,
                     })
+                } else if *self.current_token() == Token::Colon {
+                    // Function chain: ~var: func1 arg; func2 arg
+                    self.advance();
+                    let steps = self.parse_chain_steps()?;
+                    Ok(Statement::FunctionChain {
+                        variable: var_name,
+                        steps,
+                    })
                 } else if *self.current_token() == Token::Dot {
                     // This might be a property access assignment: ~var.prop is value
                     let saved_position = self.position;
@@ -325,4 +333,72 @@ impl Parser {
             rescue_body,
         })
     }
+
+    pub fn parse_chain_steps(&mut self) -> Result<Vec<ChainStep>, String> {
+        let mut steps = Vec::new();
+
+        // Skip initial newlines
+        self.skip_newlines();
+
+        while *self.current_token() != Token::Eof && !self.is_at_chain_boundary() {
+            // Each line should be a function call with arguments
+            if let Token::Identifier(function_name) = self.current_token() {
+                let function_name = function_name.clone();
+                self.advance();
+
+                // Parse all arguments on the same line until newline
+                let mut args = Vec::new();
+                while *self.current_token() != Token::Newline &&
+                      *self.current_token() != Token::Eof &&
+                      !self.is_at_chain_boundary() {
+                    args.push(self.parse_expression()?);
+                }
+
+                steps.push(ChainStep { function_name, args });
+
+                // Skip to next line
+                if *self.current_token() == Token::Newline {
+                    self.advance();
+                    // Skip any additional whitespace/newlines before next step
+                    self.skip_newlines();
+                }
+            } else {
+                // If we don't see an identifier, we're done with the chain
+                break;
+            }
+        }
+
+        if steps.is_empty() {
+            return Err("Function chain cannot be empty".to_string());
+        }
+
+        Ok(steps)
+    }
+
+
+
+
+    fn is_at_chain_boundary(&self) -> bool {
+        match self.current_token() {
+            // Only variables that start with ~ and are followed by : are chain boundaries
+            Token::Variable(_) => {
+                // Look ahead to see if there's a colon
+                if self.position + 1 < self.tokens.len() {
+                    matches!(self.tokens[self.position + 1], Token::Colon)
+                } else {
+                    false
+                }
+            }
+            Token::If => true,              // Next if statement
+            Token::Loop => true,            // Next loop
+            Token::ForEach => true,         // Next for-each
+            Token::Function => true,        // Next function definition
+            Token::Attempt => true,         // Next attempt block
+            Token::Give => true,            // Next give statement
+            Token::Open => true,            // Next open statement
+            Token::LeftParen => true,       // Next block
+            _ => false,
+        }
+    }
+
 }

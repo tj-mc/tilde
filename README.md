@@ -125,18 +125,17 @@ Lets compare this same script in **Python**:
 import fetch from 'node-fetch';
 
 const result = await fetch("https://api.orderhistory.net/krustykrab").then(r => r.json());
-const getId = (order) => order.id
-const orderIds = result.map(getId);
+const orderIds = result.map((order) => order.id);
 const sorted = orderIds.sort();
 ```
 
-and finally, in **Tilde** with **anonymous functions**:
+and finally, in **Tilde**:
 ```tilde
 ~result is get "https://api.orderhistory.net/krustykrab"
 ~order-ids is map ~result |~order (~order.id)|
 ~sorted is sort ~order-ids
 ```
-Just 3 lines! Anonymous functions make it even more concise.
+Just 3 lines!
 
 As you can see, Tilde is focused on simple and concise syntax that allows you to understand any script easily.
 

@@ -4,19 +4,19 @@ Tilde supports **block syntax** for organizing and accessing functions from diff
 
 ## Syntax
 
-Block syntax uses colons on both sides: `:block_name:function_name`
+Block syntax uses a colon after the block name: `block_name:function_name`
 
 ```tilde
-:core:is-even 4
-:core:double 5
+core:is-even 4
+core:double 5
 :math:sqrt 16
 ```
 
 ## Available Blocks
 
-### `:core:` Block
+### `core:` Block
 
-The `:core:` block provides access to the standard library functions, bypassing any user-defined functions with the same name.
+The `core:` block provides access to the standard library functions, bypassing any user-defined functions with the same name.
 
 **Available functions:**
 - **Predicates:** `is-even`, `is-odd`, `is-positive`, `is-negative`, `is-zero`
@@ -30,7 +30,7 @@ The `:core:` block provides access to the standard library functions, bypassing 
 
 Tilde follows this priority order when resolving function names:
 
-1. **Block syntax** (`:core:function`) - Always uses the specified block
+1. **Block syntax** (`core:function`) - Always uses the specified block
 2. **User-defined functions** - Functions you define with `function`
 3. **Standard library** - Built-in functions without block prefix
 
@@ -40,11 +40,11 @@ Tilde follows this priority order when resolving function names:
 
 ```tilde
 # Using core functions directly
-~result is :core:is-even 4
+~result is core:is-even 4
 say ~result  # true
 
 # Using in calculations
-~doubled is :core:double 5
+~doubled is core:double 5
 say ~doubled  # 10
 ```
 
@@ -57,7 +57,7 @@ function is-even ~x (
 )
 
 ~user_result is is-even 4        # false (uses user function)
-~core_result is :core:is-even 4  # true (uses core function)
+~core_result is core:is-even 4  # true (uses core function)
 
 say "User result: " ~user_result  # User result: false
 say "Core result: " ~core_result  # Core result: true
@@ -71,11 +71,11 @@ Block syntax works seamlessly with higher-order functions like `map`:
 ~numbers is [1, 2, 3, 4, 5]
 
 # Using core function in map
-~even_checks is map ~numbers :core:is-even
+~even_checks is map ~numbers core:is-even
 say ~even_checks  # [false, true, false, true, false]
 
 # Using core function for transformation
-~doubled is map ~numbers :core:double
+~doubled is map ~numbers core:double
 say ~doubled  # [2, 4, 6, 8, 10]
 ```
 
@@ -89,7 +89,7 @@ function custom-transform ~x (
 
 ~numbers is [1, 2, 3]
 ~custom_result is map ~numbers custom-transform  # [10, 20, 30]
-~core_result is map ~numbers :core:square        # [1, 4, 9]
+~core_result is map ~numbers core:square        # [1, 4, 9]
 ```
 
 ## Error Handling
@@ -104,7 +104,7 @@ function custom-transform ~x (
 ### Unknown Function in Block
 
 ```tilde
-~result is :core:unknown-function 1
+~result is core:unknown-function 1
 # Error: Unknown core function: unknown-function
 ```
 
@@ -123,10 +123,10 @@ import :string: from "string-utils"
 
 ## Best Practices
 
-1. **Use `:core:` when you need guaranteed standard behavior**
+1. **Use `core:` when you need guaranteed standard behavior**
    ```tilde
    # Ensure standard is-even logic even if user overrides it
-   ~filtered is filter ~numbers :core:is-even
+   ~filtered is filter ~numbers core:is-even
    ```
 
 2. **Prefer bare names for user-defined functions**
@@ -137,9 +137,9 @@ import :string: from "string-utils"
 
 3. **Use block syntax in libraries to avoid conflicts**
    ```tilde
-   # In a library, use :core: to ensure predictable behavior
+   # In a library, use core: to ensure predictable behavior
    function validate-positive ~x (
-       if :core:is-positive ~x (
+       if core:is-positive ~x (
            give true
        ) else (
            give false

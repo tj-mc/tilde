@@ -46,6 +46,10 @@ pub enum Statement {
         rescue_var: Option<String>,
         rescue_body: Vec<Statement>,
     },
+    FunctionChain {
+        variable: String,
+        steps: Vec<ChainStep>,
+    },
     Expression(Expression),
 }
 
@@ -54,6 +58,12 @@ pub enum InterpolationPart {
     Text(String),
     Variable(String),
     Expression(Expression),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ChainStep {
+    pub function_name: String,
+    pub args: Vec<Expression>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -88,6 +98,11 @@ pub enum Expression {
     AnonymousFunction {
         params: Vec<String>,
         body: Box<Expression>,
+    },
+
+    FunctionChainExpression {
+        steps: Vec<ChainStep>,
+        input: Box<Expression>,
     },
 }
 

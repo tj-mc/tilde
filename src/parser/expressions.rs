@@ -192,7 +192,7 @@ impl Parser {
 
                 // Expect a function name after the block
                 if let Token::Identifier(func_name) = self.current_token() {
-                    let full_name = format!(":{}:{}", block_name, func_name);
+                    let full_name = format!("{}:{}", block_name, func_name);
                     self.advance();
 
                     // Parse arguments like any stdlib function
@@ -220,7 +220,7 @@ impl Parser {
                         args,
                     })
                 } else {
-                    Err(format!("Expected function name after :{}:", block_name))
+                    Err(format!("Expected function name after {}:", block_name))
                 }
             }
             Token::Identifier(name) => {
@@ -513,7 +513,7 @@ impl Parser {
 
                 // Expect a function name after the block
                 if let Token::Identifier(func_name) = self.current_token() {
-                    let full_name = format!(":{}:{}", block_name, func_name);
+                    let full_name = format!("{}:{}", block_name, func_name);
                     self.advance();
 
                     // For function arguments, return a function reference (no arguments)
@@ -522,7 +522,7 @@ impl Parser {
                         args: Vec::new(),
                     })
                 } else {
-                    Err(format!("Expected function name after :{}:", block_name))
+                    Err(format!("Expected function name after {}:", block_name))
                 }
             }
             Token::Identifier(name) => {

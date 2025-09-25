@@ -78,9 +78,9 @@ fn eval_function_on_item(
     item: &Value,
     evaluator: &mut Evaluator,
 ) -> Result<Value, String> {
-    // Check for block syntax first (e.g., :core:is-even)
-    if function_name.starts_with(':') && function_name.contains(':') {
-        let parts: Vec<&str> = function_name[1..].split(':').collect();
+    // Check for block syntax first (e.g., core:is-even)
+    if function_name.contains(':') {
+        let parts: Vec<&str> = function_name.split(':').collect();
         if parts.len() == 2 {
             let block_name = parts[0];
             let func_name = parts[1];

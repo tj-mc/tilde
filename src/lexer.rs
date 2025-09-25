@@ -386,24 +386,8 @@ impl Lexer {
                 Token::RightBracket
             }
             Some(':') => {
-                // Check for block syntax :block_name:
-                if self.peek().map_or(false, |c| c.is_alphabetic()) {
-                    self.advance(); // consume first :
-                    let block_name = self.read_identifier();
-                    if self.current_char == Some(':') {
-                        self.advance(); // consume second :
-                        self.after_block = true;
-                        Token::Block(block_name)
-                    } else {
-                        // If no closing :, treat as regular colon followed by identifier
-                        // This is a bit tricky - we need to backtrack
-                        // For now, let's require the closing colon
-                        Token::Colon
-                    }
-                } else {
-                    self.advance();
-                    Token::Colon
-                }
+                self.advance();
+                Token::Colon
             }
             Some(',') => {
                 self.advance();
@@ -495,8 +479,14 @@ impl Lexer {
             Some(ch) if ch.is_alphabetic() => {
                 let ident = self.read_identifier();
 
+                // Check for new block syntax: known blocks followed by :
+                if self.current_char == Some(':') && self.is_known_block(&ident) {
+                    self.advance(); // consume the :
+                    self.after_block = true;
+                    Token::Block(ident)
+                }
                 // If we're after a block, treat everything as an identifier
-                if was_after_block {
+                else if was_after_block {
                     Token::Identifier(ident)
                 } else {
                     match ident.as_str() {
@@ -561,6 +551,10 @@ impl Lexer {
         }
 
         tokens
+    }
+
+    fn is_known_block(&self, ident: &str) -> bool {
+        matches!(ident, "core" | "math")
     }
 }
 
@@ -850,7 +844,7 @@ mod tests {
 
     #[test]
     fn test_block_syntax_lexing() {
-        let mut lexer = Lexer::new(":core:");
+        let mut lexer = Lexer::new("core:");
         let tokens = lexer.tokenize();
 
         assert_eq!(tokens[0], Token::Block("core".to_string()));
@@ -859,7 +853,7 @@ mod tests {
 
     #[test]
     fn test_block_syntax_with_function() {
-        let mut lexer = Lexer::new(":core:is-even 4");
+        let mut lexer = Lexer::new("core:is-even 4");
         let tokens = lexer.tokenize();
 
         assert_eq!(tokens[0], Token::Block("core".to_string()));
@@ -870,7 +864,7 @@ mod tests {
 
     #[test]
     fn test_regular_colon_vs_block_syntax() {
-        let mut lexer = Lexer::new("key: value :core:function");
+        let mut lexer = Lexer::new("key: value core:function");
         let tokens = lexer.tokenize();
 
         assert_eq!(tokens[0], Token::Identifier("key".to_string()));
@@ -883,7 +877,7 @@ mod tests {
 
     #[test]
     fn test_multiple_blocks() {
-        let mut lexer = Lexer::new(":core:is-even :math:sqrt");
+        let mut lexer = Lexer::new("core:is-even math:sqrt");
         let tokens = lexer.tokenize();
 
         assert_eq!(tokens[0], Token::Block("core".to_string()));
