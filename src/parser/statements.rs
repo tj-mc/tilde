@@ -342,9 +342,31 @@ impl Parser {
 
         while *self.current_token() != Token::Eof && !self.is_at_chain_boundary() {
             // Each line should be a function call with arguments
-            if let Token::Identifier(function_name) = self.current_token() {
-                let function_name = function_name.clone();
-                self.advance();
+            let function_name = match self.current_token() {
+                Token::Identifier(name) => {
+                    let name = name.clone();
+                    self.advance();
+                    name
+                }
+                Token::Block(block_name) => {
+                    // Handle block syntax like core:is-even
+                    let block_name = block_name.clone();
+                    self.advance();
+
+                    // Expect function name after block
+                    if let Token::Identifier(func_name) = self.current_token() {
+                        let func_name = func_name.clone();
+                        self.advance();
+                        format!("{}:{}", block_name, func_name)
+                    } else {
+                        return Err(format!("Expected function name after {}:", block_name));
+                    }
+                }
+                _ => {
+                    // If we don't see an identifier or block, we're done with the chain
+                    break;
+                }
+            };
 
                 // Parse all arguments on the same line until newline
                 let mut args = Vec::new();
@@ -354,17 +376,13 @@ impl Parser {
                     args.push(self.parse_expression()?);
                 }
 
-                steps.push(ChainStep { function_name, args });
+            steps.push(ChainStep { function_name, args });
 
-                // Skip to next line
-                if *self.current_token() == Token::Newline {
-                    self.advance();
-                    // Skip any additional whitespace/newlines before next step
-                    self.skip_newlines();
-                }
-            } else {
-                // If we don't see an identifier, we're done with the chain
-                break;
+            // Skip to next line
+            if *self.current_token() == Token::Newline {
+                self.advance();
+                // Skip any additional whitespace/newlines before next step
+                self.skip_newlines();
             }
         }
 

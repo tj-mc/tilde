@@ -1,0 +1,96 @@
+# Function Chaining Examples
+# Showcases multiple functions chained together in single blocks
+
+say "=== Multi-Function Chains - The Power of Chaining ==="
+
+~raw-data is [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+~processed:
+    filter ~raw-data is-even
+    map double
+    sort
+    reverse
+
+say "Raw data: " ~raw-data
+say "After filter→map→sort→reverse: " ~processed
+
+say ""
+say "=== String Processing Chain ==="
+
+~words is ["Hello", "WORLD", "tilde", "LANGUAGE", "rocks"]
+~formatted:
+    map ~words lowercase
+    sort
+    join " | "
+
+say "Original words: " ~words
+say "After lowercase→sort→join: " ~formatted
+
+say ""
+say "=== Data Analysis Chain ==="
+
+~scores is [45, 67, 89, 92, 78, 83, 96, 74, 88, 91, 85, 79]
+~analysis:
+    filter ~scores |~x (~x >= 80)|
+    sort
+    reverse
+    length
+
+say "All scores: " ~scores
+say "High scores (≥80) count after sort: " ~analysis
+
+say ""
+say "=== Mega Chain - 6 Operations! ==="
+
+~big-dataset is [15, 8, 23, 4, 16, 42, 7, 31, 11, 27, 9, 35]
+~mega-result:
+    filter ~big-dataset |~n (~n > 10)|
+    map double
+    filter is-even
+    sort
+    reverse
+    length
+
+say "Dataset: " ~big_dataset
+say "After 6-step pipeline: " ~mega_result
+
+say ""
+say "=== List Transformation Chains ==="
+
+~mixed is [1, 3, 5, 2, 4, 6, 8, 7, 9]
+~evens-processed:
+    filter ~mixed is-even
+    map square
+    sort
+
+~odds_processed:
+    filter ~mixed is-odd
+    sort
+    reverse
+
+say "Original: " ~mixed
+say "Evens squared & sorted: " ~evens_processed
+say "Odds reverse sorted: " ~odds_processed
+
+say ""
+say "=== Function Chaining vs Traditional Nesting ==="
+
+# Compare readability
+~data is [12, 5, 18, 3, 21, 8, 15, 7]
+
+# Traditional nested (hard to read)
+~nested is length ( reverse ( sort ( map ( filter ~data is-even ) triple ) ) )
+
+# Function chaining (crystal clear)
+~chained:
+    filter ~data is-even
+    map triple
+    sort
+    reverse
+    length
+
+say "Input: " ~data
+say "Nested result: " ~nested
+say "Chained result: " ~chained
+say ""
+say "Both give same result, but look how readable chaining is!"
+say "The chain shows: filter evens → triple them → sort → reverse → count"

@@ -1539,47 +1539,40 @@ impl Evaluator {
     }
 
     fn eval_chain_step(&mut self, step: &ChainStep, input_value: Option<Value>) -> Result<Value, String> {
-        let mut args = Vec::new();
-
-        // If we have input from previous step, it becomes the first argument
+        // Convert input value to expression if present
+        let mut expr_args = Vec::new();
         if let Some(value) = input_value {
-            args.push(value);
+            let input_expr = match value {
+                Value::Number(n) => Expression::Number(n, false),
+                Value::String(s) => Expression::String(s),
+                Value::Boolean(b) => Expression::Boolean(b),
+                Value::List(items) => {
+                    let expr_items: Vec<Expression> = items.into_iter().map(|item| match item {
+                        Value::Number(n) => Expression::Number(n, false),
+                        Value::String(s) => Expression::String(s),
+                        Value::Boolean(b) => Expression::Boolean(b),
+                        _ => Expression::String(item.to_string()),
+                    }).collect();
+                    Expression::List(expr_items)
+                },
+                _ => Expression::String(value.to_string()),
+            };
+            expr_args.push(input_expr);
         }
 
-        // Add the step's explicit arguments
+        // Add the step's explicit arguments (don't evaluate them here)
         for arg in &step.args {
-            args.push(self.eval_expression(arg.clone())?);
+            expr_args.push(arg.clone());
         }
 
-        // Call the function with the combined arguments
-        self.call_function(&step.function_name, args)
-    }
-
-    fn call_function(&mut self, name: &str, args: Vec<Value>) -> Result<Value, String> {
-        // Convert Values back to Expressions for function calling
-        let expr_args: Vec<Expression> = args.into_iter().map(|val| match val {
-            Value::Number(n) => Expression::Number(n, false),
-            Value::String(s) => Expression::String(s),
-            Value::Boolean(b) => Expression::Boolean(b),
-            Value::List(items) => {
-                let expr_items: Vec<Expression> = items.into_iter().map(|item| match item {
-                    Value::Number(n) => Expression::Number(n, false),
-                    Value::String(s) => Expression::String(s),
-                    Value::Boolean(b) => Expression::Boolean(b),
-                    _ => Expression::String(item.to_string()),
-                }).collect();
-                Expression::List(expr_items)
-            },
-            _ => Expression::String(val.to_string()),
-        }).collect();
-
-        // Use the existing function call logic
+        // Call the function directly with expressions
         let func_call = Expression::FunctionCall {
-            name: name.to_string(),
+            name: step.function_name.clone(),
             args: expr_args,
         };
         self.eval_expression(func_call)
     }
+
 }
 
 #[cfg(test)]
