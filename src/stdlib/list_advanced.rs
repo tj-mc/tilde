@@ -101,6 +101,7 @@ pub fn eval_unique(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<V
             }
             Value::Date(dt) => format!("d:{}", dt.format("%Y-%m-%dT%H:%M:%SZ")),
             Value::Error(err) => format!("e:{}", err.message),
+            Value::Pattern(pattern) => format!("p:{}", pattern.notation),
         };
 
         if seen.insert(key) {

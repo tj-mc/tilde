@@ -76,6 +76,7 @@ pub fn eval_write_positional(
         Value::Object(_) => content_val.to_string(),
         Value::Date(_) => content_val.to_string(),
         Value::Error(_) => content_val.to_string(),
+        Value::Pattern(_) => content_val.to_string(),
     };
 
     // Attempt to write the file

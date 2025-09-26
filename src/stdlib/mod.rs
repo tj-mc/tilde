@@ -10,6 +10,7 @@ pub mod list_advanced;
 pub mod list_mutations;
 pub mod list_queries;
 pub mod math;
+pub mod music;
 pub mod object;
 pub mod object_manipulation;
 pub mod set_operations;
@@ -185,6 +186,12 @@ pub fn get_stdlib_function_names() -> &'static [&'static str] {
         "object-get",
         "object-set",
         "deep-merge",
+        // Music functions
+        "pattern",
+        "pattern-debug",
+        "pattern-timeline",
+        "pattern-notation",
+        "pattern-length",
     ]
 }
 
@@ -368,6 +375,13 @@ pub fn get_stdlib_function(name: &str) -> Option<StdlibFunction> {
         "object-get" => Some(object_manipulation::eval_object_get),
         "object-set" => Some(object_manipulation::eval_object_set),
         "deep-merge" => Some(object_manipulation::eval_deep_merge),
+
+        // Music functions
+        "pattern" => Some(music::eval_pattern),
+        "pattern-debug" => Some(music::eval_pattern_debug),
+        "pattern-timeline" => Some(music::eval_pattern_timeline),
+        "pattern-notation" => Some(music::eval_pattern_notation),
+        "pattern-length" => Some(music::eval_pattern_length),
 
         _ => None,
     }

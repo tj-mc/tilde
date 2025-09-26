@@ -1,0 +1,54 @@
+# Tilde Pattern Examples - V1 Implementation
+# Showcases the new pattern type and Strudel-compatible mini-notation
+
+say "=== Tilde Pattern System V1 ==="
+say "Inspired by Strudel's mini-notation for live coding music"
+say ""
+
+# Basic patterns
+say "1. Basic drum patterns:"
+~kick is pattern "x ~ x ~"
+~snare is pattern "~ x ~ x"
+~hihat is pattern "x x x x"
+
+say "Kick:  " pattern-timeline ~kick
+say "Snare: " pattern-timeline ~snare
+say "Hihat: " pattern-timeline ~hihat
+say ""
+
+# Chord patterns
+say "2. Chord progressions:"
+~chord1 is pattern "[c3,e3,g3]"
+~chord2 is pattern "[f3,a3,c4]"
+~progression is pattern "[c3,e3,g3] [f3,a3,c4] [g3,b3,d4] [c3,e3,g3]"
+
+say "Single chord:"
+say pattern-debug ~chord1
+say "Full progression:"
+say pattern-timeline ~progression
+say ""
+
+# Subdivisions and speed
+say "3. Advanced timing:"
+~fast-bass is pattern "c2*4"
+~subdivided is pattern "[c3 d3 e3] f3 [g3 a3] b3"
+
+say "Fast bass (c2*4):"
+say pattern-timeline ~fast-bass
+say "Subdivided melody:"
+say pattern-timeline ~subdivided
+say ""
+
+# Complex patterns
+say "4. Complex patterns:"
+~complex is pattern "[[c3 d3] e3]*2 ~ [f3,a3,c4]"
+say "Complex pattern: [[c3 d3] e3]*2 ~ [f3,a3,c4]"
+say pattern-debug ~complex
+say ""
+
+say "=== Pattern Properties ==="
+say "Pattern length: " pattern-length ~complex
+say "Original notation: " pattern-notation ~complex
+say ""
+
+say "✨ Ready for the next phase: real-time scheduling and audio output!"

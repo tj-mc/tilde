@@ -55,6 +55,7 @@ impl Evaluator {
             Value::Object(o) => !o.is_empty(),
             Value::Date(_) => true,   // Dates are always truthy
             Value::Error(_) => false, // Errors are falsy
+            Value::Pattern(p) => !p.events.is_empty(), // Patterns with events are truthy
             Value::Null => false,
         }
     }

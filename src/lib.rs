@@ -4,6 +4,7 @@ pub mod file_io;
 pub mod http;
 pub mod intern;
 pub mod lexer;
+pub mod music;
 pub mod parser;
 pub mod random;
 pub mod stdlib;

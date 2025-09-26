@@ -11,6 +11,7 @@ pub enum Value {
     Object(HashMap<String, Value>),
     Date(DateTime<Utc>),
     Error(ErrorValue),
+    Pattern(PatternValue),
     Null,
 }
 
@@ -48,6 +49,24 @@ impl ErrorValue {
     }
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub struct PatternValue {
+    pub notation: String,
+    pub events: Vec<PatternEvent>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct PatternEvent {
+    pub time: f64,      // 0.0 to 1.0 within cycle
+    pub event_type: EventType,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum EventType {
+    Note(String),       // Note name as string
+    Rest,
+}
+
 impl Value {
     pub fn is_truthy(&self) -> bool {
         match self {
@@ -59,6 +78,7 @@ impl Value {
             Value::Object(map) => !map.is_empty(),
             Value::Date(_) => true,   // Dates are always truthy
             Value::Error(_) => false, // Errors are falsy
+            Value::Pattern(p) => !p.events.is_empty(), // Patterns with events are truthy
         }
     }
 }
@@ -85,6 +105,7 @@ impl fmt::Display for Value {
             }
             Value::Date(dt) => write!(f, "{}", dt.format("%Y-%m-%dT%H:%M:%SZ")),
             Value::Error(err) => write!(f, "Error: {}", err.message),
+            Value::Pattern(pattern) => write!(f, "pattern(\"{}\")", pattern.notation),
             Value::Null => write!(f, "null"),
         }
     }
