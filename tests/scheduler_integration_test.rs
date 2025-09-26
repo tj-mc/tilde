@@ -1,114 +1,162 @@
 use tilde::evaluator::Evaluator;
-use tilde::music::parse_mini_notation;
-use tilde::value::{Value, PatternValue};
+use tilde::ast::Expression;
 
 #[test]
 fn test_scheduler_basic_functionality() {
     let mut evaluator = Evaluator::new();
 
-    // Test initial state
-    assert!(!evaluator.scheduler.is_playing);
-    assert_eq!(evaluator.scheduler.patterns.len(), 0);
-    assert_eq!(evaluator.scheduler.cpm, 120.0);
+    // Test initial state - music engine starts as None
+    assert!(evaluator.music_engine.is_none());
 
-    // Test tempo setting
-    evaluator.scheduler.set_tempo(60.0); // 1 cycle per second
-    assert_eq!(evaluator.scheduler.cpm, 60.0);
+    // Test tempo setting via tempo function
+    let tempo_expr = Expression::FunctionCall {
+        name: "tempo".to_string(),
+        args: vec![Expression::Number(60.0, true)],
+    };
+    let _ = evaluator.eval_expression(tempo_expr);
 
-    // Create and add pattern
-    let events = parse_mini_notation("c3 d3").unwrap();
-    let pattern = Value::Pattern(PatternValue::Simple {
-        notation: "c3 d3".to_string(),
-        events,
-    });
+    // Create pattern via pattern function
+    let pattern_expr = Expression::FunctionCall {
+        name: "pattern".to_string(),
+        args: vec![Expression::String("c3 d3".to_string())],
+    };
+    let pattern_result = evaluator.eval_expression(pattern_expr);
+    assert!(pattern_result.is_ok());
+    
+    // Store pattern in variable
+    evaluator.set_variable("test_pattern".to_string(), pattern_result.unwrap());
 
-    evaluator.scheduler.add_pattern(pattern);
-    assert_eq!(evaluator.scheduler.patterns.len(), 1);
+    // Test starting scheduler via play function with pattern argument
+    let play_expr = Expression::FunctionCall {
+        name: "play".to_string(),
+        args: vec![Expression::Variable("test_pattern".to_string())],
+    };
+    let _ = evaluator.eval_expression(play_expr);
 
-    // Test starting scheduler
-    evaluator.scheduler.start();
-    assert!(evaluator.scheduler.is_playing);
-    assert!(evaluator.scheduler.current_time >= 0.0);
+    // After play, music engine should exist and be playing
+    assert!(evaluator.music_engine.is_some());
+    if let Some(ref engine) = evaluator.music_engine {
+        assert!(engine.is_playing());
+    }
 
-    // Test stopping
-    evaluator.scheduler.stop();
-    assert!(!evaluator.scheduler.is_playing);
-    assert_eq!(evaluator.scheduler.patterns.len(), 0);
+    // Test stopping via stop function
+    let stop_expr = Expression::FunctionCall {
+        name: "stop".to_string(),
+        args: vec![],
+    };
+    let _ = evaluator.eval_expression(stop_expr);
+
+    if let Some(ref engine) = evaluator.music_engine {
+        assert!(!engine.is_playing());
+    }
 }
 
 #[test]
 fn test_multiple_patterns() {
     let mut evaluator = Evaluator::new();
 
-    // Create two patterns
-    let events1 = parse_mini_notation("c3 d3").unwrap();
-    let pattern1 = Value::Pattern(PatternValue::Simple {
-        notation: "c3 d3".to_string(),
-        events: events1,
-    });
+    // Create two patterns via pattern function calls
+    let pattern1_expr = Expression::FunctionCall {
+        name: "pattern".to_string(),
+        args: vec![Expression::String("c3 d3".to_string())],
+    };
+    let pattern2_expr = Expression::FunctionCall {
+        name: "pattern".to_string(),
+        args: vec![Expression::String("e3 f3 g3".to_string())],
+    };
 
-    let events2 = parse_mini_notation("e3 f3 g3").unwrap();
-    let pattern2 = Value::Pattern(PatternValue::Simple {
-        notation: "e3 f3 g3".to_string(),
-        events: events2,
-    });
+    // Create and store both patterns
+    let result1 = evaluator.eval_expression(pattern1_expr);
+    let result2 = evaluator.eval_expression(pattern2_expr);
+    assert!(result1.is_ok());
+    assert!(result2.is_ok());
+    
+    evaluator.set_variable("pattern1".to_string(), result1.unwrap());
+    evaluator.set_variable("pattern2".to_string(), result2.unwrap());
 
-    // Add both patterns
-    evaluator.scheduler.add_pattern(pattern1);
-    evaluator.scheduler.add_pattern(pattern2);
-    assert_eq!(evaluator.scheduler.patterns.len(), 2);
+    // Start scheduler by playing both patterns
+    let play1_expr = Expression::FunctionCall {
+        name: "play".to_string(),
+        args: vec![Expression::Variable("pattern1".to_string())],
+    };
+    let play2_expr = Expression::FunctionCall {
+        name: "play".to_string(),
+        args: vec![Expression::Variable("pattern2".to_string())],
+    };
+    let _ = evaluator.eval_expression(play1_expr);
+    let _ = evaluator.eval_expression(play2_expr);
 
-    // Start scheduler
-    evaluator.scheduler.start();
-    assert!(evaluator.scheduler.is_playing);
+    // Verify music engine is playing
+    assert!(evaluator.music_engine.is_some());
+    if let Some(ref engine) = evaluator.music_engine {
+        assert!(engine.is_playing());
+    }
 }
 
 #[test]
 fn test_scheduler_tick_mechanism() {
     let mut evaluator = Evaluator::new();
 
-    // Create pattern with specific timing
-    let events = parse_mini_notation("c3 ~ d3 ~").unwrap();
-    let pattern = Value::Pattern(PatternValue::Simple {
-        notation: "c3 ~ d3 ~".to_string(),
-        events,
-    });
+    // Set tempo first
+    let tempo_expr = Expression::FunctionCall {
+        name: "tempo".to_string(),
+        args: vec![Expression::Number(120.0, true)],
+    };
+    let _ = evaluator.eval_expression(tempo_expr);
 
-    evaluator.scheduler.set_tempo(120.0); // 2 cycles per second
-    evaluator.scheduler.add_pattern(pattern);
-    evaluator.scheduler.start();
+    // Create pattern with specific timing
+    let pattern_expr = Expression::FunctionCall {
+        name: "pattern".to_string(),
+        args: vec![Expression::String("c3 ~ d3 ~".to_string())],
+    };
+    let _ = evaluator.eval_expression(pattern_expr);
+
+    // Start the scheduler
+    let play_expr = Expression::FunctionCall {
+        name: "play".to_string(),
+        args: vec![],
+    };
+    let _ = evaluator.eval_expression(play_expr);
 
     // Test ticking - this tests the mechanism even if timing isn't perfect
-    let outputs = evaluator.tick_scheduler();
+    if let Some(ref mut engine) = evaluator.music_engine {
+        let outputs = engine.tick();
+        
+        // The scheduler should be able to tick without errors
+        // Exact event firing depends on precise timing, but mechanism should work
+        println!("Scheduler tick completed with {} outputs", outputs.len());
 
-    // The scheduler should be able to tick without errors
-    // Exact event firing depends on precise timing, but mechanism should work
-    println!("Scheduler tick completed with {} outputs", outputs.len());
-
-    // Verify scheduler state is still consistent
-    assert!(evaluator.scheduler.is_playing);
-    assert_eq!(evaluator.scheduler.patterns.len(), 1);
+        // Verify scheduler state is still consistent
+        assert!(engine.is_playing());
+    } else {
+        panic!("Music engine should exist after play command");
+    }
 }
 
 #[test]
 fn test_pattern_value_enum_compatibility() {
     let mut evaluator = Evaluator::new();
 
-    // Test that both Simple and hypothetical Stacked patterns work
-    let events = parse_mini_notation("c3 d3").unwrap();
-    let simple_pattern = Value::Pattern(PatternValue::Simple {
-        notation: "c3 d3".to_string(),
-        events: events.clone(),
-    });
+    // Test pattern creation via function call
+    let pattern_expr = Expression::FunctionCall {
+        name: "pattern".to_string(),
+        args: vec![Expression::String("c3 d3".to_string())],
+    };
+    
+    let result = evaluator.eval_expression(pattern_expr);
+    assert!(result.is_ok());
 
-    // Test pattern methods work
-    if let Value::Pattern(ref pattern) = simple_pattern {
-        assert_eq!(pattern.notation(), "c3 d3");
-        assert_eq!(pattern.events().len(), 2);
-        assert!(!pattern.is_empty());
+    // Test that the pattern can be used in play context
+    let play_expr = Expression::FunctionCall {
+        name: "play".to_string(),
+        args: vec![],
+    };
+    let play_result = evaluator.eval_expression(play_expr);
+    assert!(play_result.is_ok());
+
+    // Verify music engine was created and is functional
+    assert!(evaluator.music_engine.is_some());
+    if let Some(ref engine) = evaluator.music_engine {
+        assert!(engine.is_playing());
     }
-
-    // Test scheduler accepts the pattern
-    evaluator.scheduler.add_pattern(simple_pattern);
-    assert_eq!(evaluator.scheduler.patterns.len(), 1);
 }

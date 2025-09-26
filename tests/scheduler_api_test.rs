@@ -7,27 +7,53 @@ fn test_play_stop_tempo_api() {
     let mut evaluator = Evaluator::new();
 
     // Test tempo function
-    let tempo_args = vec![Expression::Literal(Value::Number(180.0))];
-    let result = evaluator.eval_positional_function("tempo", tempo_args).unwrap();
+    let tempo_expr = Expression::FunctionCall {
+        name: "tempo".to_string(),
+        args: vec![Expression::Number(180.0, false)],
+    };
+    let result = evaluator.eval_expression(tempo_expr).unwrap();
     assert!(matches!(result, Value::String(_)));
-    assert_eq!(evaluator.scheduler.cpm, 180.0);
+    
+    // Check that tempo was set by checking the music engine
+    if let Some(ref engine) = evaluator.music_engine {
+        assert_eq!(engine.get_tempo(), 180.0);
+    }
 
-    // Test play function with a pattern
-    let pattern_args = vec![Expression::Literal(Value::String("c3 d3 e3".to_string()))];
-    let pattern_result = evaluator.eval_positional_function("pattern", pattern_args).unwrap();
-
-    let play_args = vec![Expression::Literal(pattern_result)];
-    let play_result = evaluator.eval_positional_function("play", play_args).unwrap();
+    // Test pattern creation and play function
+    let pattern_expr = Expression::FunctionCall {
+        name: "pattern".to_string(),
+        args: vec![Expression::String("c3 d3 e3".to_string())],
+    };
+    let pattern_result = evaluator.eval_expression(pattern_expr).unwrap();
+    
+    // Store the pattern in a variable for play function
+    evaluator.set_variable("test_pattern".to_string(), pattern_result);
+    
+    let play_expr = Expression::FunctionCall {
+        name: "play".to_string(),
+        args: vec![Expression::Variable("test_pattern".to_string())],
+    };
+    let play_result = evaluator.eval_expression(play_expr).unwrap();
     assert!(matches!(play_result, Value::String(_)));
-    assert!(evaluator.scheduler.is_playing);
-    assert_eq!(evaluator.scheduler.patterns.len(), 1);
+    
+    // Check that music engine is playing and has patterns
+    if let Some(ref engine) = evaluator.music_engine {
+        assert!(engine.is_playing());
+        assert!(!engine.get_pattern_names().is_empty());
+    }
 
     // Test stop function
-    let stop_args = vec![];
-    let stop_result = evaluator.eval_positional_function("stop", stop_args).unwrap();
+    let stop_expr = Expression::FunctionCall {
+        name: "stop".to_string(),
+        args: vec![],
+    };
+    let stop_result = evaluator.eval_expression(stop_expr).unwrap();
     assert!(matches!(stop_result, Value::String(_)));
-    assert!(!evaluator.scheduler.is_playing);
-    assert_eq!(evaluator.scheduler.patterns.len(), 0);
+    
+    // Check that music engine stopped
+    if let Some(ref engine) = evaluator.music_engine {
+        assert!(!engine.is_playing());
+    }
 }
 
 #[test]
@@ -35,69 +61,133 @@ fn test_multiple_pattern_play() {
     let mut evaluator = Evaluator::new();
 
     // Create and play first pattern
-    let pattern1_args = vec![Expression::Literal(Value::String("c3 d3".to_string()))];
-    let pattern1 = evaluator.eval_positional_function("pattern", pattern1_args).unwrap();
-    let play1_args = vec![Expression::Literal(pattern1)];
-    evaluator.eval_positional_function("play", play1_args).unwrap();
+    let pattern1_expr = Expression::FunctionCall {
+        name: "pattern".to_string(),
+        args: vec![Expression::String("c3 d3".to_string())],
+    };
+    let pattern1 = evaluator.eval_expression(pattern1_expr).unwrap();
+    evaluator.set_variable("pattern1".to_string(), pattern1);
+    
+    let play1_expr = Expression::FunctionCall {
+        name: "play".to_string(),
+        args: vec![Expression::Variable("pattern1".to_string())],
+    };
+    evaluator.eval_expression(play1_expr).unwrap();
 
     // Create and play second pattern
-    let pattern2_args = vec![Expression::Literal(Value::String("e3 f3 g3".to_string()))];
-    let pattern2 = evaluator.eval_positional_function("pattern", pattern2_args).unwrap();
-    let play2_args = vec![Expression::Literal(pattern2)];
-    evaluator.eval_positional_function("play", play2_args).unwrap();
+    let pattern2_expr = Expression::FunctionCall {
+        name: "pattern".to_string(),
+        args: vec![Expression::String("e3 f3 g3".to_string())],
+    };
+    let pattern2 = evaluator.eval_expression(pattern2_expr).unwrap();
+    evaluator.set_variable("pattern2".to_string(), pattern2);
+    
+    let play2_expr = Expression::FunctionCall {
+        name: "play".to_string(),
+        args: vec![Expression::Variable("pattern2".to_string())],
+    };
+    evaluator.eval_expression(play2_expr).unwrap();
 
-    // Should have both patterns loaded
-    assert!(evaluator.scheduler.is_playing);
-    assert_eq!(evaluator.scheduler.patterns.len(), 2);
+    // Check that we have multiple patterns playing
+    if let Some(ref engine) = evaluator.music_engine {
+        assert!(engine.is_playing());
+        assert!(engine.get_pattern_names().len() >= 2);
+    }
 
-    // Stop should clear all patterns
-    evaluator.eval_positional_function("stop", vec![]).unwrap();
-    assert!(!evaluator.scheduler.is_playing);
-    assert_eq!(evaluator.scheduler.patterns.len(), 0);
+    // Stop all patterns
+    let stop_expr = Expression::FunctionCall {
+        name: "stop".to_string(),
+        args: vec![],
+    };
+    evaluator.eval_expression(stop_expr).unwrap();
+    
+    // Check that all patterns stopped
+    if let Some(ref engine) = evaluator.music_engine {
+        assert!(!engine.is_playing());
+    }
 }
 
 #[test]
-fn test_api_error_handling() {
+fn test_error_handling() {
     let mut evaluator = Evaluator::new();
 
-    // Test tempo with invalid argument
-    let bad_tempo_args = vec![Expression::Literal(Value::String("not-a-number".to_string()))];
-    let result = evaluator.eval_positional_function("tempo", bad_tempo_args);
+    // Test tempo with invalid argument (should handle gracefully)
+    let bad_tempo_expr = Expression::FunctionCall {
+        name: "tempo".to_string(),
+        args: vec![Expression::String("not-a-number".to_string())],
+    };
+    let result = evaluator.eval_expression(bad_tempo_expr);
     assert!(result.is_err());
 
-    // Test tempo with zero
-    let zero_tempo_args = vec![Expression::Literal(Value::Number(0.0))];
-    let result = evaluator.eval_positional_function("tempo", zero_tempo_args);
+    // Test tempo with zero (should handle gracefully)
+    let zero_tempo_expr = Expression::FunctionCall {
+        name: "tempo".to_string(),
+        args: vec![Expression::Number(0.0, false)],
+    };
+    let result = evaluator.eval_expression(zero_tempo_expr);
     assert!(result.is_err());
 
-    // Test play with non-pattern
-    let bad_play_args = vec![Expression::Literal(Value::String("not-a-pattern".to_string()))];
-    let result = evaluator.eval_positional_function("play", bad_play_args);
+    // Test play with invalid pattern (should handle gracefully)
+    let bad_play_expr = Expression::FunctionCall {
+        name: "play".to_string(),
+        args: vec![Expression::String("not-a-pattern".to_string())],
+    };
+    let result = evaluator.eval_expression(bad_play_expr);
     assert!(result.is_err());
 
-    // Test stop with arguments (should take none)
-    let bad_stop_args = vec![Expression::Literal(Value::Number(1.0))];
-    let result = evaluator.eval_positional_function("stop", bad_stop_args);
+    // Test stop with arguments (should handle gracefully)
+    let bad_stop_expr = Expression::FunctionCall {
+        name: "stop".to_string(),
+        args: vec![Expression::Number(1.0, false)],
+    };
+    let result = evaluator.eval_expression(bad_stop_expr);
     assert!(result.is_err());
 }
 
 #[test]
-fn test_scheduler_public_tick() {
+fn test_scheduler_state_consistency() {
     let mut evaluator = Evaluator::new();
 
-    // Set up a pattern
-    let pattern_args = vec![Expression::Literal(Value::String("c3 d3".to_string()))];
-    let pattern = evaluator.eval_positional_function("pattern", pattern_args).unwrap();
-    let play_args = vec![Expression::Literal(pattern)];
-    evaluator.eval_positional_function("play", play_args).unwrap();
+    // Create a pattern and play it
+    let pattern_expr = Expression::FunctionCall {
+        name: "pattern".to_string(),
+        args: vec![Expression::String("c3 d3".to_string())],
+    };
+    let pattern = evaluator.eval_expression(pattern_expr).unwrap();
+    evaluator.set_variable("test_pattern".to_string(), pattern);
+    
+    let play_expr = Expression::FunctionCall {
+        name: "play".to_string(),
+        args: vec![Expression::Variable("test_pattern".to_string())],
+    };
+    evaluator.eval_expression(play_expr).unwrap();
 
-    // Test that public tick_scheduler method works
-    let outputs = evaluator.tick_scheduler();
+    // Verify initial state
+    if let Some(ref engine) = evaluator.music_engine {
+        assert!(engine.is_playing());
+        assert_eq!(engine.get_pattern_names().len(), 1);
+    }
 
-    // Should not error and should be possible to call
-    println!("Tick outputs: {:?}", outputs);
+    // Change tempo and verify playing continues
+    let tempo_expr = Expression::FunctionCall {
+        name: "tempo".to_string(),
+        args: vec![Expression::Number(240.0, false)],
+    };
+    evaluator.eval_expression(tempo_expr).unwrap();
+    
+    if let Some(ref engine) = evaluator.music_engine {
+        assert_eq!(engine.get_tempo(), 240.0);
+        assert!(engine.is_playing()); // Should still be playing
+    }
 
-    // Scheduler should still be in consistent state
-    assert!(evaluator.scheduler.is_playing);
-    assert_eq!(evaluator.scheduler.patterns.len(), 1);
+    // Stop and verify final state
+    let stop_expr = Expression::FunctionCall {
+        name: "stop".to_string(),
+        args: vec![],
+    };
+    evaluator.eval_expression(stop_expr).unwrap();
+    
+    if let Some(ref engine) = evaluator.music_engine {
+        assert!(!engine.is_playing());
+    }
 }

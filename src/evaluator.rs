@@ -1,8 +1,8 @@
 use crate::ast::*;
 use crate::http::{HttpClient, HttpRequest, parse_http_options};
 use crate::value::Value;
+use crate::music::MusicEngine;
 use std::collections::HashMap;
-use std::time::Instant;
 
 #[derive(Debug, PartialEq)]
 enum ControlFlow {
@@ -19,103 +19,7 @@ pub struct Function {
     pub body: Vec<Statement>,
 }
 
-#[derive(Debug)]
-pub struct ScheduledPattern {
-    pattern: Value,
-    next_event_time: f64,
-    cycle_duration: f64,
-}
-
-#[derive(Debug)]
-pub struct PatternScheduler {
-    pub patterns: Vec<ScheduledPattern>,
-    pub current_time: f64,
-    pub cpm: f64, // cycles per minute
-    pub is_playing: bool,
-    start_time: Option<Instant>,
-}
-
-impl PatternScheduler {
-    fn new() -> Self {
-        PatternScheduler {
-            patterns: Vec::new(),
-            current_time: 0.0,
-            cpm: 120.0, // Default 120 cycles per minute
-            is_playing: false,
-            start_time: None,
-        }
-    }
-
-    pub fn add_pattern(&mut self, pattern: Value) {
-        let scheduled = ScheduledPattern {
-            pattern,
-            next_event_time: 0.0,
-            cycle_duration: 1.0, // Default 1 cycle
-        };
-        self.patterns.push(scheduled);
-    }
-
-    pub fn start(&mut self) {
-        self.is_playing = true;
-        self.start_time = Some(Instant::now());
-        self.current_time = 0.0;
-    }
-
-    pub fn stop(&mut self) {
-        self.is_playing = false;
-        self.patterns.clear();
-        self.start_time = None;
-        self.current_time = 0.0;
-    }
-
-    pub fn set_tempo(&mut self, cpm: f64) {
-        self.cpm = cpm;
-    }
-
-    fn tick(&mut self) -> Vec<String> {
-        let mut output = Vec::new();
-
-        if !self.is_playing || self.start_time.is_none() {
-            return output;
-        }
-
-        if let Some(start) = self.start_time {
-            let elapsed = start.elapsed().as_secs_f64();
-            self.current_time = elapsed * (self.cpm / 60.0); // Convert CPM to cycles per second
-        }
-
-        // Check if any patterns need to fire events
-        for scheduled in &mut self.patterns {
-            if self.current_time >= scheduled.next_event_time {
-                if let Value::Pattern(ref pattern) = scheduled.pattern {
-                    let events = pattern.events();
-
-                    // Find events that should fire at this time
-                    for event in events {
-                        let cycle_time = scheduled.next_event_time.floor();
-                        let event_time = cycle_time + event.time;
-
-                        if (event_time - self.current_time).abs() < 0.01 { // Small tolerance
-                            match &event.event_type {
-                                crate::value::EventType::Note(note) => {
-                                    output.push(format!("♪ {}", note));
-                                },
-                                crate::value::EventType::Rest => {
-                                    output.push("♪ ~".to_string());
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Schedule next cycle
-                scheduled.next_event_time += scheduled.cycle_duration;
-            }
-        }
-
-        output
-    }
-}
+// Legacy scheduler code removed - now using modular MusicEngine
 
 #[derive(Debug)]
 pub struct Evaluator {
@@ -125,7 +29,7 @@ pub struct Evaluator {
     max_call_depth: usize,
     pub output_buffer: Vec<String>,
     last_error: Option<Value>,
-    pub scheduler: PatternScheduler,
+    pub music_engine: Option<MusicEngine>,
 }
 
 impl Default for Evaluator {
@@ -143,7 +47,7 @@ impl Evaluator {
             max_call_depth: 100,
             output_buffer: Vec::new(),
             last_error: None,
-            scheduler: PatternScheduler::new(),
+            music_engine: None,
         }
     }
 
@@ -1375,10 +1279,13 @@ impl Evaluator {
 
         let pattern = self.eval_expression(args[0].clone())?;
         match pattern {
-            Value::Pattern(_) => {
-                self.scheduler.add_pattern(pattern);
-                if !self.scheduler.is_playing {
-                    self.scheduler.start();
+            Value::Pattern(ref pattern_value) => {
+                let engine = self.ensure_music_engine();
+                let pattern_name = format!("pattern_{}", engine.get_pattern_names().len());
+                
+                engine.add_pattern_value(pattern_name, pattern_value)?;
+                if !engine.is_playing() {
+                    engine.start()?;
                 }
                 Ok(Value::String("Pattern added to scheduler".to_string()))
             }
@@ -1391,7 +1298,9 @@ impl Evaluator {
             return Err("stop takes no arguments".to_string());
         }
 
-        self.scheduler.stop();
+        if let Some(ref mut engine) = self.music_engine {
+            engine.stop();
+        }
         Ok(Value::String("Scheduler stopped".to_string()))
     }
 
@@ -1406,7 +1315,8 @@ impl Evaluator {
                 if cpm <= 0.0 {
                     return Err("tempo must be positive".to_string());
                 }
-                self.scheduler.set_tempo(cpm);
+                let engine = self.ensure_music_engine();
+                engine.set_tempo(cpm);
                 Ok(Value::String(format!("Tempo set to {} CPM", cpm)))
             }
             _ => Err("tempo argument must be a number".to_string()),
@@ -1415,12 +1325,25 @@ impl Evaluator {
 
     // Public method to tick the scheduler and get any pattern outputs
     pub fn tick_scheduler(&mut self) -> Vec<String> {
-        let outputs = self.scheduler.tick();
+        let outputs = if let Some(ref mut engine) = self.music_engine {
+            engine.tick()
+        } else {
+            Vec::new()
+        };
+        
         // Add outputs to the output buffer
         for output in &outputs {
             self.output_buffer.push(output.clone());
         }
         outputs
+    }
+    
+    // Helper method to ensure music engine is initialized
+    pub fn ensure_music_engine(&mut self) -> &mut MusicEngine {
+        if self.music_engine.is_none() {
+            self.music_engine = Some(MusicEngine::with_debug_output());
+        }
+        self.music_engine.as_mut().unwrap()
     }
 
     // Hidden debug functions for TDD - prefixed with __ to indicate internal use
@@ -1429,21 +1352,28 @@ impl Evaluator {
             return Err("__scheduler-debug takes no arguments".to_string());
         }
 
-        let debug_info = format!(
-            "Scheduler Debug:\n\
-            - Playing: {}\n\
-            - Tempo: {} CPM\n\
-            - Current time: {:.3}\n\
-            - Active patterns: {}\n\
-            - Output buffer: {} items",
-            self.scheduler.is_playing,
-            self.scheduler.cpm,
-            self.scheduler.current_time,
-            self.scheduler.patterns.len(),
-            self.output_buffer.len()
-        );
-
-        Ok(Value::String(debug_info))
+        if let Some(ref engine) = self.music_engine {
+            let stats = engine.get_stats();
+            let debug_info = format!(
+                "Scheduler Debug:\n\
+                - Playing: {}\n\
+                - Tempo: {} CPM\n\
+                - Current time: {:.3}\n\
+                - Active patterns: {}\n\
+                - Outputs: {} ({})\n\
+                - Output buffer: {} items",
+                stats.scheduler_stats.is_playing,
+                stats.scheduler_stats.cpm,
+                stats.scheduler_stats.current_time,
+                stats.scheduler_stats.active_patterns,
+                stats.output_count,
+                stats.output_names.join(", "),
+                self.output_buffer.len()
+            );
+            Ok(Value::String(debug_info))
+        } else {
+            Ok(Value::String("Music engine not initialized".to_string()))
+        }
     }
 
     fn eval_scheduler_tick(&mut self, args: Vec<Expression>) -> Result<Value, String> {

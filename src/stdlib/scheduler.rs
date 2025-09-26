@@ -10,10 +10,13 @@ pub fn eval_play(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Val
 
     let pattern = evaluator.eval_expression(args[0].clone())?;
     match pattern {
-        Value::Pattern(_) => {
-            evaluator.scheduler.add_pattern(pattern);
-            if !evaluator.scheduler.is_playing {
-                evaluator.scheduler.start();
+        Value::Pattern(ref pattern_value) => {
+            let engine = evaluator.ensure_music_engine();
+            let pattern_name = format!("pattern_{}", engine.get_pattern_names().len());
+            
+            engine.add_pattern_value(pattern_name, pattern_value)?;
+            if !engine.is_playing() {
+                engine.start()?;
             }
             Ok(Value::String("Pattern added to scheduler".to_string()))
         }
@@ -22,12 +25,14 @@ pub fn eval_play(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Val
 }
 
 /// Stop the pattern scheduler
-pub fn eval_stop(args: Vec<Expression>, _evaluator: &mut Evaluator) -> Result<Value, String> {
+pub fn eval_stop(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
     if !args.is_empty() {
         return Err("stop takes no arguments".to_string());
     }
 
-    _evaluator.scheduler.stop();
+    if let Some(ref mut engine) = evaluator.music_engine {
+        engine.stop();
+    }
     Ok(Value::String("Scheduler stopped".to_string()))
 }
 
@@ -43,7 +48,8 @@ pub fn eval_tempo(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Va
             if cpm <= 0.0 {
                 return Err("tempo must be positive".to_string());
             }
-            evaluator.scheduler.set_tempo(cpm);
+            let engine = evaluator.ensure_music_engine();
+            engine.set_tempo(cpm);
             Ok(Value::String(format!("Tempo set to {} CPM", cpm)))
         }
         _ => Err("tempo argument must be a number".to_string()),
@@ -56,21 +62,28 @@ pub fn eval_scheduler_debug(args: Vec<Expression>, evaluator: &mut Evaluator) ->
         return Err("__scheduler-debug takes no arguments".to_string());
     }
 
-    let debug_info = format!(
-        "Scheduler Debug:\n\
-        - Playing: {}\n\
-        - Tempo: {} CPM\n\
-        - Current time: {:.3}\n\
-        - Active patterns: {}\n\
-        - Output buffer: {} items",
-        evaluator.scheduler.is_playing,
-        evaluator.scheduler.cpm,
-        evaluator.scheduler.current_time,
-        evaluator.scheduler.patterns.len(),
-        evaluator.output_buffer.len()
-    );
-
-    Ok(Value::String(debug_info))
+    if let Some(ref engine) = evaluator.music_engine {
+        let stats = engine.get_stats();
+        let debug_info = format!(
+            "Scheduler Debug:\n\
+            - Playing: {}\n\
+            - Tempo: {} CPM\n\
+            - Current time: {:.3}\n\
+            - Active patterns: {}\n\
+            - Outputs: {} ({})\n\
+            - Output buffer: {} items",
+            stats.scheduler_stats.is_playing,
+            stats.scheduler_stats.cpm,
+            stats.scheduler_stats.current_time,
+            stats.scheduler_stats.active_patterns,
+            stats.output_count,
+            stats.output_names.join(", "),
+            evaluator.output_buffer.len()
+        );
+        Ok(Value::String(debug_info))
+    } else {
+        Ok(Value::String("Music engine not initialized".to_string()))
+    }
 }
 
 /// Debug function to manually tick the scheduler
