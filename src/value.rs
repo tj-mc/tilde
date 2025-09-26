@@ -50,9 +50,49 @@ impl ErrorValue {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct PatternValue {
-    pub notation: String,
-    pub events: Vec<PatternEvent>,
+pub enum PatternValue {
+    Simple {
+        notation: String,
+        events: Vec<PatternEvent>,
+    },
+    Stacked {
+        patterns: Vec<PatternValue>,
+    },
+}
+
+impl PatternValue {
+    /// Get a display-friendly notation for this pattern
+    pub fn notation(&self) -> String {
+        match self {
+            PatternValue::Simple { notation, .. } => notation.clone(),
+            PatternValue::Stacked { patterns } => {
+                let notations: Vec<String> = patterns.iter().map(|p| p.notation()).collect();
+                format!("stack({})", notations.join(", "))
+            }
+        }
+    }
+
+    /// Get all events from this pattern (flattened for stacked patterns)
+    pub fn events(&self) -> Vec<PatternEvent> {
+        match self {
+            PatternValue::Simple { events, .. } => events.clone(),
+            PatternValue::Stacked { patterns } => {
+                let mut all_events = Vec::new();
+                for pattern in patterns {
+                    all_events.extend(pattern.events());
+                }
+                all_events
+            }
+        }
+    }
+
+    /// Check if this pattern has any events
+    pub fn is_empty(&self) -> bool {
+        match self {
+            PatternValue::Simple { events, .. } => events.is_empty(),
+            PatternValue::Stacked { patterns } => patterns.is_empty() || patterns.iter().all(|p| p.is_empty()),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -78,7 +118,7 @@ impl Value {
             Value::Object(map) => !map.is_empty(),
             Value::Date(_) => true,   // Dates are always truthy
             Value::Error(_) => false, // Errors are falsy
-            Value::Pattern(p) => !p.events.is_empty(), // Patterns with events are truthy
+            Value::Pattern(p) => !p.is_empty(), // Patterns with events are truthy
         }
     }
 }
@@ -105,7 +145,7 @@ impl fmt::Display for Value {
             }
             Value::Date(dt) => write!(f, "{}", dt.format("%Y-%m-%dT%H:%M:%SZ")),
             Value::Error(err) => write!(f, "Error: {}", err.message),
-            Value::Pattern(pattern) => write!(f, "pattern(\"{}\")", pattern.notation),
+            Value::Pattern(pattern) => write!(f, "pattern(\"{}\")", pattern.notation()),
             Value::Null => write!(f, "null"),
         }
     }

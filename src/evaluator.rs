@@ -2,6 +2,7 @@ use crate::ast::*;
 use crate::http::{HttpClient, HttpRequest, parse_http_options};
 use crate::value::Value;
 use std::collections::HashMap;
+use std::time::Instant;
 
 #[derive(Debug, PartialEq)]
 enum ControlFlow {
@@ -19,6 +20,104 @@ pub struct Function {
 }
 
 #[derive(Debug)]
+pub struct ScheduledPattern {
+    pattern: Value,
+    next_event_time: f64,
+    cycle_duration: f64,
+}
+
+#[derive(Debug)]
+pub struct PatternScheduler {
+    pub patterns: Vec<ScheduledPattern>,
+    pub current_time: f64,
+    pub cpm: f64, // cycles per minute
+    pub is_playing: bool,
+    start_time: Option<Instant>,
+}
+
+impl PatternScheduler {
+    fn new() -> Self {
+        PatternScheduler {
+            patterns: Vec::new(),
+            current_time: 0.0,
+            cpm: 120.0, // Default 120 cycles per minute
+            is_playing: false,
+            start_time: None,
+        }
+    }
+
+    pub fn add_pattern(&mut self, pattern: Value) {
+        let scheduled = ScheduledPattern {
+            pattern,
+            next_event_time: 0.0,
+            cycle_duration: 1.0, // Default 1 cycle
+        };
+        self.patterns.push(scheduled);
+    }
+
+    pub fn start(&mut self) {
+        self.is_playing = true;
+        self.start_time = Some(Instant::now());
+        self.current_time = 0.0;
+    }
+
+    pub fn stop(&mut self) {
+        self.is_playing = false;
+        self.patterns.clear();
+        self.start_time = None;
+        self.current_time = 0.0;
+    }
+
+    pub fn set_tempo(&mut self, cpm: f64) {
+        self.cpm = cpm;
+    }
+
+    fn tick(&mut self) -> Vec<String> {
+        let mut output = Vec::new();
+
+        if !self.is_playing || self.start_time.is_none() {
+            return output;
+        }
+
+        if let Some(start) = self.start_time {
+            let elapsed = start.elapsed().as_secs_f64();
+            self.current_time = elapsed * (self.cpm / 60.0); // Convert CPM to cycles per second
+        }
+
+        // Check if any patterns need to fire events
+        for scheduled in &mut self.patterns {
+            if self.current_time >= scheduled.next_event_time {
+                if let Value::Pattern(ref pattern) = scheduled.pattern {
+                    let events = pattern.events();
+
+                    // Find events that should fire at this time
+                    for event in events {
+                        let cycle_time = scheduled.next_event_time.floor();
+                        let event_time = cycle_time + event.time;
+
+                        if (event_time - self.current_time).abs() < 0.01 { // Small tolerance
+                            match &event.event_type {
+                                crate::value::EventType::Note(note) => {
+                                    output.push(format!("♪ {}", note));
+                                },
+                                crate::value::EventType::Rest => {
+                                    output.push("♪ ~".to_string());
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Schedule next cycle
+                scheduled.next_event_time += scheduled.cycle_duration;
+            }
+        }
+
+        output
+    }
+}
+
+#[derive(Debug)]
 pub struct Evaluator {
     pub variables: HashMap<String, Value>,
     pub functions: HashMap<String, Function>,
@@ -26,6 +125,7 @@ pub struct Evaluator {
     max_call_depth: usize,
     pub output_buffer: Vec<String>,
     last_error: Option<Value>,
+    pub scheduler: PatternScheduler,
 }
 
 impl Default for Evaluator {
@@ -43,6 +143,7 @@ impl Evaluator {
             max_call_depth: 100,
             output_buffer: Vec::new(),
             last_error: None,
+            scheduler: PatternScheduler::new(),
         }
     }
 
@@ -55,7 +156,7 @@ impl Evaluator {
             Value::Object(o) => !o.is_empty(),
             Value::Date(_) => true,   // Dates are always truthy
             Value::Error(_) => false, // Errors are falsy
-            Value::Pattern(p) => !p.events.is_empty(), // Patterns with events are truthy
+            Value::Pattern(p) => !p.events().is_empty(), // Patterns with events are truthy
             Value::Null => false,
         }
     }
@@ -97,6 +198,11 @@ impl Evaluator {
             "read" => crate::file_io::eval_read_positional(args, self),
             "write" => crate::file_io::eval_write_positional(args, self),
             "clear" => crate::terminal::eval_clear_positional(args, self),
+            "play" => self.eval_play(args),
+            "stop" => self.eval_stop(args),
+            "tempo" => self.eval_tempo(args),
+            "__scheduler-debug" => self.eval_scheduler_debug(args),
+            "__scheduler-tick" => self.eval_scheduler_tick(args),
             _ => Err(format!("Unknown positional function: {}", name)),
         }
     }
@@ -1259,6 +1365,100 @@ impl Evaluator {
         let duration = std::time::Duration::from_secs_f64(seconds);
         std::thread::sleep(duration);
         Ok(Value::Null)
+    }
+
+    // Pattern scheduler functions
+    fn eval_play(&mut self, args: Vec<Expression>) -> Result<Value, String> {
+        if args.len() != 1 {
+            return Err("play requires exactly 1 argument: pattern".to_string());
+        }
+
+        let pattern = self.eval_expression(args[0].clone())?;
+        match pattern {
+            Value::Pattern(_) => {
+                self.scheduler.add_pattern(pattern);
+                if !self.scheduler.is_playing {
+                    self.scheduler.start();
+                }
+                Ok(Value::String("Pattern added to scheduler".to_string()))
+            }
+            _ => Err("play argument must be a pattern".to_string()),
+        }
+    }
+
+    fn eval_stop(&mut self, args: Vec<Expression>) -> Result<Value, String> {
+        if !args.is_empty() {
+            return Err("stop takes no arguments".to_string());
+        }
+
+        self.scheduler.stop();
+        Ok(Value::String("Scheduler stopped".to_string()))
+    }
+
+    fn eval_tempo(&mut self, args: Vec<Expression>) -> Result<Value, String> {
+        if args.len() != 1 {
+            return Err("tempo requires exactly 1 argument: cpm".to_string());
+        }
+
+        let tempo = self.eval_expression(args[0].clone())?;
+        match tempo {
+            Value::Number(cpm) => {
+                if cpm <= 0.0 {
+                    return Err("tempo must be positive".to_string());
+                }
+                self.scheduler.set_tempo(cpm);
+                Ok(Value::String(format!("Tempo set to {} CPM", cpm)))
+            }
+            _ => Err("tempo argument must be a number".to_string()),
+        }
+    }
+
+    // Public method to tick the scheduler and get any pattern outputs
+    pub fn tick_scheduler(&mut self) -> Vec<String> {
+        let outputs = self.scheduler.tick();
+        // Add outputs to the output buffer
+        for output in &outputs {
+            self.output_buffer.push(output.clone());
+        }
+        outputs
+    }
+
+    // Hidden debug functions for TDD - prefixed with __ to indicate internal use
+    fn eval_scheduler_debug(&mut self, args: Vec<Expression>) -> Result<Value, String> {
+        if !args.is_empty() {
+            return Err("__scheduler-debug takes no arguments".to_string());
+        }
+
+        let debug_info = format!(
+            "Scheduler Debug:\n\
+            - Playing: {}\n\
+            - Tempo: {} CPM\n\
+            - Current time: {:.3}\n\
+            - Active patterns: {}\n\
+            - Output buffer: {} items",
+            self.scheduler.is_playing,
+            self.scheduler.cpm,
+            self.scheduler.current_time,
+            self.scheduler.patterns.len(),
+            self.output_buffer.len()
+        );
+
+        Ok(Value::String(debug_info))
+    }
+
+    fn eval_scheduler_tick(&mut self, args: Vec<Expression>) -> Result<Value, String> {
+        if !args.is_empty() {
+            return Err("__scheduler-tick takes no arguments".to_string());
+        }
+
+        let outputs = self.tick_scheduler();
+        let result = if outputs.is_empty() {
+            "No events fired".to_string()
+        } else {
+            format!("Events fired: {}", outputs.join(", "))
+        };
+
+        Ok(Value::String(result))
     }
 
     pub fn eval_function(

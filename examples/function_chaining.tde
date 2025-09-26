@@ -5,7 +5,8 @@ say "=== Multi-Function Chains - The Power of Chaining ==="
 
 ~raw-data is [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 ~processed:
-    filter ~raw-data is-even
+    ~raw-data
+    filter is-even
     map double
     sort
     reverse
@@ -18,7 +19,8 @@ say "=== String Processing Chain ==="
 
 ~words is ["Hello", "WORLD", "tilde", "LANGUAGE", "rocks"]
 ~formatted:
-    map ~words lowercase
+    ~words
+    map lowercase
     sort
     join " | "
 
@@ -30,7 +32,8 @@ say "=== Data Analysis Chain ==="
 
 ~scores is [45, 67, 89, 92, 78, 83, 96, 74, 88, 91, 85, 79]
 ~analysis:
-    filter ~scores |~x (~x >= 80)|
+    ~scores
+    filter  |~x (~x >= 80)|
     sort
     reverse
     length
@@ -43,7 +46,8 @@ say "=== Mega Chain - 6 Operations! ==="
 
 ~big-dataset is [15, 8, 23, 4, 16, 42, 7, 31, 11, 27, 9, 35]
 ~mega-result:
-    filter ~big-dataset |~n (~n > 10)|
+    ~big-dataset
+    filter |~n (~n > 10)|
     map double
     filter is-even
     sort
@@ -58,12 +62,14 @@ say "=== List Transformation Chains ==="
 
 ~mixed is [1, 3, 5, 2, 4, 6, 8, 7, 9]
 ~evens-processed:
-    filter ~mixed is-even
+    ~mixed
+    filter is-even
     map square
     sort
 
 ~odds-processed:
-    filter ~mixed is-odd
+    ~mixed
+    filter is-odd
     sort
     reverse
 
@@ -82,7 +88,8 @@ say "=== Function Chaining vs Traditional Nesting ==="
 
 # Function chaining (crystal clear)
 ~chained:
-    filter ~data is-even
+    ~data
+    filter is-even
     map triple
     sort
     reverse

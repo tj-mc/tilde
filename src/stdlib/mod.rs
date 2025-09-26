@@ -18,6 +18,7 @@ pub mod string;
 pub mod system;
 pub mod type_checking;
 mod utils;
+pub mod scheduler;
 
 use crate::ast::Expression;
 use crate::evaluator::Evaluator;
@@ -192,6 +193,12 @@ pub fn get_stdlib_function_names() -> &'static [&'static str] {
         "pattern-timeline",
         "pattern-notation",
         "pattern-length",
+        // Scheduler functions
+        "play",
+        "stop",
+        "tempo",
+        "__scheduler-debug",
+        "__scheduler-tick",
     ]
 }
 
@@ -382,6 +389,13 @@ pub fn get_stdlib_function(name: &str) -> Option<StdlibFunction> {
         "pattern-timeline" => Some(music::eval_pattern_timeline),
         "pattern-notation" => Some(music::eval_pattern_notation),
         "pattern-length" => Some(music::eval_pattern_length),
+
+        // Scheduler functions
+        "play" => Some(scheduler::eval_play),
+        "stop" => Some(scheduler::eval_stop),
+        "tempo" => Some(scheduler::eval_tempo),
+        "__scheduler-debug" => Some(scheduler::eval_scheduler_debug),
+        "__scheduler-tick" => Some(scheduler::eval_scheduler_tick),
 
         _ => None,
     }

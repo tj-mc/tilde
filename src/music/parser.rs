@@ -47,6 +47,7 @@ enum SequenceItem {
     Rest,
     Chord(Vec<String>),
     Subdivision(Vec<SequenceItem>),
+    #[allow(dead_code)]
     ProbabilityChoice(Vec<SequenceItem>),
     WithSpeed(Box<SequenceItem>, f64),
     WithProbability(Box<SequenceItem>, f64),

@@ -84,7 +84,7 @@ fn tilde_value_to_json_value(value: &Value) -> Result<serde_json::Value, String>
         }
         Value::Pattern(pattern) => {
             // Convert pattern to its notation string
-            Ok(serde_json::Value::String(pattern.notation.clone()))
+            Ok(serde_json::Value::String(pattern.notation()))
         }
     }
 }

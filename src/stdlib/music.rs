@@ -10,7 +10,7 @@ pub fn eval_pattern(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<
     let notation = extract_string_arg(&args, evaluator, "pattern")?;
     let events = parse_mini_notation(&notation)?;
 
-    Ok(Value::Pattern(PatternValue {
+    Ok(Value::Pattern(PatternValue::Simple {
         notation,
         events,
     }))
@@ -24,10 +24,11 @@ pub fn eval_pattern_debug(args: Vec<Expression>, evaluator: &mut Evaluator) -> R
     match pattern_val {
         Value::Pattern(pattern) => {
             let mut debug_output = String::new();
-            debug_output.push_str(&format!("Pattern: \"{}\"\n", pattern.notation));
-            debug_output.push_str(&format!("Events: {}\n", pattern.events.len()));
+            debug_output.push_str(&format!("Pattern: \"{}\"\n", pattern.notation()));
+            let events = pattern.events();
+            debug_output.push_str(&format!("Events: {}\n", events.len()));
 
-            for (i, event) in pattern.events.iter().enumerate() {
+            for (i, event) in events.iter().enumerate() {
                 debug_output.push_str(&format!("  {}: time={:.3} ", i, event.time));
                 match &event.event_type {
                     EventType::Note(note) => debug_output.push_str(&format!("note={}\n", note)),
@@ -50,12 +51,13 @@ pub fn eval_pattern_timeline(args: Vec<Expression>, evaluator: &mut Evaluator) -
         Value::Pattern(pattern) => {
             let mut timeline = String::from("Time: |");
             let width = 40;
+            let events = pattern.events();
 
             for i in 0..width {
                 let time = i as f64 / width as f64;
                 let mut found_event = false;
 
-                for event in &pattern.events {
+                for event in &events {
                     if (event.time - time).abs() < (1.0 / width as f64) {  // Within tolerance
                         match &event.event_type {
                             EventType::Note(_) => {
@@ -85,7 +87,7 @@ pub fn eval_pattern_timeline(args: Vec<Expression>, evaluator: &mut Evaluator) -
                 let time = i as f64 / width as f64;
                 let mut found_note = false;
 
-                for event in &pattern.events {
+                for event in &events {
                     if (event.time - time).abs() < (1.0 / width as f64) {
                         match &event.event_type {
                             EventType::Note(note) => {
@@ -124,7 +126,7 @@ pub fn eval_pattern_notation(args: Vec<Expression>, evaluator: &mut Evaluator) -
     let pattern_val = evaluator.eval_expression(args[0].clone())?;
 
     match pattern_val {
-        Value::Pattern(pattern) => Ok(Value::String(pattern.notation)),
+        Value::Pattern(pattern) => Ok(Value::String(pattern.notation())),
         _ => Err("pattern-notation requires a pattern argument".to_string())
     }
 }
@@ -135,7 +137,7 @@ pub fn eval_pattern_length(args: Vec<Expression>, evaluator: &mut Evaluator) -> 
     let pattern_val = evaluator.eval_expression(args[0].clone())?;
 
     match pattern_val {
-        Value::Pattern(pattern) => Ok(Value::Number(pattern.events.len() as f64)),
+        Value::Pattern(pattern) => Ok(Value::Number(pattern.events().len() as f64)),
         _ => Err("pattern-length requires a pattern argument".to_string())
     }
 }

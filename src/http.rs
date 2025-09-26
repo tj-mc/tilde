@@ -181,7 +181,7 @@ impl HttpRequest {
                 dt.format("%Y-%m-%dT%H:%M:%SZ").to_string(),
             )),
             Value::Error(_) => Err("Cannot serialize Error values to JSON".to_string()),
-            Value::Pattern(pattern) => Ok(serde_json::Value::String(pattern.notation.clone())),
+            Value::Pattern(pattern) => Ok(serde_json::Value::String(pattern.notation())),
         }
     }
 }

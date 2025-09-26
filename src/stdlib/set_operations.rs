@@ -146,6 +146,6 @@ fn value_to_hash_key(value: &Value) -> Result<String, String> {
         Value::Object(_) => {
             Err("Set operations cannot be performed on lists containing objects".to_string())
         }
-        Value::Pattern(pattern) => Ok(format!("p:{}", pattern.notation)),
+        Value::Pattern(pattern) => Ok(format!("p:{}", pattern.notation())),
     }
 }
