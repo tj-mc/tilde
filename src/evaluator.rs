@@ -441,30 +441,33 @@ impl Evaluator {
     fn update_variable(&mut self, name: String, value: Value) -> Result<(), String> {
         // Search through scope stack to find where the variable exists
         for scope in self.scope_stack.iter_mut().rev() {
-            if scope.contains_key(&name) {
-                scope.insert(name, value);
+            if let std::collections::hash_map::Entry::Occupied(mut e) = scope.entry(name.clone()) {
+                e.insert(value);
                 return Ok(());
             }
         }
 
         // If not found in any scope, check if it exists in global variables
-        if self.variables.contains_key(&name) {
-            self.variables.insert(name, value);
-            Ok(())
-        } else {
-            // Variable doesn't exist anywhere - this should not happen for increment/decrement
-            // since we already validated it exists in get_variable_value
-            Err(format!("Variable '{}' not found for update", name))
+        match self.variables.entry(name.clone()) {
+            std::collections::hash_map::Entry::Occupied(mut e) => {
+                e.insert(value);
+                Ok(())
+            }
+            std::collections::hash_map::Entry::Vacant(_) => {
+                // Variable doesn't exist anywhere - this should not happen for increment/decrement
+                // since we already validated it exists in get_variable_value
+                Err(format!("Variable '{}' not found for update", name))
+            }
         }
     }
 
     fn get_variable_value(&self, name: &str) -> Result<Value, String> {
         // CRITICAL OPTIMIZATION: Most variable lookups in recursive functions are parameters
         // in the current scope. Check the most recent scope first as a fast path.
-        if let Some(current_scope) = self.scope_stack.last() {
-            if let Some(value) = current_scope.get(name) {
-                return Ok(value.clone());
-            }
+        if let Some(current_scope) = self.scope_stack.last()
+            && let Some(value) = current_scope.get(name)
+        {
+            return Ok(value.clone());
         }
 
         // If not in current scope, check remaining scopes (rare for recursive functions)
@@ -748,43 +751,42 @@ impl Evaluator {
                     }
                     Value::List(list) => {
                         // Check if property is a variable (starts with ~)
-                        let index_value = if property.starts_with('~') {
-                            // Remove the ~ for lookup (variables are stored without ~ prefix everywhere)
-                            let var_name_without_tilde = &property[1..];
+                        let index_value =
+                            if let Some(var_name_without_tilde) = property.strip_prefix('~') {
+                                // Remove the ~ for lookup (variables are stored without ~ prefix everywhere)
+                                // Search in scope stack first (function local variables stored without ~)
+                                let mut found_value = None;
+                                for scope in self.scope_stack.iter().rev() {
+                                    if let Some(val) = scope.get(var_name_without_tilde) {
+                                        found_value = Some(val.clone());
+                                        break;
+                                    }
+                                }
 
-                            // Search in scope stack first (function local variables stored without ~)
-                            let mut found_value = None;
-                            for scope in self.scope_stack.iter().rev() {
-                                if let Some(val) = scope.get(var_name_without_tilde) {
-                                    found_value = Some(val.clone());
-                                    break;
+                                // If not found in scope, check global variables (also stored without ~)
+                                match found_value
+                                    .or_else(|| self.variables.get(var_name_without_tilde).cloned())
+                                {
+                                    Some(val) => val,
+                                    None => {
+                                        return Err(format!(
+                                            "Undefined variable: ~{}",
+                                            var_name_without_tilde
+                                        ));
+                                    }
                                 }
-                            }
-
-                            // If not found in scope, check global variables (also stored without ~)
-                            match found_value
-                                .or_else(|| self.variables.get(var_name_without_tilde).cloned())
-                            {
-                                Some(val) => val,
-                                None => {
-                                    return Err(format!(
-                                        "Undefined variable: ~{}",
-                                        var_name_without_tilde
-                                    ));
+                            } else {
+                                // Try to parse property as literal numeric index
+                                match property.parse::<f64>() {
+                                    Ok(n) => Value::Number(n),
+                                    Err(_) => {
+                                        return Err(format!(
+                                            "Cannot access non-numeric property '{}' on list",
+                                            property
+                                        ));
+                                    }
                                 }
-                            }
-                        } else {
-                            // Try to parse property as literal numeric index
-                            match property.parse::<f64>() {
-                                Ok(n) => Value::Number(n),
-                                Err(_) => {
-                                    return Err(format!(
-                                        "Cannot access non-numeric property '{}' on list",
-                                        property
-                                    ));
-                                }
-                            }
-                        };
+                            };
 
                         // Convert the index value to usize
                         match index_value {
@@ -1337,7 +1339,7 @@ impl Evaluator {
                             if std::env::var("TILDE_DEBUG_TAIL_CALL").is_ok() {
                                 eprintln!("Checking statement for tail call: {:?}", stmt);
                             }
-                            if let Some(tail_args) = self.detect_tail_call(&stmt, fn_name) {
+                            if let Some(tail_args) = self.detect_tail_call(stmt, fn_name) {
                                 // Evaluate new arguments for tail call
                                 let mut new_args = Vec::new();
                                 for arg_expr in tail_args {
@@ -1381,6 +1383,7 @@ impl Evaluator {
     }
 
     /// Recursively search for tail calls in any statement structure
+    #[allow(clippy::only_used_in_recursion)]
     fn find_tail_call_in_statement(
         &self,
         stmt: &Statement,
@@ -1416,12 +1419,11 @@ impl Evaluator {
                     return Some(tail_args);
                 }
                 // Check the else branch if it exists
-                if let Some(else_branch) = else_stmt {
-                    if let Some(tail_args) =
+                if let Some(else_branch) = else_stmt
+                    && let Some(tail_args) =
                         self.find_tail_call_in_statement(else_branch, function_name)
-                    {
-                        return Some(tail_args);
-                    }
+                {
+                    return Some(tail_args);
                 }
                 None
             }
@@ -1440,20 +1442,18 @@ impl Evaluator {
                 rescue_body,
             } => {
                 // Check the attempt body (last statement could be tail)
-                if let Some(last_stmt) = attempt_body.last() {
-                    if let Some(tail_args) =
+                if let Some(last_stmt) = attempt_body.last()
+                    && let Some(tail_args) =
                         self.find_tail_call_in_statement(last_stmt, function_name)
-                    {
-                        return Some(tail_args);
-                    }
+                {
+                    return Some(tail_args);
                 }
                 // Check the rescue body (last statement could be tail)
-                if let Some(last_stmt) = rescue_body.last() {
-                    if let Some(tail_args) =
+                if let Some(last_stmt) = rescue_body.last()
+                    && let Some(tail_args) =
                         self.find_tail_call_in_statement(last_stmt, function_name)
-                    {
-                        return Some(tail_args);
-                    }
+                {
+                    return Some(tail_args);
                 }
                 None
             }
@@ -1463,7 +1463,6 @@ impl Evaluator {
     }
 
     /// Create a hash key from function arguments for memoization
-
     fn eval_attempt_rescue(
         &mut self,
         attempt_body: Vec<Statement>,
@@ -1538,7 +1537,21 @@ impl Evaluator {
         Ok(current_value)
     }
 
-    fn eval_chain_step(&mut self, step: &ChainStep, input_value: Option<Value>) -> Result<Value, String> {
+    fn eval_chain_step(
+        &mut self,
+        step: &ChainStep,
+        input_value: Option<Value>,
+    ) -> Result<Value, String> {
+        // Handle special "initial value" step
+        if step.function_name == "@@initial-value" {
+            // This should only be called with no input_value (first step)
+            if input_value.is_some() {
+                return Err("Initial value step should not receive input".to_string());
+            }
+            // Evaluate the initial value expression (should be a Variable)
+            return self.eval_expression(step.args[0].clone());
+        }
+
         // Convert input value to expression if present
         let mut expr_args = Vec::new();
         if let Some(value) = input_value {
@@ -1547,14 +1560,17 @@ impl Evaluator {
                 Value::String(s) => Expression::String(s),
                 Value::Boolean(b) => Expression::Boolean(b),
                 Value::List(items) => {
-                    let expr_items: Vec<Expression> = items.into_iter().map(|item| match item {
-                        Value::Number(n) => Expression::Number(n, false),
-                        Value::String(s) => Expression::String(s),
-                        Value::Boolean(b) => Expression::Boolean(b),
-                        _ => Expression::String(item.to_string()),
-                    }).collect();
+                    let expr_items: Vec<Expression> = items
+                        .into_iter()
+                        .map(|item| match item {
+                            Value::Number(n) => Expression::Number(n, false),
+                            Value::String(s) => Expression::String(s),
+                            Value::Boolean(b) => Expression::Boolean(b),
+                            _ => Expression::String(item.to_string()),
+                        })
+                        .collect();
                     Expression::List(expr_items)
-                },
+                }
                 _ => Expression::String(value.to_string()),
             };
             expr_args.push(input_expr);
@@ -1572,7 +1588,6 @@ impl Evaluator {
         };
         self.eval_expression(func_call)
     }
-
 }
 
 #[cfg(test)]
@@ -2480,7 +2495,6 @@ mod tests {
         );
     }
 
-
     #[test]
     fn test_block_syntax_unknown_core_function() {
         use crate::parser::Parser;
@@ -2635,7 +2649,9 @@ mod tests {
 
         // Test the library pattern mentioned in docs - using core: for predictable behavior
         // Simplified to single line to avoid multiline parsing complexities
-        let mut parser = Parser::new("function validate-positive ~x ( give core:is-positive ~x )\n~result is *validate-positive 5");
+        let mut parser = Parser::new(
+            "function validate-positive ~x ( give core:is-positive ~x )\n~result is *validate-positive 5",
+        );
         let program = parser.parse().unwrap();
 
         let mut evaluator = Evaluator::new();

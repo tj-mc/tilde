@@ -351,7 +351,7 @@ fn test_string_operations_edge_cases() {
     let program = parser.parse().unwrap();
     let result = evaluator.eval_program(program).unwrap();
     if let Value::String(output) = result {
-        assert!(output.contains("\"\"") || output == ""); // Should be empty string
+        assert!(output.contains("\"\"") || output.is_empty()); // Should be empty string
     }
 
     // Test: Trim string with only whitespace

@@ -154,6 +154,7 @@ impl HttpRequest {
             .map_err(|e| format!("Failed to serialize to JSON: {}", e))
     }
 
+    #[allow(clippy::only_used_in_recursion)]
     fn tilde_value_to_json(&self, value: &Value) -> Result<serde_json::Value, String> {
         match value {
             Value::Null => Ok(serde_json::Value::Null),
@@ -362,7 +363,7 @@ impl HttpClient {
                     .into(),
                 ));
             }
-            url if url == "not-a-valid-url" => {
+            "not-a-valid-url" => {
                 return Err(Self::create_error(
                     "Invalid URL format".to_string(),
                     Some("invalid_url".to_string()),
@@ -617,6 +618,7 @@ impl HttpClient {
 }
 
 /// Parse HTTP options from Tilde value
+#[allow(clippy::type_complexity)]
 pub fn parse_http_options(
     options_value: Option<Value>,
 ) -> Result<
@@ -668,16 +670,15 @@ pub fn parse_http_options(
             headers.insert("authorization".to_string(), format!("Bearer {}", token));
         }
 
-        if let Some(Value::Object(auth)) = options.get("basic_auth") {
-            if let (Some(Value::String(username)), Some(Value::String(password))) =
+        if let Some(Value::Object(auth)) = options.get("basic_auth")
+            && let (Some(Value::String(username)), Some(Value::String(password))) =
                 (auth.get("username"), auth.get("password"))
-            {
-                let credentials = base64::encode(format!("{}:{}", username, password));
-                headers.insert(
-                    "authorization".to_string(),
-                    format!("Basic {}", credentials),
-                );
-            }
+        {
+            let credentials = base64::encode(format!("{}:{}", username, password));
+            headers.insert(
+                "authorization".to_string(),
+                format!("Basic {}", credentials),
+            );
         }
 
         // Parse query parameters

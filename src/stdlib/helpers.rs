@@ -4,7 +4,6 @@ use crate::evaluator::Evaluator;
 use crate::value::Value;
 
 /// Common predicate functions for filtering
-
 /// Checks if a number is even
 pub fn eval_is_even(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
     let number = extract_number_arg(&args, evaluator, "is-even")?;
@@ -36,7 +35,6 @@ pub fn eval_is_zero(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<
 }
 
 /// Common transformation functions
-
 /// Doubles a number (multiplies by 2)
 pub fn eval_double(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
     let number = extract_number_arg(&args, evaluator, "double")?;
@@ -80,7 +78,6 @@ pub fn eval_decrement(args: Vec<Expression>, evaluator: &mut Evaluator) -> Resul
 }
 
 /// Common reduction functions
-
 /// Adds two numbers
 pub fn eval_add(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
     let (a, b) = extract_two_number_args(&args, evaluator, "add")?;

@@ -72,7 +72,7 @@ mod tests {
         for _ in 0..10 {
             let result = eval_random_positional(args.clone(), &mut evaluator).unwrap();
             if let Value::Number(n) = result {
-                assert!(n >= 1.0 && n <= 5.0);
+                assert!((1.0..=5.0).contains(&n));
                 // Should be an integer (no fractional part)
                 assert_eq!(n.fract(), 0.0);
             } else {
@@ -93,7 +93,7 @@ mod tests {
         for _ in 0..10 {
             let result = eval_random_positional(args.clone(), &mut evaluator).unwrap();
             if let Value::Number(n) = result {
-                assert!(n >= 0.0 && n <= 1.5);
+                assert!((0.0..=1.5).contains(&n));
             } else {
                 panic!("Expected number result");
             }
@@ -111,7 +111,7 @@ mod tests {
 
         let result = eval_random_positional(args, &mut evaluator).unwrap();
         if let Value::Number(n) = result {
-            assert!(n >= 1.0 && n <= 2.5);
+            assert!((1.0..=2.5).contains(&n));
         } else {
             panic!("Expected number result");
         }
@@ -194,7 +194,7 @@ mod tests {
 
         let result = eval_random_positional(args, &mut evaluator).unwrap();
         if let Value::Number(n) = result {
-            assert!(n >= -5.0 && n <= -1.0);
+            assert!((-5.0..=-1.0).contains(&n));
             assert_eq!(n.fract(), 0.0); // Should be integer
         } else {
             panic!("Expected number result");

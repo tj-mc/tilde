@@ -134,7 +134,7 @@ pub fn eval_pad_left(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result
         Ok(Value::String(string))
     } else {
         let padding_needed = target_length - string.len();
-        let padding: String = std::iter::repeat(pad_char).take(padding_needed).collect();
+        let padding: String = std::iter::repeat_n(pad_char, padding_needed).collect();
         Ok(Value::String(format!("{}{}", padding, string)))
     }
 }
@@ -162,7 +162,7 @@ pub fn eval_pad_right(args: Vec<Expression>, evaluator: &mut Evaluator) -> Resul
         Ok(Value::String(string))
     } else {
         let padding_needed = target_length - string.len();
-        let padding: String = std::iter::repeat(pad_char).take(padding_needed).collect();
+        let padding: String = std::iter::repeat_n(pad_char, padding_needed).collect();
         Ok(Value::String(format!("{}{}", string, padding)))
     }
 }

@@ -3,7 +3,7 @@ use tilde::parser::Parser;
 
 #[test]
 fn test_arithmetic_nesting() {
-    let input = "((((1 + 2) * 3) - 4) / 2)";  // This is a statement, last expression is returned
+    let input = "((((1 + 2) * 3) - 4) / 2)"; // This is a statement, last expression is returned
     let mut parser = Parser::new(input);
     let program = parser.parse().unwrap();
     let mut evaluator = Evaluator::new();
@@ -44,7 +44,10 @@ fn test_triple_nested_anonymous_functions() {
     let program = parser.parse().unwrap();
     let mut evaluator = Evaluator::new();
     let result = evaluator.eval_program(program).unwrap();
-    assert_eq!(result.to_string(), "[[[11, 101], [12, 102]], [[13, 103], [14, 104]]]");
+    assert_eq!(
+        result.to_string(),
+        "[[[11, 101], [12, 102]], [[13, 103], [14, 104]]]"
+    );
 }
 
 #[test]

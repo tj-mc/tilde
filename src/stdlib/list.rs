@@ -58,7 +58,9 @@ fn eval_function_expression_on_item(
             Ok(result)
         }
         Expression::Variable(name) => eval_function_on_item(name, item, evaluator),
-        Expression::FunctionCall { name, args } if args.is_empty() => eval_function_on_item(name, item, evaluator),
+        Expression::FunctionCall { name, args } if args.is_empty() => {
+            eval_function_on_item(name, item, evaluator)
+        }
         _ => Err("Expected function name or anonymous function".to_string()),
     }
 }
@@ -164,7 +166,6 @@ fn eval_function_on_item(
 /// * If first argument is not a list
 /// * If second argument is not a valid function name
 /// * If the function doesn't exist or doesn't take exactly one parameter
-
 pub fn eval_map(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
     if args.len() != 2 {
         return Err("map requires exactly 2 arguments (list, function_name)".to_string());
@@ -264,7 +265,7 @@ pub fn eval_map(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Valu
         }),
         "fibonacci" => native_map!(list, |v| match v {
             Value::Number(n) => {
-                if n >= 0.0 && n <= 1476.0 {
+                if (0.0..=1476.0).contains(&n) {
                     // Max safe fibonacci in f64
                     Value::Number(fibonacci_iterative(n as u32))
                 } else {
@@ -912,7 +913,9 @@ pub fn eval_group_by(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result
             Value::String(s) => s,
             Value::Boolean(b) => b.to_string(),
             _ => {
-                return Err("group-by function must return a number, string, or boolean".to_string());
+                return Err(
+                    "group-by function must return a number, string, or boolean".to_string()
+                );
             }
         };
 

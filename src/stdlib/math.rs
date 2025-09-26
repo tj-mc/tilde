@@ -35,7 +35,7 @@ pub fn eval_tan(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Valu
 // Inverse trigonometric functions
 pub fn eval_asin(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
     let value = extract_number_arg(&args, evaluator, "asin")?;
-    if value < -1.0 || value > 1.0 {
+    if !(-1.0..=1.0).contains(&value) {
         return Err("asin argument must be between -1 and 1".to_string());
     }
     Ok(Value::Number(value.asin()))
@@ -43,7 +43,7 @@ pub fn eval_asin(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Val
 
 pub fn eval_acos(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
     let value = extract_number_arg(&args, evaluator, "acos")?;
-    if value < -1.0 || value > 1.0 {
+    if !(-1.0..=1.0).contains(&value) {
         return Err("acos argument must be between -1 and 1".to_string());
     }
     Ok(Value::Number(value.acos()))

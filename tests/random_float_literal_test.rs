@@ -24,11 +24,11 @@ fn test_random_float_literal_detection() {
             let mut evaluator = Evaluator::new();
             evaluator.eval_program(program).unwrap();
 
-            if let Some(Value::Number(n)) = evaluator.get_variable("val") {
-                if n.fract() != 0.0 {
-                    found_non_integer = true;
-                    break;
-                }
+            if let Some(Value::Number(n)) = evaluator.get_variable("val")
+                && n.fract() != 0.0
+            {
+                found_non_integer = true;
+                break;
             }
         }
         assert!(
@@ -61,11 +61,11 @@ fn test_random_integer_vs_float_literal() {
             let mut evaluator = Evaluator::new();
             evaluator.eval_program(program).unwrap();
 
-            if let Some(Value::Number(n)) = evaluator.get_variable("val") {
-                if n.fract() != 0.0 {
-                    found_non_integer = true;
-                    break;
-                }
+            if let Some(Value::Number(n)) = evaluator.get_variable("val")
+                && n.fract() != 0.0
+            {
+                found_non_integer = true;
+                break;
             }
         }
 

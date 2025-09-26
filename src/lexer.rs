@@ -199,6 +199,27 @@ impl Lexer {
         string
     }
 
+    fn read_single_quoted_string(&mut self) -> String {
+        self.advance(); // Skip opening single quote
+
+        let mut string = String::new();
+        while let Some(ch) = self.current_char {
+            if ch == '\'' {
+                self.advance(); // Skip closing single quote
+                break;
+            }
+
+            if ch == '\\' {
+                self.handle_escape_sequence(&mut string);
+            } else {
+                string.push(ch);
+                self.advance();
+            }
+        }
+
+        string
+    }
+
     fn read_interpolated_string(&mut self) -> Vec<InterpolationPart> {
         let quote_char = self.current_char.unwrap();
         self.advance();
@@ -357,6 +378,11 @@ impl Lexer {
                     Token::String(string)
                 }
             }
+            Some('\'') => {
+                // Single quotes - treat as simple string (no interpolation)
+                let string = self.read_single_quoted_string();
+                Token::String(string)
+            }
             Some('(') => {
                 self.advance();
                 Token::LeftParen
@@ -400,23 +426,23 @@ impl Lexer {
             Some('-') => {
                 self.advance();
                 // Check if this is a negative number literal
-                if let Some(ch) = self.current_char {
-                    if ch.is_ascii_digit() {
-                        let (num, was_float) = self.read_number();
-                        return Token::Number(-num, was_float);
-                    }
+                if let Some(ch) = self.current_char
+                    && ch.is_ascii_digit()
+                {
+                    let (num, was_float) = self.read_number();
+                    return Token::Number(-num, was_float);
                 }
                 Token::Minus
             }
             Some('*') => {
                 self.advance();
                 // Check if this is an function call (*identifier) or multiplication
-                if let Some(ch) = self.current_char {
-                    if ch.is_alphabetic() {
-                        // This is an function call
-                        let name = self.read_identifier();
-                        return Token::Identifier(format!("*{}", name));
-                    }
+                if let Some(ch) = self.current_char
+                    && ch.is_alphabetic()
+                {
+                    // This is an function call
+                    let name = self.read_identifier();
+                    return Token::Identifier(format!("*{}", name));
                 }
                 Token::Multiply
             }
@@ -885,5 +911,16 @@ mod tests {
         assert_eq!(tokens[2], Token::Block("math".to_string()));
         assert_eq!(tokens[3], Token::Identifier("sqrt".to_string()));
         assert_eq!(tokens[4], Token::Eof);
+    }
+
+    #[test]
+    fn test_single_quoted_strings() {
+        let mut lexer = Lexer::new("join '' 'hello world'");
+        let tokens = lexer.tokenize();
+
+        assert_eq!(tokens[0], Token::Identifier("join".to_string()));
+        assert_eq!(tokens[1], Token::String("".to_string()));
+        assert_eq!(tokens[2], Token::String("hello world".to_string()));
+        assert_eq!(tokens[3], Token::Eof);
     }
 }

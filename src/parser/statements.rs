@@ -7,6 +7,7 @@ impl Parser {
         match self.current_token() {
             Token::Variable(name) => {
                 let var_name = name.clone();
+                let saved_position = self.position; // Save position BEFORE advancing
                 self.advance();
 
                 // Check for immediate assignment first
@@ -44,7 +45,6 @@ impl Parser {
                     })
                 } else if *self.current_token() == Token::Dot {
                     // This might be a property access assignment: ~var.prop is value
-                    let saved_position = self.position;
 
                     // Try to parse the property chain and check for assignment
                     let mut expr = Expression::Variable(var_name);
@@ -65,7 +65,9 @@ impl Parser {
                             }
                             Token::Boolean(b) => b.to_string(),
                             _ => {
-                                return Err("Expected property name or number after '.'".to_string());
+                                return Err(
+                                    "Expected property name or number after '.'".to_string()
+                                );
                             }
                         };
                         self.advance();
@@ -341,42 +343,69 @@ impl Parser {
         self.skip_newlines();
 
         while *self.current_token() != Token::Eof && !self.is_at_chain_boundary() {
-            // Each line should be a function call with arguments
-            let function_name = match self.current_token() {
-                Token::Identifier(name) => {
-                    let name = name.clone();
-                    self.advance();
-                    name
-                }
-                Token::Block(block_name) => {
-                    // Handle block syntax like core:is-even
-                    let block_name = block_name.clone();
-                    self.advance();
+            // Check if this is a bare variable (first step initial value)
+            if let Token::Variable(var_name) = self.current_token() {
+                let var_name = var_name.clone();
+                self.advance();
 
-                    // Expect function name after block
-                    if let Token::Identifier(func_name) = self.current_token() {
-                        let func_name = func_name.clone();
+                // If this is the first step and there are no arguments, treat it as initial value
+                if steps.is_empty()
+                    && (*self.current_token() == Token::Newline
+                        || *self.current_token() == Token::Eof
+                        || self.is_at_chain_boundary())
+                {
+                    // This is a bare variable as the initial value - create a special "identity" step
+                    steps.push(ChainStep {
+                        function_name: "@@initial-value".to_string(),
+                        args: vec![Expression::Variable(var_name)],
+                    });
+                } else {
+                    return Err(
+                        "Variables can only appear as the first step in a chain".to_string()
+                    );
+                }
+            } else {
+                // Each line should be a function call with arguments
+                let function_name = match self.current_token() {
+                    Token::Identifier(name) => {
+                        let name = name.clone();
                         self.advance();
-                        format!("{}:{}", block_name, func_name)
-                    } else {
-                        return Err(format!("Expected function name after {}:", block_name));
+                        name
                     }
-                }
-                _ => {
-                    // If we don't see an identifier or block, we're done with the chain
-                    break;
-                }
-            };
+                    Token::Block(block_name) => {
+                        // Handle block syntax like core:is-even
+                        let block_name = block_name.clone();
+                        self.advance();
+
+                        // Expect function name after block
+                        if let Token::Identifier(func_name) = self.current_token() {
+                            let func_name = func_name.clone();
+                            self.advance();
+                            format!("{}:{}", block_name, func_name)
+                        } else {
+                            return Err(format!("Expected function name after {}:", block_name));
+                        }
+                    }
+                    _ => {
+                        // If we don't see an identifier or block, we're done with the chain
+                        break;
+                    }
+                };
 
                 // Parse all arguments on the same line until newline
                 let mut args = Vec::new();
-                while *self.current_token() != Token::Newline &&
-                      *self.current_token() != Token::Eof &&
-                      !self.is_at_chain_boundary() {
+                while *self.current_token() != Token::Newline
+                    && *self.current_token() != Token::Eof
+                    && !self.is_at_chain_boundary()
+                {
                     args.push(self.parse_expression()?);
                 }
 
-            steps.push(ChainStep { function_name, args });
+                steps.push(ChainStep {
+                    function_name,
+                    args,
+                });
+            }
 
             // Skip to next line
             if *self.current_token() == Token::Newline {
@@ -393,9 +422,6 @@ impl Parser {
         Ok(steps)
     }
 
-
-
-
     fn is_at_chain_boundary(&self) -> bool {
         match self.current_token() {
             // Only variables that start with ~ and are followed by : are chain boundaries
@@ -407,16 +433,15 @@ impl Parser {
                     false
                 }
             }
-            Token::If => true,              // Next if statement
-            Token::Loop => true,            // Next loop
-            Token::ForEach => true,         // Next for-each
-            Token::Function => true,        // Next function definition
-            Token::Attempt => true,         // Next attempt block
-            Token::Give => true,            // Next give statement
-            Token::Open => true,            // Next open statement
-            Token::LeftParen => true,       // Next block
+            Token::If => true,        // Next if statement
+            Token::Loop => true,      // Next loop
+            Token::ForEach => true,   // Next for-each
+            Token::Function => true,  // Next function definition
+            Token::Attempt => true,   // Next attempt block
+            Token::Give => true,      // Next give statement
+            Token::Open => true,      // Next open statement
+            Token::LeftParen => true, // Next block
             _ => false,
         }
     }
-
 }

@@ -11,7 +11,7 @@ Variables are prefixed with `~` and can contain hyphens:
 
 ### Data Types
 - **Numbers**: Integer (`0`, `100`) and floating-point (`0.345`)
-- **Strings**: Double-quoted (`"fergus"`, `"you win"`) with backtick interpolation (`"hello `~var`"`)
+- **Strings**: Single-quoted (`'hello'`) or double-quoted (`"fergus"`, `"you win"`) with backtick interpolation (`"hello `~var`"`)
 - **Objects**: Key-value maps (`{"name": "Alice" "age": 30}`)
 - **Lists**: Ordered collections (`[1, 2, 3]`, `["hello", 42, true]`)
 - **Booleans**: `true` and `false`
@@ -709,6 +709,127 @@ Tilde includes a comprehensive standard library for functional programming and c
 ~positive is absolute -42                  # 42
 ~root is square-root 16                    # 4
 ```
+
+### Function Chaining
+
+Tilde supports elegant function chaining syntax that allows you to pipe data through a series of transformations. This creates more readable and concise code compared to nested function calls.
+
+#### Basic Chain Syntax
+
+Function chains use the colon (`:`) followed by indented function calls:
+
+```tilde
+~numbers is [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+~result:
+    ~numbers
+    filter is-even
+    map double
+    reverse
+    length
+
+say ~result  # outputs: 5
+```
+
+#### Two Chain Patterns
+
+**Input Chains**: Start with an existing variable to transform data:
+```tilde
+~data is [15, 8, 23, 4, 16, 42, 7, 31, 11, 27, 9, 35]
+~processed:
+    ~data
+    filter |~n (~n > 10)|
+    map double
+    sort
+    reverse
+    length
+```
+
+**Creation Chains**: Start with function calls to build values:
+```tilde
+~bass:
+    pattern <c3 e5 g4>
+    synth "Mondello"
+    attack 0.3
+    reverb 5
+```
+
+#### String Literal Support
+
+Function chains support both single and double quoted strings:
+```tilde
+~words is ["hello", "WORLD", "tilde"]
+~result:
+    ~words
+    map lowercase
+    sort
+    join ' | '        # Single quotes work
+
+~message:
+    "Welcome to Tilde"
+    split " "
+    reverse
+    join "-"          # Double quotes work
+```
+
+#### Complex Chain Examples
+
+**Data Analysis Pipeline:**
+```tilde
+~scores is [45, 67, 89, 92, 78, 83, 96, 74, 88, 91, 85, 79]
+~high-scores:
+    ~scores
+    filter |~score (~score >= 80)|
+    sort
+    reverse
+    length
+
+say "High scores count: " ~high-scores
+```
+
+**String Processing:**
+```tilde
+~text is "Hello World Programming"
+~processed:
+    ~text
+    lowercase
+    split " "
+    filter |~word ((length ~word) > 5)|
+    join "_"
+
+say ~processed  # outputs: "programming"
+```
+
+#### Chain vs Nested Comparison
+
+Traditional nested approach:
+```tilde
+~result is length(reverse(map(filter(~data, is-even), double)))
+```
+
+Chain approach (much more readable):
+```tilde
+~result:
+    ~data
+    filter is-even
+    map double
+    reverse
+    length
+```
+
+#### Universal Function Compatibility
+
+All stdlib functions automatically work in chains. Any function `foo(a, b, c)` works in chains as:
+```tilde
+~result:
+    ~initial-value  # Becomes first argument 'a'
+    foo b c         # Additional arguments 'b' and 'c'
+```
+
+This means you can chain ANY function without special modifications:
+- List functions: `filter`, `map`, `reduce`, `sort`, `reverse`, `unique`
+- String functions: `split`, `join`, `trim`, `uppercase`, `lowercase`
+- Math functions: `square`, `square-root`, `absolute`, `round`
+- Type functions: `is-list`, `is-string`, `is-number`, `length`
 
 ### Functional Programming Patterns
 ```tilde

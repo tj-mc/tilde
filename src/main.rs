@@ -14,11 +14,9 @@ fn main() {
         match args[1].as_str() {
             "--version" | "-v" => {
                 println!("{}", version_string());
-                return;
             }
             "--help" | "-h" => {
                 print_help();
-                return;
             }
             _ => {
                 // File execution mode
@@ -180,17 +178,17 @@ fn should_execute_buffer(buffer: &str) -> bool {
 fn print_help() {
     println!("{}", version_string());
     println!("A simple, readable scripting language");
-    println!("");
+    println!();
     println!("USAGE:");
     println!("  tilde                  Start interactive REPL");
     println!("  tilde <file>          Run a Tilde script file");
     println!("  tilde --version       Show version information");
     println!("  tilde --help          Show this help message");
-    println!("");
+    println!();
     println!("EXAMPLES:");
     println!("  tilde                 # Start REPL");
     println!("  tilde hello.tde     # Run hello.tde");
-    println!("");
+    println!();
     println!("LANGUAGE FEATURES:");
     println!("  Variables:    ~name is \"Hello\"");
     println!("  Output:       say ~name");

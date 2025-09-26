@@ -228,10 +228,7 @@ fn test_sort_by_with_anonymous_function() {
     let mut evaluator = Evaluator::new();
     let result = evaluator.eval_program(program).unwrap();
 
-    assert_eq!(
-        result.to_string(),
-        "[cat, dog, bird, elephant]"
-    );
+    assert_eq!(result.to_string(), "[cat, dog, bird, elephant]");
 }
 
 #[test]

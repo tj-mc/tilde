@@ -227,7 +227,7 @@ impl Parser {
                 self.advance();
 
                 // Check if this is an function call (*name)
-                if name.starts_with('*') {
+                if let Some(stripped) = name.strip_prefix('*') {
                     // Parse function call arguments (space-separated until terminator)
                     let mut args = Vec::new();
 
@@ -254,7 +254,7 @@ impl Parser {
                     }
 
                     Ok(Expression::FunctionCall {
-                        name: name[1..].to_string(), // Remove the * prefix
+                        name: stripped.to_string(), // Remove the * prefix
                         args,
                     })
                 } else {

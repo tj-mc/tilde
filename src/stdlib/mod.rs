@@ -22,6 +22,9 @@ use crate::ast::Expression;
 use crate::evaluator::Evaluator;
 use crate::value::Value;
 
+/// Type alias for standard library functions
+pub type StdlibFunction = fn(Vec<Expression>, &mut Evaluator) -> Result<Value, String>;
+
 /// Get all standard library function names
 pub fn get_stdlib_function_names() -> &'static [&'static str] {
     &[
@@ -186,9 +189,7 @@ pub fn get_stdlib_function_names() -> &'static [&'static str] {
 }
 
 /// Register all standard library functions
-pub fn get_stdlib_function(
-    name: &str,
-) -> Option<fn(Vec<Expression>, &mut Evaluator) -> Result<Value, String>> {
+pub fn get_stdlib_function(name: &str) -> Option<StdlibFunction> {
     match name {
         // List functions
         "map" => Some(list::eval_map),

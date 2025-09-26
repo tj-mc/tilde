@@ -91,7 +91,7 @@ if ~best_path.0 == 0 and ~best_path.1 == 1 and ~best_path.2 == 3 and ~best_path.
 
     // Execute the Tilde interpreter
     let output = Command::new("cargo")
-        .args(&["run", "--", temp_file])
+        .args(["run", "--", temp_file])
         .output()
         .expect("Failed to execute tilde");
 
@@ -153,7 +153,7 @@ if ~result0 == 10 and ~result1 == 20 and ~result4 == 50 (
     std::fs::write(temp_file, dynamic_access_program).expect("Failed to write test file");
 
     let output = Command::new("cargo")
-        .args(&["run", "--", temp_file])
+        .args(["run", "--", temp_file])
         .output()
         .expect("Failed to execute tilde");
 
@@ -199,7 +199,7 @@ if ~fact_5 == 120 (
     std::fs::write(temp_file, recursive_program).expect("Failed to write test file");
 
     let output = Command::new("cargo")
-        .args(&["run", "--", temp_file])
+        .args(["run", "--", temp_file])
         .output()
         .expect("Failed to execute tilde");
 
