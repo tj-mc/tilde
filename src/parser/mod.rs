@@ -338,7 +338,7 @@ mod tests {
 
     #[test]
     fn test_parse_object_functions() {
-        let mut parser = Parser::new("~keys is keys(~obj)");
+        let mut parser = Parser::new("~keys is keys ~obj");
         let program = parser.parse().unwrap();
 
         match &program[0] {

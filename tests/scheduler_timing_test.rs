@@ -1,6 +1,6 @@
 use tilde::evaluator::Evaluator;
 use tilde::ast::*;
-use tilde::value::Value;
+
 use std::thread;
 use std::time::Duration;
 

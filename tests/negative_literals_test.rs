@@ -38,11 +38,11 @@ fn test_negative_float_literal() {
 
     assert_eq!(
         evaluator.get_variable("negative_pi"),
-        Some(&Value::Number(-std::f64::consts::PI))
+        Some(&Value::Number(-3.14159))
     );
     assert_eq!(
         evaluator.get_variable("positive_pi"),
-        Some(&Value::Number(std::f64::consts::PI))
+        Some(&Value::Number(3.14159))
     );
 }
 
@@ -187,7 +187,7 @@ fn test_negative_literals_in_list() {
         evaluator.get_variable("mixed_list"),
         Some(&Value::List(vec![
             Value::Number(-42.0),
-            Value::Number(std::f64::consts::PI),
+            Value::Number(3.14),
             Value::Number(-0.5),
             Value::Number(100.0),
             Value::Number(-999.0)

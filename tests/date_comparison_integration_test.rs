@@ -97,13 +97,13 @@ fn test_date_comparison_in_conditionals() {
     ~deadline is date "2024-12-31"
     ~current is date "2024-03-15"
 
-    if date-before ~current ~deadline (
+    if (date-before ~current ~deadline) (
         ~status is "on-time"
     ) else (
         ~status is "overdue"
     )
 
-    if date-after ~current ~deadline (
+    if (date-after ~current ~deadline) (
         ~urgency is "past-due"
     ) else (
         ~urgency is "still-time"

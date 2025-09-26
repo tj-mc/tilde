@@ -202,7 +202,7 @@ fn test_power_and_rounding_functions() {
         .to_string()
         .parse::<f64>()
         .unwrap();
-    assert!((rounded - std::f64::consts::PI).abs() < 1e-10);
+    assert!((rounded - 3.14).abs() < 1e-10);
 
     // floor(3.7) = 3
     assert_eq!(evaluator.get_variable("result3").unwrap().to_string(), "3");

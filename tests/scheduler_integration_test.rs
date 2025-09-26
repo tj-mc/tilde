@@ -109,12 +109,15 @@ fn test_scheduler_tick_mechanism() {
         name: "pattern".to_string(),
         args: vec![Expression::String("c3 ~ d3 ~".to_string())],
     };
-    let _ = evaluator.eval_expression(pattern_expr);
+    let pattern_result = evaluator.eval_expression(pattern_expr);
+    assert!(pattern_result.is_ok());
+    
+    evaluator.set_variable("test_pattern".to_string(), pattern_result.unwrap());
 
     // Start the scheduler
     let play_expr = Expression::FunctionCall {
         name: "play".to_string(),
-        args: vec![],
+        args: vec![Expression::Variable("test_pattern".to_string())],
     };
     let _ = evaluator.eval_expression(play_expr);
 
@@ -145,11 +148,13 @@ fn test_pattern_value_enum_compatibility() {
     
     let result = evaluator.eval_expression(pattern_expr);
     assert!(result.is_ok());
+    
+    evaluator.set_variable("test_pattern".to_string(), result.unwrap());
 
     // Test that the pattern can be used in play context
     let play_expr = Expression::FunctionCall {
         name: "play".to_string(),
-        args: vec![],
+        args: vec![Expression::Variable("test_pattern".to_string())],
     };
     let play_result = evaluator.eval_expression(play_expr);
     assert!(play_result.is_ok());

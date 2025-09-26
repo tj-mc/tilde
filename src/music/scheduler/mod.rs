@@ -1,5 +1,7 @@
 use crate::music::output::TimedEvent;
-use crate::music::pattern::{Pattern, Event, EventData};
+use crate::music::pattern::Pattern;
+#[cfg(test)]
+use crate::music::pattern::{Event, EventData};
 use std::collections::HashMap;
 use std::time::Instant;
 

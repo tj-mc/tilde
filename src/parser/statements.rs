@@ -118,7 +118,18 @@ impl Parser {
                 let path = self.parse_expression()?;
                 Ok(Statement::Open(path))
             }
-            Token::LeftParen => self.parse_block(),
+            Token::LeftParen => {
+                // Try parsing as a regular expression statement first (which handles parentheses)
+                let saved_pos = self.position;
+                match self.parse_expression() {
+                    Ok(expr) => Ok(Statement::Expression(expr)),
+                    Err(_) => {
+                        // Restore position and try as block
+                        self.position = saved_pos;
+                        self.parse_block()
+                    }
+                }
+            }
             Token::Function => self.parse_function_definition(),
             Token::Give => {
                 self.advance();
@@ -138,6 +149,9 @@ impl Parser {
 
         let condition = self.parse_expression()?;
         let then_stmt = Box::new(self.parse_statement()?);
+
+        // Skip newlines before checking for else clause
+        self.skip_newlines();
 
         let else_stmt = if *self.current_token() == Token::Else {
             self.advance();
@@ -422,13 +436,15 @@ impl Parser {
         Ok(steps)
     }
 
+
+
     fn is_at_chain_boundary(&self) -> bool {
         match self.current_token() {
-            // Only variables that start with ~ and are followed by : are chain boundaries
+            // Variables mark chain boundaries when they start new statements or chains
             Token::Variable(_) => {
-                // Look ahead to see if there's a colon
+                // Look ahead to see if this is a chain declaration or assignment
                 if self.position + 1 < self.tokens.len() {
-                    matches!(self.tokens[self.position + 1], Token::Colon)
+                    matches!(self.tokens[self.position + 1], Token::Colon | Token::Is)
                 } else {
                     false
                 }
