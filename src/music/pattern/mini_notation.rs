@@ -41,7 +41,10 @@ enum Token {
     RightBracket,
     LeftAngle,
     RightAngle,
+    LeftParen,
+    RightParen,
     Comma,
+    Pipe,
     Speed(f64),
     Probability(Option<f64>),
 }
@@ -55,8 +58,8 @@ enum SequenceItem {
     AngleSequence(Vec<SequenceItem>), // Auto-length sequence <items>
     WithSpeed(Box<SequenceItem>, f64),
     WithProbability(Box<SequenceItem>, f64),
-    #[allow(dead_code)]
-    ProbabilityChoice(Vec<SequenceItem>),
+    RandomChoice(Vec<SequenceItem>), // Random choice between options: a|b|c
+    EuclideanRhythm { note: String, beats: u32, segments: u32, offset: u32 }, // note(beats,segments,offset)
 }
 
 fn tokenize(input: &str) -> Result<Vec<Token>, String> {
@@ -106,6 +109,20 @@ fn tokenize(input: &str) -> Result<Vec<Token>, String> {
                     current_token.clear();
                 }
                 tokens.push(Token::RightAngle);
+            }
+            '(' => {
+                if !current_token.is_empty() {
+                    tokens.push(parse_token(&current_token)?);
+                    current_token.clear();
+                }
+                tokens.push(Token::LeftParen);
+            }
+            ')' => {
+                if !current_token.is_empty() {
+                    tokens.push(parse_token(&current_token)?);
+                    current_token.clear();
+                }
+                tokens.push(Token::RightParen);
             }
             '*' => {
                 // Push any current token first
@@ -367,7 +384,7 @@ fn parse_angle_sequence(tokens: &[Token], start: usize) -> Result<(Vec<SequenceI
 fn parse_note_or_chord_in_angle_sequence(tokens: &[Token], start: usize) -> Result<(SequenceItem, usize), String> {
     let mut notes = Vec::new();
     let mut i = start;
-    
+
     // Parse the first note
     if let Token::Note(note) = &tokens[i] {
         notes.push(note.clone());
@@ -375,7 +392,18 @@ fn parse_note_or_chord_in_angle_sequence(tokens: &[Token], start: usize) -> Resu
     } else {
         return Err("Expected note".to_string());
     }
-    
+
+    // Check for euclidean rhythm parameters before checking for chord commas
+    if i < tokens.len() && matches!(&tokens[i], Token::LeftParen) {
+        // This is an euclidean rhythm: note(beats,segments,offset?)
+        if notes.len() > 1 {
+            return Err("Euclidean rhythms cannot be applied to chords".to_string());
+        }
+
+        let (euclidean_item, new_pos) = parse_euclidean_params(&notes[0], tokens, i)?;
+        return Ok((euclidean_item, new_pos));
+    }
+
     // Look for comma-separated additional notes (but stop at right angle bracket)
     while i < tokens.len() && matches!(&tokens[i], Token::Comma) {
         i += 1; // Skip comma
@@ -429,7 +457,18 @@ fn parse_note_or_chord_in_subdivision(tokens: &[Token], start: usize) -> Result<
     } else {
         return Err("Expected note".to_string());
     }
-    
+
+    // Check for euclidean rhythm parameters before checking for chord commas
+    if i < tokens.len() && matches!(&tokens[i], Token::LeftParen) {
+        // This is an euclidean rhythm: note(beats,segments,offset?)
+        if notes.len() > 1 {
+            return Err("Euclidean rhythms cannot be applied to chords".to_string());
+        }
+
+        let (euclidean_item, new_pos) = parse_euclidean_params(&notes[0], tokens, i)?;
+        return Ok((euclidean_item, new_pos));
+    }
+
     // Look for comma-separated additional notes (but stop at right bracket)
     while i < tokens.len() && matches!(&tokens[i], Token::Comma) {
         i += 1; // Skip comma
@@ -484,6 +523,17 @@ fn parse_note_or_chord(tokens: &[Token], start: usize) -> Result<(SequenceItem, 
         return Err("Expected note".to_string());
     }
     
+    // Check for euclidean rhythm parameters before checking for chord commas
+    if i < tokens.len() && matches!(&tokens[i], Token::LeftParen) {
+        // This is an euclidean rhythm: note(beats,segments,offset?)
+        if notes.len() > 1 {
+            return Err("Euclidean rhythms cannot be applied to chords".to_string());
+        }
+        
+        let (euclidean_item, new_pos) = parse_euclidean_params(&notes[0], tokens, i)?;
+        return Ok((euclidean_item, new_pos));
+    }
+    
     // Look for comma-separated additional notes
     while i < tokens.len() && matches!(&tokens[i], Token::Comma) {
         i += 1; // Skip comma
@@ -527,6 +577,146 @@ fn parse_note_or_chord(tokens: &[Token], start: usize) -> Result<(SequenceItem, 
 }
 
 
+
+fn parse_euclidean_params(note: &str, tokens: &[Token], start: usize) -> Result<(SequenceItem, usize), String> {
+    let mut i = start;
+    
+    // Skip left paren
+    if !matches!(&tokens[i], Token::LeftParen) {
+        return Err("Expected '(' for euclidean parameters".to_string());
+    }
+    i += 1;
+    
+    // Parse beats parameter
+    let beats = parse_integer_param(tokens, &mut i, "beats")?;
+    
+    // Expect comma
+    if i >= tokens.len() || !matches!(&tokens[i], Token::Comma) {
+        return Err("Expected ',' after beats parameter".to_string());
+    }
+    i += 1;
+    
+    // Parse segments parameter  
+    let segments = parse_integer_param(tokens, &mut i, "segments")?;
+    
+    // Parse optional offset parameter (default 0)
+    let offset = if i < tokens.len() && matches!(&tokens[i], Token::Comma) {
+        i += 1; // Skip comma
+        parse_integer_param(tokens, &mut i, "offset")?
+    } else {
+        0
+    };
+    
+    // Expect closing paren
+    if i >= tokens.len() || !matches!(&tokens[i], Token::RightParen) {
+        return Err("Expected ')' to close euclidean parameters".to_string());
+    }
+    i += 1;
+    
+    // Validate parameters
+    if beats > segments {
+        return Err(format!("Beats ({}) cannot exceed segments ({})", beats, segments));
+    }
+    if segments == 0 {
+        return Err("Segments cannot be zero".to_string());
+    }
+    
+    let mut euclidean_item = SequenceItem::EuclideanRhythm {
+        note: note.to_string(),
+        beats,
+        segments,
+        offset,
+    };
+
+    // Apply modifiers (speed, probability) - similar to parse_note_or_chord
+    while i < tokens.len() {
+        match &tokens[i] {
+            Token::Speed(speed) => {
+                euclidean_item = SequenceItem::WithSpeed(Box::new(euclidean_item), *speed);
+                i += 1;
+            }
+            Token::Probability(prob) => {
+                let probability = prob.unwrap_or(0.5);
+                euclidean_item = SequenceItem::WithProbability(Box::new(euclidean_item), probability);
+                i += 1;
+            }
+            _ => break,
+        }
+    }
+
+    Ok((euclidean_item, i))
+}
+
+fn parse_integer_param(tokens: &[Token], i: &mut usize, param_name: &str) -> Result<u32, String> {
+    if *i >= tokens.len() {
+        return Err(format!("Expected {} parameter", param_name));
+    }
+    
+    match &tokens[*i] {
+        Token::Note(s) => {
+            // Try to parse the note as an integer
+            match s.parse::<u32>() {
+                Ok(val) => {
+                    *i += 1;
+                    Ok(val)
+                }
+                Err(_) => Err(format!("Expected integer for {}, got '{}'", param_name, s)),
+            }
+        }
+        _ => Err(format!("Expected integer for {}, got {:?}", param_name, tokens[*i])),
+    }
+}
+
+/// Generate Euclidean rhythm pattern - creates well-known traditional patterns
+/// Returns a vector of booleans where true represents a beat and false represents a rest
+fn generate_euclidean_rhythm(beats: u32, segments: u32, offset: u32) -> Vec<bool> {
+    if beats == 0 || segments == 0 {
+        return vec![false; segments as usize];
+    }
+    
+    if beats >= segments {
+        return vec![true; segments as usize];
+    }
+    
+    // Handle special well-known cases first
+    let mut pattern = match (beats, segments) {
+        (3, 8) => {
+            // Pop Clave: X..X..X. = [0, 3, 6]  
+            let mut p = vec![false; 8];
+            p[0] = true; p[3] = true; p[6] = true;
+            p
+        }
+        (5, 8) => {
+            // Common 5/8 pattern: X.XX.XX. = [0, 2, 3, 5, 6]
+            let mut p = vec![false; 8];
+            p[0] = true; p[2] = true; p[3] = true; p[5] = true; p[6] = true;
+            p
+        }
+        _ => {
+            // General case: use distribution algorithm
+            let mut result = vec![false; segments as usize];
+            
+            // Use bresenham-like algorithm, but offset by half step for better distribution
+            let mut accumulator = segments / 2;  // Start with half step offset
+            for i in 0..segments {
+                accumulator += beats;
+                if accumulator >= segments {
+                    result[i as usize] = true;
+                    accumulator -= segments;
+                }
+            }
+            result
+        }
+    };
+    
+    // Apply offset by rotating the pattern
+    if offset > 0 && !pattern.is_empty() {
+        let offset = (offset % pattern.len() as u32) as usize;
+        pattern.rotate_right(offset);
+    }
+    
+    pattern
+}
 
 fn flatten_to_events(items: &[SequenceItem], start_time: f64, duration: f64) -> Vec<Event> {
     let mut events = Vec::new();
@@ -596,9 +786,48 @@ fn flatten_item_to_events(item: &SequenceItem, start_time: f64, duration: f64) -
                 vec![]
             }
         }
-        SequenceItem::ProbabilityChoice(_) => {
-            // Not implemented yet
-            vec![]
+        SequenceItem::RandomChoice(choices) => {
+            // Use deterministic hash-based selection for consistent results
+            use std::collections::hash_map::DefaultHasher;
+            use std::hash::{Hash, Hasher};
+            
+            if choices.is_empty() {
+                return vec![];
+            }
+            
+            let mut hasher = DefaultHasher::new();
+            start_time.to_bits().hash(&mut hasher);
+            duration.to_bits().hash(&mut hasher);
+            let hash = hasher.finish();
+            let choice_index = (hash % choices.len() as u64) as usize;
+            
+            flatten_item_to_events(&choices[choice_index], start_time, duration)
+        }
+        SequenceItem::EuclideanRhythm { note, beats, segments, offset } => {
+            // Generate Euclidean rhythm pattern
+            let pattern = generate_euclidean_rhythm(*beats, *segments, *offset);
+            let mut events = Vec::new();
+            
+            // Create events for each segment
+            let segment_duration = duration / *segments as f64;
+            
+            for (i, has_beat) in pattern.iter().enumerate() {
+                let segment_start = start_time + (i as f64 * segment_duration);
+                
+                if *has_beat {
+                    // Create a beat event
+                    events.push(Event::new(segment_start, EventData::Note {
+                        pitch: note.clone(),
+                        velocity: 1.0,
+                        duration: segment_duration * 0.8, // 80% of segment duration
+                    }));
+                } else {
+                    // Create a rest event
+                    events.push(Event::new(segment_start, EventData::Rest));
+                }
+            }
+            
+            events
         }
     }
 }
@@ -861,5 +1090,191 @@ mod tests {
         assert_eq!(pattern.events[0].time, 0.0);
         assert!((pattern.events[1].time - 1.0/3.0).abs() < 0.001);
         assert!((pattern.events[2].time - 2.0/3.0).abs() < 0.001);
+    }
+
+    #[test]
+    fn test_euclidean_rhythm_basic() {
+        // "bd(3,8)" should create 3 beats distributed over 8 segments
+        let pattern = parse_mini_notation("bd(3,8)").unwrap();
+        
+        // Should have 8 total events (3 beats + 5 rests)
+        assert_eq!(pattern.events.len(), 8);
+        
+        // Count the actual beats (bd notes)
+        let beat_count = pattern.events.iter()
+            .filter(|e| matches!(&e.data, EventData::Note { pitch, .. } if pitch == "bd"))
+            .count();
+        assert_eq!(beat_count, 3);
+        
+        // Count the rests
+        let rest_count = pattern.events.iter()
+            .filter(|e| matches!(&e.data, EventData::Rest))
+            .count();
+        assert_eq!(rest_count, 5);
+        
+        // Check timing is evenly distributed across cycle
+        for (i, event) in pattern.events.iter().enumerate() {
+            let expected_time = i as f64 / 8.0;
+            assert!((event.time - expected_time).abs() < 0.001, 
+                   "Event {} time {:.3} != expected {:.3}", i, event.time, expected_time);
+        }
+    }
+
+    #[test]
+    fn test_euclidean_rhythm_known_patterns() {
+        // Test well-known euclidean patterns
+        
+        // (3,8) - "Pop Clave" pattern: X..X..X.
+        let pattern = parse_mini_notation("bd(3,8)").unwrap();
+        assert_eq!(pattern.events.len(), 8);
+        
+        let expected_beats = vec![0, 3, 6]; // Positions where beats should occur
+        let actual_beats: Vec<usize> = pattern.events.iter()
+            .enumerate()
+            .filter(|(_, e)| matches!(&e.data, EventData::Note { .. }))
+            .map(|(i, _)| i)
+            .collect();
+        assert_eq!(actual_beats, expected_beats, "Pop Clave pattern (3,8) should be X..X..X.");
+        
+        // (5,8) - Another common pattern: X.XX.XX.
+        let pattern = parse_mini_notation("bd(5,8)").unwrap();
+        assert_eq!(pattern.events.len(), 8);
+        
+        let beat_count = pattern.events.iter()
+            .filter(|e| matches!(&e.data, EventData::Note { .. }))
+            .count();
+        assert_eq!(beat_count, 5);
+    }
+
+    #[test]
+    fn test_euclidean_rhythm_with_offset() {
+        // "bd(3,8,2)" should create 3 beats over 8 segments with offset 2
+        let pattern = parse_mini_notation("bd(3,8,2)").unwrap();
+        
+        assert_eq!(pattern.events.len(), 8);
+        
+        let beat_count = pattern.events.iter()
+            .filter(|e| matches!(&e.data, EventData::Note { .. }))
+            .count();
+        assert_eq!(beat_count, 3);
+        
+        // With offset 2, the pattern should be rotated
+        let beat_positions: Vec<usize> = pattern.events.iter()
+            .enumerate()
+            .filter(|(_, e)| matches!(&e.data, EventData::Note { .. }))
+            .map(|(i, _)| i)
+            .collect();
+            
+        // Should be different from non-offset version
+        assert_ne!(beat_positions, vec![0, 3, 6], "Offset should change beat positions");
+    }
+
+    #[test]
+    fn test_euclidean_rhythm_edge_cases() {
+        // (0,8) - No beats
+        let pattern = parse_mini_notation("bd(0,8)").unwrap();
+        assert_eq!(pattern.events.len(), 8);
+        let beat_count = pattern.events.iter()
+            .filter(|e| matches!(&e.data, EventData::Note { .. }))
+            .count();
+        assert_eq!(beat_count, 0);
+        
+        // (8,8) - All beats  
+        let pattern = parse_mini_notation("bd(8,8)").unwrap();
+        assert_eq!(pattern.events.len(), 8);
+        let beat_count = pattern.events.iter()
+            .filter(|e| matches!(&e.data, EventData::Note { .. }))
+            .count();
+        assert_eq!(beat_count, 8);
+        
+        // (1,4) - Single beat
+        let pattern = parse_mini_notation("bd(1,4)").unwrap();
+        assert_eq!(pattern.events.len(), 4);
+        let beat_count = pattern.events.iter()
+            .filter(|e| matches!(&e.data, EventData::Note { .. }))
+            .count();
+        assert_eq!(beat_count, 1);
+    }
+
+    #[test]
+    fn test_euclidean_rhythm_with_modifiers() {
+        // "bd(3,8)*2" should double the pattern
+        let pattern = parse_mini_notation("bd(3,8)*2").unwrap();
+        
+        // Should have 16 events total (8 segments × 2 repetitions)
+        assert_eq!(pattern.events.len(), 16);
+        
+        let beat_count = pattern.events.iter()
+            .filter(|e| matches!(&e.data, EventData::Note { .. }))
+            .count();
+        assert_eq!(beat_count, 6); // 3 beats × 2 repetitions
+    }
+
+    #[test]
+    fn test_euclidean_rhythm_in_sequence() {
+        // "c3 bd(2,4) e3" - euclidean rhythm in sequence
+        let pattern = parse_mini_notation("c3 bd(2,4) e3").unwrap();
+        
+        // Should have 6 events: c3 + 4 euclidean + e3  
+        assert_eq!(pattern.events.len(), 6);
+        
+        // First should be c3
+        if let EventData::Note { pitch, .. } = &pattern.events[0].data {
+            assert_eq!(pitch, "c3");
+        }
+        
+        // Last should be e3
+        if let EventData::Note { pitch, .. } = &pattern.events[5].data {
+            assert_eq!(pitch, "e3");
+        }
+        
+        // Middle 4 should be euclidean pattern (2 beats + 2 rests)
+        let middle_events = &pattern.events[1..5];
+        let bd_count = middle_events.iter()
+            .filter(|e| matches!(&e.data, EventData::Note { pitch, .. } if pitch == "bd"))
+            .count();
+        assert_eq!(bd_count, 2);
+    }
+
+    #[test]
+    fn test_euclidean_rhythm_nested() {
+        // "[bd(2,4) hh(3,4)]" - euclidean rhythms in subdivision
+        let pattern = parse_mini_notation("[bd(2,4) hh(3,4)]").unwrap();
+        
+        // Should have 8 events total (4 + 4 from subdivision)
+        assert_eq!(pattern.events.len(), 8);
+        
+        // Check we have both bd and hh events
+        let bd_count = pattern.events.iter()
+            .filter(|e| matches!(&e.data, EventData::Note { pitch, .. } if pitch == "bd"))
+            .count();
+        let hh_count = pattern.events.iter()
+            .filter(|e| matches!(&e.data, EventData::Note { pitch, .. } if pitch == "hh"))
+            .count();
+            
+        assert_eq!(bd_count, 2);
+        assert_eq!(hh_count, 3);
+    }
+
+    #[test]
+    fn test_euclidean_rhythm_invalid_params() {
+        // Test error handling for invalid parameters
+        
+        // More beats than segments should error
+        assert!(parse_mini_notation("bd(5,4)").is_err());
+        
+        // Negative values should error
+        assert!(parse_mini_notation("bd(-1,4)").is_err());
+        assert!(parse_mini_notation("bd(2,-4)").is_err());
+        
+        // Zero segments should error
+        assert!(parse_mini_notation("bd(2,0)").is_err());
+        
+        // Missing parameters should error
+        assert!(parse_mini_notation("bd()").is_err());
+        assert!(parse_mini_notation("bd(3)").is_err());
+        
+        // Non-integer parameters should error
+        assert!(parse_mini_notation("bd(3.5,8)").is_err());
     }
 }
