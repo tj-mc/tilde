@@ -337,8 +337,10 @@ fn parse_subdivision(tokens: &[Token], start: usize) -> Result<(Vec<SequenceItem
             }
             Token::LeftBracket => {
                 let (sub_subdivision, end_pos) = parse_subdivision(tokens, i + 1)?;
-                items.push(SequenceItem::Subdivision(sub_subdivision));
-                i = end_pos + 1;
+                let item = SequenceItem::Subdivision(sub_subdivision);
+                let (modified_item, new_pos) = apply_modifiers(item, tokens, end_pos + 1, Some(Token::RightBracket))?;
+                items.push(modified_item);
+                i = new_pos;
             }
             _ => {
                 return Err(format!("Unexpected token in subdivision: {:?}", tokens[i]));
@@ -621,30 +623,50 @@ fn parse_euclidean_params(note: &str, tokens: &[Token], start: usize) -> Result<
         return Err("Segments cannot be zero".to_string());
     }
     
-    let mut euclidean_item = SequenceItem::EuclideanRhythm {
+    let euclidean_item = SequenceItem::EuclideanRhythm {
         note: note.to_string(),
         beats,
         segments,
         offset,
     };
 
-    // Apply modifiers (speed, probability) - similar to parse_note_or_chord
+    // Apply modifiers using shared function
+    apply_modifiers(euclidean_item, tokens, i, None)
+}
+
+/// Apply modifiers (speed, probability) to a SequenceItem
+/// Stops at end of tokens or when encountering the stop_token
+fn apply_modifiers(
+    mut item: SequenceItem,
+    tokens: &[Token],
+    start: usize,
+    stop_token: Option<Token>
+) -> Result<(SequenceItem, usize), String> {
+    let mut i = start;
+
     while i < tokens.len() {
+        // Check for stop token
+        if let Some(ref stop) = stop_token {
+            if std::mem::discriminant(&tokens[i]) == std::mem::discriminant(stop) {
+                break;
+            }
+        }
+
         match &tokens[i] {
             Token::Speed(speed) => {
-                euclidean_item = SequenceItem::WithSpeed(Box::new(euclidean_item), *speed);
+                item = SequenceItem::WithSpeed(Box::new(item), *speed);
                 i += 1;
             }
             Token::Probability(prob) => {
                 let probability = prob.unwrap_or(0.5);
-                euclidean_item = SequenceItem::WithProbability(Box::new(euclidean_item), probability);
+                item = SequenceItem::WithProbability(Box::new(item), probability);
                 i += 1;
             }
             _ => break,
         }
     }
 
-    Ok((euclidean_item, i))
+    Ok((item, i))
 }
 
 fn parse_integer_param(tokens: &[Token], i: &mut usize, param_name: &str) -> Result<u32, String> {
