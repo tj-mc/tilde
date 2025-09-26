@@ -182,6 +182,18 @@ fn value_to_js_value(value: &Value) -> serde_json::Value {
             }
             serde_json::Value::Object(error_map)
         }
+        Value::Pattern(pattern) => {
+            let mut pattern_map = serde_json::Map::new();
+            pattern_map.insert(
+                "type".to_string(),
+                serde_json::Value::String("pattern".to_string()),
+            );
+            pattern_map.insert(
+                "notation".to_string(),
+                serde_json::Value::String(pattern.notation()),
+            );
+            serde_json::Value::Object(pattern_map)
+        }
         Value::Null => serde_json::Value::Null,
     }
 }
