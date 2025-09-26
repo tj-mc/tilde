@@ -50,8 +50,8 @@ say "=== Mega Chain - 6 Operations! ==="
     reverse
     length
 
-say "Dataset: " ~big_dataset
-say "After 6-step pipeline: " ~mega_result
+say "Dataset: " ~big-dataset
+say "After 6-step pipeline: " ~mega-result
 
 say ""
 say "=== List Transformation Chains ==="
@@ -62,14 +62,14 @@ say "=== List Transformation Chains ==="
     map square
     sort
 
-~odds_processed:
+~odds-processed:
     filter ~mixed is-odd
     sort
     reverse
 
 say "Original: " ~mixed
-say "Evens squared & sorted: " ~evens_processed
-say "Odds reverse sorted: " ~odds_processed
+say "Evens squared & sorted: " ~evens-processed
+say "Odds reverse sorted: " ~odds-processed
 
 say ""
 say "=== Function Chaining vs Traditional Nesting ==="

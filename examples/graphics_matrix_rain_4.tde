@@ -1,17 +1,17 @@
 function random-character (
     ~dice is random 0 6
-    if ~dice == 0 give " 0"
-    if ~dice == 1  give " 1"
-    if ~dice == 2 give "% "
-    if ~dice == 3 give "# "
-    if ~dice == 4 give " 0"
+    if ~dice == 0 give " . - "
+    if ~dice == 1  give "  _ "
+    if ~dice == 2 give " .    "
+    if ~dice == 3 give "   "
+    if ~dice == 4 give "   "
     if ~dice == 5 give "  "
-    if ~dice == 6 give ". "
+    if ~dice == 6 give " ~ "
 )
 
 function build-row (
     ~this-row is ""
-    ~row-length is 60
+    ~row-length is 30
 
     ~i is 0
     loop (
@@ -27,7 +27,7 @@ function build-row (
 clear
 
 ~screen is ""
-~columns is 35
+~columns is 100
 ~i is 0
 
 # Main Draw Loop
@@ -35,7 +35,7 @@ loop (
     if ~i > ~columns (
         clear
         say ~screen
-        wait 0.001
+        wait 0.05
         ~screen is ""
         ~i is 0
     ) else (
