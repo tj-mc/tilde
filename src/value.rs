@@ -95,17 +95,8 @@ impl PatternValue {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct PatternEvent {
-    pub time: f64,      // 0.0 to 1.0 within cycle
-    pub event_type: EventType,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum EventType {
-    Note(String),       // Note name as string
-    Rest,
-}
+// Re-export the better event format from music module
+pub use crate::music::{Event as PatternEvent, EventData as EventType};
 
 impl Value {
     pub fn is_truthy(&self) -> bool {

@@ -2,17 +2,17 @@ use super::utils::*;
 use crate::ast::Expression;
 use crate::evaluator::Evaluator;
 use crate::music::parse_mini_notation;
-use crate::value::{Value, PatternValue, EventType};
+use crate::value::{Value, PatternValue};
 
 /// Create a pattern from mini-notation string
 /// Usage: pattern "c3 d3 ~ e3"
 pub fn eval_pattern(args: Vec<Expression>, evaluator: &mut Evaluator) -> Result<Value, String> {
     let notation = extract_string_arg(&args, evaluator, "pattern")?;
-    let events = parse_mini_notation(&notation)?;
+    let pattern = parse_mini_notation(&notation)?;
 
     Ok(Value::Pattern(PatternValue::Simple {
         notation,
-        events,
+        events: pattern.events,
     }))
 }
 
@@ -30,9 +30,10 @@ pub fn eval_pattern_debug(args: Vec<Expression>, evaluator: &mut Evaluator) -> R
 
             for (i, event) in events.iter().enumerate() {
                 debug_output.push_str(&format!("  {}: time={:.3} ", i, event.time));
-                match &event.event_type {
-                    EventType::Note(note) => debug_output.push_str(&format!("note={}\n", note)),
-                    EventType::Rest => debug_output.push_str("rest\n"),
+                match &event.data {
+                    crate::music::EventData::Note { pitch, .. } => debug_output.push_str(&format!("note={}\n", pitch)),
+                    crate::music::EventData::Rest => debug_output.push_str("rest\n"),
+                    crate::music::EventData::Control { .. } => debug_output.push_str("control\n"),
                 }
             }
 
@@ -59,14 +60,19 @@ pub fn eval_pattern_timeline(args: Vec<Expression>, evaluator: &mut Evaluator) -
 
                 for event in &events {
                     if (event.time - time).abs() < (1.0 / width as f64) {  // Within tolerance
-                        match &event.event_type {
-                            EventType::Note(_) => {
+                        match &event.data {
+                            crate::music::EventData::Note { .. } => {
                                 timeline.push('x');
                                 found_event = true;
                                 break;
                             }
-                            EventType::Rest => {
+                            crate::music::EventData::Rest => {
                                 timeline.push('~');
+                                found_event = true;
+                                break;
+                            }
+                            crate::music::EventData::Control { .. } => {
+                                timeline.push('c');
                                 found_event = true;
                                 break;
                             }
@@ -89,19 +95,25 @@ pub fn eval_pattern_timeline(args: Vec<Expression>, evaluator: &mut Evaluator) -
 
                 for event in &events {
                     if (event.time - time).abs() < (1.0 / width as f64) {
-                        match &event.event_type {
-                            EventType::Note(note) => {
+                        match &event.data {
+                            crate::music::EventData::Note { pitch, .. } => {
                                 timeline.push(' ');
                                 // Show first character of note if it fits
-                                if let Some(first_char) = note.chars().next() {
+                                if let Some(first_char) = pitch.chars().next() {
                                     timeline.push(first_char);
                                 }
                                 found_note = true;
                                 break;
                             }
-                            EventType::Rest => {
+                            crate::music::EventData::Rest => {
                                 timeline.push(' ');
                                 timeline.push('~');
+                                found_note = true;
+                                break;
+                            }
+                            crate::music::EventData::Control { .. } => {
+                                timeline.push(' ');
+                                timeline.push('C');
                                 found_note = true;
                                 break;
                             }

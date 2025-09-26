@@ -1,5 +1,5 @@
 use crate::music::pattern::Pattern;
-use crate::value::PatternValue; // Use the legacy PatternValue from value.rs
+use crate::value::PatternValue;
 use crate::music::scheduler::Scheduler;
 use crate::music::output::{OutputAdapter, OutputCollection, DebugOutput};
 
@@ -88,25 +88,12 @@ impl MusicEngine {
     
     /// Convert legacy PatternValue from value.rs to new modular Pattern
     fn convert_legacy_pattern_value(&self, legacy: &PatternValue) -> Result<Pattern, String> {
-        use crate::music::pattern::{Event, EventData};
-        use crate::value::{EventType};
         
         let notation = legacy.notation();
         let legacy_events = legacy.events();
         
-        let mut new_events = Vec::new();
-        for legacy_event in legacy_events {
-            let event_data = match &legacy_event.event_type {
-                EventType::Note(pitch) => EventData::Note {
-                    pitch: pitch.clone(),
-                    velocity: 1.0,
-                    duration: 0.1,
-                },
-                EventType::Rest => EventData::Rest,
-            };
-            
-            new_events.push(Event::new(legacy_event.time, event_data));
-        }
+        // Events are already in the correct format, no conversion needed
+        let new_events = legacy_events;
         
         Ok(Pattern::new(notation, new_events))
     }
@@ -263,7 +250,7 @@ pub struct EngineStats {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::music::pattern::{Event, EventData};
+    use crate::music::{Event, EventData};
 
     fn create_test_pattern() -> Pattern {
         Pattern::new(
@@ -379,10 +366,11 @@ mod tests {
         let pattern_value = PatternValue::Simple {
             notation: "c3 d3".to_string(),
             events: vec![
-                PatternEvent {
-                    time: 0.0,
-                    event_type: EventType::Note("c3".to_string()),
-                },
+                Event::new(0.0, EventData::Note { 
+                    pitch: "c3".to_string(), 
+                    velocity: 1.0, 
+                    duration: 0.1 
+                }),
             ],
         };
         
