@@ -1,7 +1,6 @@
 pub mod debug;
 pub mod audio;
 pub mod direct_audio;
-pub mod test_audio_direct;
 
 use crate::music::pattern::EventData;
 use std::fmt;
@@ -10,7 +9,6 @@ use std::fmt;
 pub use debug::{DebugOutput, ConsoleOutput};
 pub use audio::AudioOutput;
 pub use direct_audio::DirectAudioOutput;
-pub use test_audio_direct::test_direct_audio;
 
 /// Output system for the modular music architecture
 /// This provides a clean interface for sending timed musical events to various destinations
