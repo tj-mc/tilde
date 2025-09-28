@@ -1,7 +1,10 @@
 use crate::music::pattern::Pattern;
 use crate::value::PatternValue;
 use crate::music::scheduler::Scheduler;
-use crate::music::output::{OutputAdapter, OutputCollection, DebugOutput};
+use crate::music::output::{OutputAdapter, OutputCollection, DebugOutput, AudioOutput, DirectAudioOutput};
+use std::thread;
+use std::time::Duration;
+use crossbeam_channel::{unbounded, Sender, Receiver};
 
 /// MusicEngine coordinates the Pattern Engine, Scheduler, and Output Adapters
 /// This is the main entry point for the modular music system, providing a clean API
@@ -11,6 +14,9 @@ pub struct MusicEngine {
     scheduler: Scheduler,
     outputs: OutputCollection,
     is_initialized: bool,
+    audio_thread: Option<thread::JoinHandle<()>>,
+    stop_sender: Option<Sender<()>>,
+    tick_receiver: Option<Receiver<()>>,
 }
 
 impl MusicEngine {
@@ -20,6 +26,9 @@ impl MusicEngine {
             scheduler: Scheduler::new(),
             outputs: OutputCollection::new(),
             is_initialized: false,
+            audio_thread: None,
+            stop_sender: None,
+            tick_receiver: None,
         }
     }
     
@@ -30,24 +39,63 @@ impl MusicEngine {
         engine.is_initialized = true;
         engine
     }
+
+    /// Create a MusicEngine with audio output for real sound
+    pub fn with_audio_output() -> Result<Self, String> {
+        let mut engine = Self::new();
+
+        // Use efficient direct audio piping
+        println!("🎵 Using efficient direct audio piping");
+        let audio_output = DirectAudioOutput::new()?;
+        engine.add_output(Box::new(audio_output));
+
+        engine.is_initialized = true;
+        Ok(engine)
+    }
     
     /// Initialize the engine (start outputs, etc.)
     pub fn initialize(&mut self) -> Result<(), String> {
         if self.is_initialized {
             return Ok(());
         }
-        
-        // If no outputs are configured, add a debug output
+
+        // If no outputs are configured, use efficient direct audio for live coding
         if self.outputs.is_empty() {
-            self.outputs.add_adapter(Box::new(DebugOutput::default()));
+            if let Ok(direct_audio) = DirectAudioOutput::new() {
+                println!("🎵 Auto-configuring efficient direct audio");
+                self.outputs.add_adapter(Box::new(direct_audio));
+            } else {
+                self.outputs.add_adapter(Box::new(DebugOutput::default()));
+            }
         }
-        
+
         // Start all outputs
         let errors = self.outputs.start_all();
         if !errors.is_empty() {
             return Err(format!("Failed to start outputs: {}", errors.join(", ")));
         }
-        
+
+        self.is_initialized = true;
+        Ok(())
+    }
+
+    /// Initialize the engine with audio output
+    pub fn initialize_audio(&mut self) -> Result<(), String> {
+        if self.is_initialized {
+            return Ok(());
+        }
+
+        // Clear existing outputs and add audio output
+        self.outputs = OutputCollection::new();
+        let audio_output = AudioOutput::new()?;
+        self.outputs.add_adapter(Box::new(audio_output));
+
+        // Start all outputs
+        let errors = self.outputs.start_all();
+        if !errors.is_empty() {
+            return Err(format!("Failed to start audio outputs: {}", errors.join(", ")));
+        }
+
         self.is_initialized = true;
         Ok(())
     }
@@ -74,7 +122,7 @@ impl MusicEngine {
     pub fn remove_output(&mut self, name: &str) -> bool {
         self.outputs.remove_adapter(name)
     }
-    
+
     /// Get list of output adapter names
     pub fn get_output_names(&self) -> Vec<&str> {
         self.outputs.get_adapter_names()
@@ -103,16 +151,16 @@ impl MusicEngine {
         if !self.is_initialized {
             self.initialize()?;
         }
-        
+
         self.scheduler.add_pattern(name, pattern);
         Ok(())
     }
-    
+
     /// Remove a pattern from the scheduler
     pub fn remove_pattern(&mut self, name: &str) -> bool {
         self.scheduler.remove_pattern(name)
     }
-    
+
     /// Update an existing pattern
     pub fn update_pattern(&mut self, name: &str, pattern: Pattern) -> bool {
         self.scheduler.update_pattern(name, pattern)
@@ -123,15 +171,96 @@ impl MusicEngine {
         if !self.is_initialized {
             self.initialize()?;
         }
-        
+
         self.scheduler.start();
+
+        // Play the melody once, respecting tempo
+        println!("🎵 Music engine started - playing melody at {} CPM", self.get_tempo());
+
+        if let Some(pattern) = self.scheduler.active_patterns.values().next() {
+            println!("🎵 Playing {} note melody", pattern.pattern.events.len());
+
+            // Calculate timing based on tempo (CPM = cycles per minute)
+            let cpm = self.get_tempo();
+            let cycle_duration_ms = 60.0 / cpm * 1000.0; // milliseconds per cycle
+
+            let events = &pattern.pattern.events;
+            for (i, event) in events.iter().enumerate() {
+                println!("🎵 Note {}: {}", i + 1, event.data);
+
+                // Calculate note duration based on tempo and time to next event
+                let note_duration = if i < events.len() - 1 {
+                    let current_time = event.time;
+                    let next_time = events[i + 1].time;
+
+                    let time_diff = if next_time > current_time {
+                        next_time - current_time
+                    } else {
+                        (1.0 - current_time) + next_time
+                    };
+
+                    // Convert to seconds based on tempo - fill the entire time slot (legato)
+                    time_diff * (60.0 / cpm)
+                } else {
+                    // Last note fills remaining time to end of cycle
+                    (1.0 - event.time) * (60.0 / cpm)
+                };
+
+                // Create event with tempo-adjusted duration
+                let adjusted_event_data = match &event.data {
+                    crate::music::pattern::EventData::Note { pitch, velocity, .. } => {
+                        crate::music::pattern::EventData::Note {
+                            pitch: pitch.clone(),
+                            velocity: *velocity,
+                            duration: note_duration,
+                        }
+                    }
+                    other => other.clone(),
+                };
+
+                let timed_event = crate::music::output::TimedEvent::new(
+                    event.time,
+                    event.time,
+                    "melody".to_string(),
+                    adjusted_event_data,
+                );
+
+                let _ = self.outputs.send_event_to_all(&timed_event);
+
+                // Calculate sleep duration until next event
+                if i < events.len() - 1 {
+                    let current_time = event.time;
+                    let next_time = events[i + 1].time;
+
+                    // Calculate time difference between notes in this cycle
+                    let time_diff = if next_time > current_time {
+                        next_time - current_time
+                    } else {
+                        // Handle wrap-around to next cycle
+                        (1.0 - current_time) + next_time
+                    };
+
+                    let sleep_duration_ms = (time_diff * cycle_duration_ms) as u64;
+                    // No minimum - let tempo control everything
+                    let actual_sleep = sleep_duration_ms;
+
+                    println!("⏱️  Sleeping {}ms (tempo: {} CPM, time diff: {:.3})", actual_sleep, cpm, time_diff);
+                    std::thread::sleep(Duration::from_millis(actual_sleep));
+                }
+            }
+        }
+
+        println!("🎵 Melody complete!");
         Ok(())
     }
-    
-    /// Stop playback and clear patterns
+
+
+
+    /// Stop playbook
     pub fn stop(&mut self) {
         self.scheduler.stop();
     }
+
     
     /// Pause playback
     pub fn pause(&mut self) {

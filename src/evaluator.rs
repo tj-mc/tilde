@@ -107,6 +107,7 @@ impl Evaluator {
             "tempo" => self.eval_tempo(args),
             "__scheduler-debug" => self.eval_scheduler_debug(args),
             "__scheduler-tick" => self.eval_scheduler_tick(args),
+            "testaudio" => self.eval_test_audio(args),
             _ => Err(format!("Unknown positional function: {}", name)),
         }
     }
@@ -1341,7 +1342,18 @@ impl Evaluator {
     // Helper method to ensure music engine is initialized
     pub fn ensure_music_engine(&mut self) -> &mut MusicEngine {
         if self.music_engine.is_none() {
-            self.music_engine = Some(MusicEngine::with_debug_output());
+            // Try to create audio engine first, fall back to debug if audio fails
+            let engine = match MusicEngine::with_audio_output() {
+                Ok(audio_engine) => {
+                    println!("🎵 Audio output initialized successfully");
+                    audio_engine
+                }
+                Err(audio_error) => {
+                    println!("⚠️  Audio output failed ({}), using debug output", audio_error);
+                    MusicEngine::with_debug_output()
+                }
+            };
+            self.music_engine = Some(engine);
         }
         self.music_engine.as_mut().unwrap()
     }
@@ -1389,6 +1401,17 @@ impl Evaluator {
         };
 
         Ok(Value::String(result))
+    }
+
+    fn eval_test_audio(&mut self, args: Vec<Expression>) -> Result<Value, String> {
+        if !args.is_empty() {
+            return Err("test-audio takes no arguments".to_string());
+        }
+
+        use crate::music::output::test_direct_audio;
+        test_direct_audio();
+
+        Ok(Value::String("Direct audio test completed".to_string()))
     }
 
     pub fn eval_function(

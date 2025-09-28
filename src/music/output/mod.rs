@@ -1,10 +1,17 @@
 pub mod debug;
+pub mod audio;
+pub mod system_audio;
+pub mod direct_audio;
+pub mod test_audio_direct;
 
 use crate::music::pattern::EventData;
 use std::fmt;
 
-// Re-export debug output adapters
+// Re-export output adapters
 pub use debug::{DebugOutput, ConsoleOutput};
+pub use audio::AudioOutput;
+pub use direct_audio::DirectAudioOutput;
+pub use test_audio_direct::test_direct_audio;
 
 /// Output system for the modular music architecture
 /// This provides a clean interface for sending timed musical events to various destinations
@@ -62,7 +69,7 @@ impl fmt::Display for TimedEvent {
 
 /// Trait for output adapters that can receive and process timed musical events
 /// Implementations can send events to MIDI devices, audio engines, OSC servers, etc.
-pub trait OutputAdapter: Send + Sync {
+pub trait OutputAdapter {
     /// Send a timed event to this output destination
     fn send_event(&mut self, event: &TimedEvent) -> Result<(), String>;
     

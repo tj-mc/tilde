@@ -42,6 +42,12 @@ hmac = "0.12"
 md-5 = "0.10"
 hex = "0.4"
 
+# Audio output
+rodio = "0.17"
+
+# Threading for background audio ticking
+crossbeam-channel = "0.5"
+
 # HTTP client (not available in WASM)
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 ureq = "3.1.2"

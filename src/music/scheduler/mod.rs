@@ -161,8 +161,8 @@ impl Scheduler {
                 let absolute_time = cycle_start_time + (event.time * active.cycle_duration);
                 let cycle_time = event.time; // Time within the cycle (0.0 to 1.0)
                 
-                // Only include events that should fire now (with small tolerance)
-                if (absolute_time - current_time).abs() < 0.01 {
+                // Only include events that should fire now (larger tolerance for controlled timing)
+                if (absolute_time - current_time).abs() < 0.1 {
                     events.push(TimedEvent::new(
                         absolute_time,
                         cycle_time,
@@ -184,6 +184,49 @@ impl Scheduler {
     pub fn tick_at_time(&mut self, time: f64) -> Vec<TimedEvent> {
         self.current_time = time;
         self.tick()
+    }
+
+    /// Query events in a time range (Strudel-style)
+    pub fn query_time_range(&self, start_time: f64, end_time: f64) -> Vec<TimedEvent> {
+        let mut events = Vec::new();
+
+        for (name, active) in &self.active_patterns {
+            // Calculate which cycles overlap with this time range
+            let cycle_duration = active.cycle_duration;
+            let pattern_duration = active.pattern.duration;
+            let full_cycle_length = cycle_duration * pattern_duration;
+
+            if full_cycle_length <= 0.0 {
+                continue;
+            }
+
+            // Find all cycles that might contain events in this time range
+            let start_cycle = (start_time / full_cycle_length).floor() as i32;
+            let end_cycle = (end_time / full_cycle_length).ceil() as i32;
+
+            for cycle in start_cycle..=end_cycle {
+                let cycle_start = cycle as f64 * full_cycle_length;
+
+                // Generate events for this cycle
+                for event in &active.pattern.events {
+                    let absolute_time = cycle_start + (event.time * cycle_duration);
+
+                    // Only include events within our query range
+                    if absolute_time >= start_time && absolute_time < end_time {
+                        events.push(TimedEvent::new(
+                            absolute_time,
+                            event.time, // cycle_time
+                            name.clone(),
+                            event.data.clone(),
+                        ));
+                    }
+                }
+            }
+        }
+
+        // Sort events by time
+        events.sort_by(|a, b| a.timestamp.partial_cmp(&b.timestamp).unwrap());
+        events
     }
     
     /// Get scheduling statistics
