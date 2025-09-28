@@ -1,0 +1,13 @@
+~tetris_melody is pattern "
+[e5 [b4 c5] d5 [c5 b4]]
+[a4 [a4 c5] e5 [d5 c5]]
+[b4 [~ c5] d5 e5]
+[c5 a4 a4 ~]
+"
+
+say "🎵 Starting Tetris audio test..."
+say "Melody pattern:"
+say pattern-debug ~tetris_melody
+
+tempo 15
+play ~tetris_melody
