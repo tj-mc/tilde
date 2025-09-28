@@ -118,7 +118,7 @@ print_step "Generating release summary"
 CHANGELOG_SECTION=$(sed -n "/## \[$NEW_VERSION\]/,/## \[/p" CHANGELOG.md | sed '$d' | tail -n +2)
 
 if [ -z "$CHANGELOG_SECTION" ]; then
-    print_error "No changelog entry found for version $NEW_VERSION. Please update CHANGELOG.md first."
+    print_warning "No changelog entry found for version $NEW_VERSION. Please update CHANGELOG.md first."
 fi
 
 echo "Release notes preview:"
