@@ -33,7 +33,7 @@ if [ ! -f web/package.json ]; then
     cat > web/package.json << EOF
 {
   "name": "tilde-web-repl",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "description": "Tilde Scripting Language Web REPL",
   "main": "repl.js",
   "type": "module",
